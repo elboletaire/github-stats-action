@@ -5,6 +5,7 @@ export * from './semver';
 export * from './assets';
 export * from './summary';
 export * from './dataset';
+export * from './derive';
 export * from './estimate';
 export * from './periods';
 export * from './csv';

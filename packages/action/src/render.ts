@@ -1,0 +1,53 @@
+// `render`: rebuilds the derived files and the outputs from data already stored, with no API calls.
+
+import { join } from 'node:path';
+import { mkdir } from 'node:fs/promises';
+import {
+  deriveRepo,
+  listRepos,
+  renderBadges,
+  renderCharts,
+  renderDashboard,
+  repoDir,
+  writeDerived,
+  writeOutputFiles,
+  type Dataset,
+  type Logger,
+  type StatsConfig,
+} from '@github-stats-action/core';
+
+export interface RenderOptions {
+  /** Folder holding `<owner>/<repo>/` (a data branch checkout, or an exported copy). */
+  dataRoot: string;
+  /** Where the outputs go, in the same `<owner>/<repo>/` layout. */
+  outDir: string;
+  config: StatsConfig;
+  /** owner/name to render; needed when the data holds more than one repo. */
+  repo?: string;
+  now: Date;
+  log: Logger;
+}
+
+export interface RenderResult {
+  datasets: Dataset[];
+  /** Absolute paths of the written dataset.json files. */
+  datasetPaths: string[];
+}
+
+export async function renderData(options: RenderOptions): Promise<RenderResult> {
+  const repos = await listRepos(options.dataRoot);
+  if (repos.length === 0) throw new Error(`no snapshots under ${options.dataRoot}`);
+  const selected = options.repo ? repos.filter((r) => r === options.repo) : repos;
+  if (selected.length === 0) throw new Error(`${options.repo} has no snapshots under ${options.dataRoot}`);
+  if (selected.length > 1) throw new Error(`the data holds ${selected.length} repos; pick one with --repo (${selected.join(', ')})`);
+
+  const repo = selected[0]!;
+  const { dataset, csv } = await deriveRepo(repoDir(options.dataRoot, repo), repo, options.config, options.now);
+  const dir = repoDir(options.outDir, repo);
+  await mkdir(dir, { recursive: true });
+  await writeDerived(dir, dataset, csv);
+  await writeOutputFiles(dir, [...renderCharts(dataset), ...renderBadges(dataset)]);
+  await writeOutputFiles(options.outDir, renderDashboard([dataset], { mode: 'standalone' }));
+  options.log.info(`rendered ${repo} into ${options.outDir}`);
+  return { datasets: [dataset], datasetPaths: [join(dir, 'dataset.json')] };
+}

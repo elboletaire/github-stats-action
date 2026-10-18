@@ -25590,15 +25590,6 @@ function buildDailyCsv(days, names) {
 	return `${lines.join("\n")}\n`;
 }
 //#endregion
-//#region packages/core/src/traffic.ts
-/** Days by date; a day fetched again replaces the stored one (its count can still grow). */
-function mergeTrafficDays(existing, incoming) {
-	const byDate = /* @__PURE__ */ new Map();
-	for (const day of existing) byDate.set(day.date, day);
-	for (const day of incoming) byDate.set(day.date, day);
-	return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
-}
-//#endregion
 //#region packages/core/src/store.ts
 const SNAPSHOT_RE = /^(\d{4}-\d{2}-\d{2})\.json$/;
 /** Where a repo's files live under the data branch root. */
@@ -25704,6 +25695,35 @@ async function writeOutputFiles(root, files) {
 		await mkdir(join(path, ".."), { recursive: true });
 		await writeFile(path, file.content);
 	}
+}
+//#endregion
+//#region packages/core/src/derive.ts
+/** Builds the Dataset and daily.csv from the snapshots, stargazers and traffic in `dir` (`<owner>/<repo>/`). */
+async function deriveRepo(dir, repo, config, now) {
+	const snapshots = await readSnapshots(dir);
+	if (snapshots.length === 0) throw new Error(`${repo}: no snapshots in ${dir}`);
+	const dataset = buildDataset({
+		repo,
+		config,
+		snapshots,
+		stargazers: await readStargazers(dir),
+		traffic: await readTraffic(dir),
+		now
+	});
+	const names = groupNames(config, snapshots);
+	return {
+		dataset,
+		csv: buildDailyCsv(snapshots.map((s) => summariseDay(s, config, repo, names)), names)
+	};
+}
+//#endregion
+//#region packages/core/src/traffic.ts
+/** Days by date; a day fetched again replaces the stored one (its count can still grow). */
+function mergeTrafficDays(existing, incoming) {
+	const byDate = /* @__PURE__ */ new Map();
+	for (const day of existing) byDate.set(day.date, day);
+	for (const day of incoming) byDate.set(day.date, day);
+	return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
 }
 //#endregion
 //#region packages/core/src/outputs.ts
@@ -26218,17 +26238,8 @@ async function runStats(options) {
 		await writeTrafficSeries(dir, "clones", mergeTrafficDays(await readTrafficSeries(dir, "clones"), traffic.clones));
 		await writeTrafficAggregates(dir, date, traffic);
 	}
-	const snapshots = await readSnapshots(dir);
-	const dataset = buildDataset({
-		repo,
-		config,
-		snapshots,
-		stargazers: [...known, ...starred],
-		traffic: await readTraffic(dir),
-		now
-	});
-	const names = groupNames(config, snapshots);
-	await writeDerived(dir, dataset, buildDailyCsv(snapshots.map((s) => summariseDay(s, config, repo, names)), names));
+	const { dataset, csv } = await deriveRepo(dir, repo, config, now);
+	await writeDerived(dir, dataset, csv);
 	await writeOutputFiles(dir, [...renderCharts(dataset), ...renderBadges(dataset)]);
 	await writeOutputFiles(options.dataDir, renderDashboard(await readDatasets(options.dataDir), { mode: "standalone" }));
 	if (options.pages) {

@@ -93,6 +93,17 @@ export async function readTraffic(dir: string): Promise<TrafficData | undefined>
   return { views, clones, referrers, paths, asOf };
 }
 
+/** The `owner/name` of every repo folder that holds snapshots, sorted. */
+export async function listRepos(root: string): Promise<string[]> {
+  const repos: string[] = [];
+  for (const owner of await listDirs(root)) {
+    for (const name of await listDirs(join(root, owner))) {
+      if ((await listJson(join(root, owner, name, 'snapshots'))).length > 0) repos.push(`${owner}/${name}`);
+    }
+  }
+  return repos;
+}
+
 /** Every repo's dataset.json on the branch, for the standalone dashboard. */
 export async function readDatasets(root: string): Promise<Dataset[]> {
   const datasets: Dataset[] = [];

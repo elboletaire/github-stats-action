@@ -4,27 +4,22 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
-  buildDailyCsv,
-  buildDataset,
   createClient,
+  deriveRepo,
   fetchDockerPulls,
   fetchReleases,
   fetchRepoCounts,
   fetchStargazers,
   fetchTraffic,
   githubClient,
-  groupNames,
   mergeTrafficDays,
   readDatasets,
-  readSnapshots,
   readStargazers,
-  readTraffic,
   readTrafficSeries,
   renderBadges,
   renderCharts,
   renderDashboard,
   repoDir,
-  summariseDay,
   utcDate,
   writeDerived,
   writeOutputFiles,
@@ -102,24 +97,8 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
     await writeTrafficAggregates(dir, date, traffic);
   }
 
-  const snapshots = await readSnapshots(dir);
-  const dataset = buildDataset({
-    repo,
-    config,
-    snapshots,
-    stargazers: [...known, ...starred],
-    traffic: await readTraffic(dir),
-    now,
-  });
-  const names = groupNames(config, snapshots);
-  await writeDerived(
-    dir,
-    dataset,
-    buildDailyCsv(
-      snapshots.map((s) => summariseDay(s, config, repo, names)),
-      names,
-    ),
-  );
+  const { dataset, csv } = await deriveRepo(dir, repo, config, now);
+  await writeDerived(dir, dataset, csv);
   await writeOutputFiles(dir, [...renderCharts(dataset), ...renderBadges(dataset)]);
   await writeOutputFiles(options.dataDir, renderDashboard(await readDatasets(options.dataDir), { mode: 'standalone' }));
 

@@ -4,6 +4,9 @@
   "private": true,
   "description": "GitHub Action that keeps release, star, traffic and Docker Hub history on a data branch and turns it into a dashboard, charts and badges",
   "type": "module",
+  "bin": {
+    "github-stats": "./dist/cli.js"
+  },
   "packageManager": "pnpm@10.32.1",
   "engines": {
     "node": ">=24"
