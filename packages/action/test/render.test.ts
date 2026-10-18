@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   importOldSnapshots,
@@ -66,7 +66,6 @@ describe('render from a data folder', () => {
       dataRoot: data,
       outDir: out,
       config: await loadConfig(CONFIG),
-      now: new Date('2026-10-18T13:00:00Z'),
       log,
     });
 
@@ -85,7 +84,7 @@ describe('render from a data folder', () => {
     await fixtureData(data);
     await fixtureData(data, 'elboletaire/other');
     const config = await loadConfig(CONFIG);
-    const base = { dataRoot: data, outDir: await mkdtemp(join(tmpdir(), 'render-out-')), config, now: new Date(), log };
+    const base = { dataRoot: data, outDir: await mkdtemp(join(tmpdir(), 'render-out-')), config, log };
 
     await expect(renderData(base)).rejects.toThrow('pick one with --repo');
     const picked = await renderData({ ...base, repo: 'elboletaire/other' });
@@ -95,8 +94,43 @@ describe('render from a data folder', () => {
   it('fails clearly on a folder without snapshots', async () => {
     const data = await mkdtemp(join(tmpdir(), 'render-empty-'));
     await expect(
-      renderData({ dataRoot: data, outDir: data, config: await loadConfig(CONFIG), now: new Date(), log }),
+      renderData({ dataRoot: data, outDir: data, config: await loadConfig(CONFIG), log }),
     ).rejects.toThrow('no snapshots under');
+  });
+});
+
+describe('reproducible renders', () => {
+  /** Every file under `root` by its relative path. */
+  const tree = async (root: string): Promise<Record<string, string>> => {
+    const files: Record<string, string> = {};
+    for (const entry of await readdir(root, { recursive: true, withFileTypes: true })) {
+      if (!entry.isFile()) continue;
+      const path = join(entry.parentPath, entry.name);
+      files[relative(root, path)] = await readFile(path, 'utf8');
+    }
+    return files;
+  };
+
+  it('renders the same bytes whenever it runs, so the clock does not leak into the outputs', async () => {
+    const data = await mkdtemp(join(tmpdir(), 'render-data-'));
+    await fixtureData(data);
+    const config = await loadConfig(CONFIG);
+    const first = await mkdtemp(join(tmpdir(), 'render-out-'));
+    const second = await mkdtemp(join(tmpdir(), 'render-out-'));
+
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      vi.setSystemTime(new Date('2026-10-18T13:00:00Z'));
+      await renderData({ dataRoot: data, outDir: first, config, log });
+      vi.setSystemTime(new Date('2026-11-30T08:00:00Z'));
+      await renderData({ dataRoot: data, outDir: second, config, log });
+    } finally {
+      vi.useRealTimers();
+    }
+
+    expect(await tree(second)).toEqual(await tree(first));
+    const dataset = JSON.parse(await readFile(join(first, REPO, 'dataset.json'), 'utf8')) as Dataset;
+    expect(dataset.generatedAt).toBe(new Date(dataset.snapshotAt).toISOString());
   });
 });
 
@@ -129,6 +163,22 @@ describe('render from a git ref', () => {
     expect(git(repo, 'status', '--porcelain')).toBe(before);
     expect(await readFile(join(repo, 'README.md'), 'utf8')).toBe('code\n');
     expect(await readdir(repo)).not.toContain(REPO.split('/')[0]);
+  });
+
+  it('reads a ref whose name starts with a dash as a ref, not as an option', async () => {
+    const repo = await mkdtemp(join(tmpdir(), 'render-git-'));
+    git(repo, 'init', '-q', '-b', 'main');
+    git(repo, 'config', 'user.email', 'dev@example.com');
+    git(repo, 'config', 'user.name', 'dev');
+    await fixtureData(repo);
+    git(repo, 'add', '-A');
+    git(repo, 'commit', '-q', '-m', 'data');
+    git(repo, 'update-ref', 'refs/heads/-data', 'HEAD');
+
+    const out = await mkdtemp(join(tmpdir(), 'render-out-'));
+    const code = await runCli(['render', '--from-branch=-data', '--out', out, '--config', CONFIG], repo);
+    expect(code).toBe(0);
+    expect(JSON.parse(await readFile(join(out, REPO, 'dataset.json'), 'utf8')).repo).toBe(REPO);
   });
 
   it('reports an unknown ref without writing anything', async () => {

@@ -63,6 +63,25 @@ export function summaryLine(dataset: Dataset): string {
   return `${dataset.repo}: ${dataset.totals.downloads} downloads (${groups}), ${dataset.totals.stars} stars${docker}`;
 }
 
+/** Rebuilds the derived files, charts, badges and dashboard from the stored snapshots of `repo`. */
+export async function writeDerivedOutputs(dataDir: string, repo: string, config: StatsConfig, now: Date): Promise<Dataset> {
+  const dir = repoDir(dataDir, repo);
+  const { dataset, csv } = await deriveRepo(dir, repo, config, now);
+  await writeDerived(dir, dataset, csv);
+  await writeOutputFiles(dir, [...renderCharts(dataset), ...renderBadges(dataset)]);
+  await writeOutputFiles(dataDir, renderDashboard(await readDatasets(dataDir), { mode: 'standalone' }));
+  return dataset;
+}
+
+/** Writes the Pages site: the dashboard and the dataset, without traffic unless `traffic` is set. */
+export async function writePagesSite(pages: { dir: string; traffic: boolean }, repo: string, dataset: Dataset): Promise<void> {
+  const pagesDataset = pages.traffic ? dataset : { ...dataset, traffic: undefined };
+  const datasetPath = join(pages.dir, 'data', repo, 'dataset.json');
+  await mkdir(join(datasetPath, '..'), { recursive: true });
+  await writeFile(datasetPath, `${JSON.stringify(pagesDataset, null, 1)}\n`);
+  await writeOutputFiles(pages.dir, renderDashboard([pagesDataset], { mode: 'pages' }));
+}
+
 export async function runStats(options: RunOptions): Promise<RunResult> {
   const { repo, config, now, log } = options;
   const fetchFn = options.fetch ?? fetch;
@@ -75,7 +94,7 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
     fetchReleases(api, repo),
     readStargazers(dir),
   ]);
-  const starred = await fetchStargazers(api, repo, known.length, log);
+  const stargazers = await fetchStargazers(api, repo, known, counts.stars, log);
   const traffic = options.traffic ? await fetchTraffic(api, repo) : undefined;
   const dockerPulls = config.docker
     ? await fetchDockerPulls(createClient({ fetch: fetchFn, baseUrl: 'https://hub.docker.com' }), config.docker, log)
@@ -90,25 +109,16 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
     releases,
   };
   await writeSnapshot(dir, snapshot);
-  await writeStargazers(dir, [...known, ...starred]);
+  await writeStargazers(dir, stargazers);
   if (traffic) {
     await writeTrafficSeries(dir, 'views', mergeTrafficDays(await readTrafficSeries(dir, 'views'), traffic.views));
     await writeTrafficSeries(dir, 'clones', mergeTrafficDays(await readTrafficSeries(dir, 'clones'), traffic.clones));
     await writeTrafficAggregates(dir, date, traffic);
   }
 
-  const { dataset, csv } = await deriveRepo(dir, repo, config, now);
-  await writeDerived(dir, dataset, csv);
-  await writeOutputFiles(dir, [...renderCharts(dataset), ...renderBadges(dataset)]);
-  await writeOutputFiles(options.dataDir, renderDashboard(await readDatasets(options.dataDir), { mode: 'standalone' }));
+  const dataset = await writeDerivedOutputs(options.dataDir, repo, config, now);
 
-  if (options.pages) {
-    const pagesDataset = options.pages.traffic ? dataset : { ...dataset, traffic: undefined };
-    const datasetPath = join(options.pages.dir, 'data', repo, 'dataset.json');
-    await mkdir(join(datasetPath, '..'), { recursive: true });
-    await writeFile(datasetPath, `${JSON.stringify(pagesDataset, null, 1)}\n`);
-    await writeOutputFiles(options.pages.dir, renderDashboard([pagesDataset], { mode: 'pages' }));
-  }
+  if (options.pages) await writePagesSite(options.pages, repo, dataset);
 
   return { dataset, datasetPath: join(dir, 'dataset.json'), summary: summaryLine(dataset) };
 }

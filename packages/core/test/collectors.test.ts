@@ -87,14 +87,15 @@ describe('fetchStargazers', () => {
   const stamp = (i: number) => `2026-01-01T00:00:${String(i).padStart(2, '0')}Z`;
   const starPage = (from: number, count: number) =>
     Array.from({ length: count }, (_, i) => ({ starred_at: stamp(from + i), user: null }));
+  const stored = (count: number) => Array.from({ length: count }, (_, i) => stamp(i));
 
   it('backfills every page with the star media type', async () => {
     const pages = [starPage(0, 100), starPage(100, 30)];
     const fake = fakeFetch((url) => json(pages[Number(url.searchParams.get('page')) - 1] ?? []));
     const log = logger();
-    const fresh = await fetchStargazers(githubClient(fake.fetch), 'o/r', 0, log);
-    expect(fresh).toHaveLength(130);
-    expect(fresh[129]).toBe(stamp(129));
+    const all = await fetchStargazers(githubClient(fake.fetch), 'o/r', [], 130, log);
+    expect(all).toHaveLength(130);
+    expect(all[129]).toBe(stamp(129));
     expect(fake.calls[0]!.headers.get('accept')).toBe('application/vnd.github.star+json');
     expect(log.info).toHaveBeenCalledWith('stargazers: 130 new, 130 stored');
   });
@@ -103,20 +104,55 @@ describe('fetchStargazers', () => {
     // 150 stored: page 2 starts at star 100, so its first 50 entries are known.
     const pages: Record<string, { starred_at: string }[]> = { '2': starPage(100, 100), '3': starPage(200, 10) };
     const fake = fakeFetch((url) => json(pages[url.searchParams.get('page')!] ?? []));
-    const fresh = await fetchStargazers(githubClient(fake.fetch), 'o/r', 150, logger());
-    expect(fresh).toHaveLength(60);
-    expect(fresh[0]).toBe(stamp(150));
+    const all = await fetchStargazers(githubClient(fake.fetch), 'o/r', stored(150), 210, logger());
+    expect(all).toHaveLength(210);
+    expect(all[150]).toBe(stamp(150));
     expect(fake.calls.map((c) => c.url.searchParams.get('page'))).toEqual(['2', '3']);
   });
 
-  it('keeps what it has when GitHub stops listing past its limit', async () => {
+  it('refetches the whole list when a star was removed and the count disagrees', async () => {
+    // Stored: stars 0, 1, 2. Star 1 was removed since, so the list is 0 and 2.
+    const fake = fakeFetch((url) =>
+      json(url.searchParams.get('page') === '1' ? [{ starred_at: stamp(0) }, { starred_at: stamp(2) }] : []),
+    );
+    const log = logger();
+    const all = await fetchStargazers(githubClient(fake.fetch), 'o/r', stored(3), 2, log);
+    expect(all).toEqual([stamp(0), stamp(2)]);
+    expect(fake.calls.map((c) => c.url.searchParams.get('page'))).toEqual(['1', '1']);
+    expect(log.info).toHaveBeenCalledWith(expect.stringContaining('refetching all of it'));
+  });
+
+  it('refetches when one star was added and another removed, leaving the count the same', async () => {
+    // Stored: stars 0, 1, 2. Star 1 was removed and star 3 added, so GitHub lists 0, 2, 3.
+    // Fetching by position alone would see one new star past the stored list and keep the stale 1.
+    const fake = fakeFetch(() => json([{ starred_at: stamp(0) }, { starred_at: stamp(2) }, { starred_at: stamp(3) }]));
+    const all = await fetchStargazers(githubClient(fake.fetch), 'o/r', stored(3), 3, logger());
+    expect(all).toEqual([stamp(0), stamp(2), stamp(3)]);
+    expect(fake.calls.map((c) => c.url.searchParams.get('page'))).toEqual(['1', '1']);
+  });
+
+  it("keeps the stored list when the refetch hits GitHub's limit", async () => {
+    let calls = 0;
+    const fake = fakeFetch(() =>
+      ++calls === 1
+        ? json([{ starred_at: stamp(0) }, { starred_at: stamp(2) }])
+        : json({ message: 'Only the first 40000 results are available.' }, 422),
+    );
+    const log = logger();
+    const all = await fetchStargazers(githubClient(fake.fetch), 'o/r', stored(3), 2, log);
+    expect(all).toEqual(stored(3));
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('keeping the stored list'));
+  });
+
+  it('keeps what it has when GitHub stops listing past its limit, without refetching', async () => {
     const fake = fakeFetch((url) =>
       url.searchParams.get('page') === '1'
         ? json(starPage(0, 100))
         : json({ message: 'Only the first 40000 results are available.' }, 422),
     );
     const log = logger();
-    expect(await fetchStargazers(githubClient(fake.fetch), 'o/r', 0, log)).toHaveLength(100);
+    expect(await fetchStargazers(githubClient(fake.fetch), 'o/r', [], 150, log)).toHaveLength(100);
+    expect(fake.calls.map((c) => c.url.searchParams.get('page'))).toEqual(['1', '2']);
     expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('stops listing past 100 stars'));
   });
 });

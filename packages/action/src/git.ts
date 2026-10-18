@@ -13,16 +13,32 @@ const BOT = {
   email: '41898282+github-actions[bot]@users.noreply.github.com',
 };
 
+const AS_BOT = ['-c', `user.name=${BOT.name}`, '-c', `user.email=${BOT.email}`];
+
 export interface DataBranch {
   /** The worktree holding the branch; the run writes here. */
   dir: string;
-  /** Commits and pushes what changed. Returns false when nothing did. */
-  publish(message: string): Promise<boolean>;
+  /**
+   * Commits and pushes what changed. Returns false when nothing did. After a rebase onto a
+   * moved branch, `rederive` rebuilds the derived files over the rebased tree first.
+   */
+  publish(message: string, rederive?: () => Promise<unknown>): Promise<boolean>;
 }
 
 async function git(args: string[], cwd: string): Promise<string> {
   const { stdout } = await execFileAsync('git', args, { cwd, maxBuffer: 64 * 1024 * 1024 });
   return stdout.trim();
+}
+
+/** `ls-remote --exit-code` exits 2 when no ref matches; any other failure (auth, network) is an error. */
+async function remoteBranchExists(cwd: string, branch: string): Promise<boolean> {
+  try {
+    await git(['ls-remote', '--exit-code', 'origin', `refs/heads/${branch}`], cwd);
+    return true;
+  } catch (error) {
+    if ((error as { code?: unknown }).code === 2) return false;
+    throw error;
+  }
 }
 
 async function hasStagedChanges(cwd: string): Promise<boolean> {
@@ -42,12 +58,8 @@ async function hasStagedChanges(cwd: string): Promise<boolean> {
 export async function checkoutDataBranch(options: { cwd: string; branch: string; tmp: string }): Promise<DataBranch> {
   const { cwd, branch } = options;
   const remoteRef = `refs/remotes/origin/${branch}`;
-  let exists = true;
-  try {
-    await git(['fetch', '--quiet', '--no-tags', 'origin', `+refs/heads/${branch}:${remoteRef}`], cwd);
-  } catch {
-    exists = false;
-  }
+  const exists = await remoteBranchExists(cwd, branch);
+  if (exists) await git(['fetch', '--quiet', '--no-tags', 'origin', `+refs/heads/${branch}:${remoteRef}`], cwd);
 
   const dir = join(await mkdtemp(join(options.tmp, 'stats-data-')), 'worktree');
   if (exists) {
@@ -58,15 +70,24 @@ export async function checkoutDataBranch(options: { cwd: string; branch: string;
 
   return {
     dir,
-    async publish(message: string): Promise<boolean> {
+    async publish(message: string, rederive?: () => Promise<unknown>): Promise<boolean> {
       await git(['add', '-A'], dir);
       if (!(await hasStagedChanges(dir))) return false;
-      await git(['-c', `user.name=${BOT.name}`, '-c', `user.email=${BOT.email}`, 'commit', '--quiet', '-m', message], dir);
+      await git([...AS_BOT, 'commit', '--quiet', '-m', message], dir);
       try {
         await git(['push', '--quiet', 'origin', `HEAD:refs/heads/${branch}`], dir);
       } catch {
         await git(['fetch', '--quiet', '--no-tags', 'origin', `+refs/heads/${branch}:${remoteRef}`], dir);
-        await git(['-c', `user.name=${BOT.name}`, '-c', `user.email=${BOT.email}`, 'rebase', '--quiet', '-X', 'theirs', remoteRef], dir);
+        await git([...AS_BOT, 'rebase', '--quiet', '-X', 'theirs', remoteRef], dir);
+        // The rebase drops this run's commit when the remote already holds the same change.
+        const ours = (await git(['rev-parse', 'HEAD'], dir)) !== (await git(['rev-parse', remoteRef], dir));
+        await rederive?.();
+        await git(['add', '-A'], dir);
+        if (await hasStagedChanges(dir)) {
+          await git([...AS_BOT, 'commit', '--quiet', ...(ours ? ['--amend', '--no-edit'] : ['-m', message])], dir);
+        } else if (!ours) {
+          return false;
+        }
         await git(['push', '--quiet', 'origin', `HEAD:refs/heads/${branch}`], dir);
       }
       return true;

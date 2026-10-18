@@ -5,6 +5,7 @@ import { mkdir } from 'node:fs/promises';
 import {
   deriveRepo,
   listRepos,
+  readSnapshots,
   renderBadges,
   renderCharts,
   renderDashboard,
@@ -24,7 +25,6 @@ export interface RenderOptions {
   config: StatsConfig;
   /** owner/name to render; needed when the data holds more than one repo. */
   repo?: string;
-  now: Date;
   log: Logger;
 }
 
@@ -42,7 +42,11 @@ export async function renderData(options: RenderOptions): Promise<RenderResult> 
   if (selected.length > 1) throw new Error(`the data holds ${selected.length} repos; pick one with --repo (${selected.join(', ')})`);
 
   const repo = selected[0]!;
-  const { dataset, csv } = await deriveRepo(repoDir(options.dataRoot, repo), repo, options.config, options.now);
+  // The latest snapshot's time is "now": the output depends on the data only, so re-rendering is reproducible.
+  const source = repoDir(options.dataRoot, repo);
+  const latest = (await readSnapshots(source)).at(-1);
+  if (!latest) throw new Error(`${repo}: no snapshots in ${source}`);
+  const { dataset, csv } = await deriveRepo(source, repo, options.config, new Date(latest.takenAt));
   const dir = repoDir(options.outDir, repo);
   await mkdir(dir, { recursive: true });
   await writeDerived(dir, dataset, csv);

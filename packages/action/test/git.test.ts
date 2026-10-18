@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -42,6 +42,13 @@ describe('checkoutDataBranch', () => {
     expect(git(remote, 'rev-list', '--count', 'stats-data')).toBe('2');
   });
 
+  it('fails without creating an orphan branch when the remote cannot be read', async () => {
+    const { root, work } = await setup();
+    git(work, 'remote', 'set-url', 'origin', join(root, 'missing.git'));
+    await expect(checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root })).rejects.toThrow();
+    expect(git(work, 'branch', '--list', 'stats-data')).toBe('');
+  });
+
   it('publishes nothing when the run changed no file', async () => {
     const { root, remote, work } = await setup();
     const data = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
@@ -74,5 +81,70 @@ describe('checkoutDataBranch', () => {
     expect(git(remote, 'show', 'stats-data:theirs.json')).toBe('2');
     expect(git(remote, 'show', 'stats-data:mine.json')).toBe('3');
     expect(await readFile(join(mine.dir, 'theirs.json'), 'utf8')).toBe('2\n');
+  });
+
+  it('rebuilds the derived files over the rebased tree, so they include the day pushed meanwhile', async () => {
+    const { root, remote, work } = await setup();
+    const seed = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    await mkdir(join(seed.dir, 'snapshots'), { recursive: true });
+    await writeFile(join(seed.dir, 'snapshots', '2026-01-01.json'), '{}\n');
+    await seed.publish('day 1');
+
+    const mine = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    await writeFile(join(mine.dir, 'snapshots', '2026-01-03.json'), '{}\n');
+    const other = join(root, 'other');
+    git(root, 'clone', '-q', '-b', 'stats-data', remote, other);
+    git(other, 'config', 'user.email', 'x@example.com');
+    git(other, 'config', 'user.name', 'other');
+    await mkdir(join(other, 'snapshots'), { recursive: true });
+    await writeFile(join(other, 'snapshots', '2026-01-02.json'), '{}\n');
+    git(other, 'add', '-A');
+    git(other, 'commit', '-q', '-m', 'day 2');
+    git(other, 'push', '-q', 'origin', 'stats-data');
+
+    const derive = async () => {
+      const days = (await readdir(join(mine.dir, 'snapshots'))).sort();
+      await writeFile(join(mine.dir, 'daily.csv'), `${days.join('\n')}\n`);
+    };
+    expect(await mine.publish('day 3', derive)).toBe(true);
+    expect(git(remote, 'show', 'stats-data:daily.csv')).toBe('2026-01-01.json\n2026-01-02.json\n2026-01-03.json');
+    expect(git(remote, 'rev-list', '--count', 'stats-data')).toBe('3');
+  });
+
+  describe('when the rebase drops this run\'s commit', () => {
+    /** The data branch with `a.json` = 1 pushed by someone else after this run took its checkout. */
+    async function raced() {
+      const { root, remote, work } = await setup();
+      const seed = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+      await writeFile(join(seed.dir, 'seed.json'), '0\n');
+      await seed.publish('seed');
+
+      const mine = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+      await writeFile(join(mine.dir, 'a.json'), '1\n');
+      const other = join(root, 'other');
+      git(root, 'clone', '-q', '-b', 'stats-data', remote, other);
+      git(other, 'config', 'user.email', 'x@example.com');
+      git(other, 'config', 'user.name', 'other');
+      await writeFile(join(other, 'a.json'), '1\n');
+      git(other, 'add', '-A');
+      git(other, 'commit', '-q', '-m', 'same change');
+      git(other, 'push', '-q', 'origin', 'stats-data');
+      return { remote, mine, other };
+    }
+
+    it('reports nothing published and leaves the remote tip alone', async () => {
+      const { remote, mine, other } = await raced();
+      expect(await mine.publish('mine')).toBe(false);
+      expect(git(remote, 'rev-parse', 'stats-data')).toBe(git(other, 'rev-parse', 'HEAD'));
+    });
+
+    it('commits the rederived files on top of the remote instead of amending it', async () => {
+      const { remote, mine, other } = await raced();
+      const derive = () => writeFile(join(mine.dir, 'daily.csv'), 'day\n');
+      expect(await mine.publish('mine', derive)).toBe(true);
+      expect(git(remote, 'show', 'stats-data:daily.csv')).toBe('day');
+      expect(git(remote, 'log', '-1', '--format=%s', 'stats-data')).toBe('mine');
+      expect(git(remote, 'rev-parse', 'stats-data^')).toBe(git(other, 'rev-parse', 'HEAD'));
+    });
   });
 });
