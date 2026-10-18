@@ -7,6 +7,7 @@
   "dependencies": {
     "@actions/core": "^3.0.1",
     "@github-stats-action/badges": "workspace:*",
-    "@github-stats-action/core": "workspace:*"
+    "@github-stats-action/core": "workspace:*",
+    "@github-stats-action/svg": "workspace:*"
   }
 }

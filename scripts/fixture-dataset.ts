@@ -65,6 +65,7 @@ export async function buildFixtureDataset(): Promise<Dataset> {
     repo,
     config,
     snapshots: [convertOldSnapshot(old17, '2026-10-17', config.docker), snapshot18],
+    // Synthetic sample: 18 timestamps, not the repo's stargazers (totals.stars is 271), so the stars chart ends at 18.
     stargazers: await read<string[]>('stargazers.json'),
     traffic: {
       views: mergeTrafficDays([], traffic.views),

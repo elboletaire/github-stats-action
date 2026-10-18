@@ -1,5 +1,5 @@
 // Output renderers. Each returns the files to write; the action and the CLI do the writing.
-// Stubs until the dashboard and svg packages fill them in.
+// The dashboard is still a stub; charts and badges live in their own packages.
 
 import type { Dataset } from './types';
 
@@ -17,11 +17,5 @@ export interface OutputFile {
 export function renderDashboard(datasets: readonly Dataset[], options: { mode: 'pages' | 'standalone' }): OutputFile[] {
   void datasets;
   void options;
-  return [];
-}
-
-/** SVG charts for one repo; paths are relative to `<owner>/<repo>/` (`charts/*.svg`). */
-export function renderCharts(dataset: Dataset): OutputFile[] {
-  void dataset;
   return [];
 }
