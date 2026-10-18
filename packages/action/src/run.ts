@@ -75,7 +75,7 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
     fetchReleases(api, repo),
     readStargazers(dir),
   ]);
-  const starred = await fetchStargazers(api, repo, known.length, log);
+  const stargazers = await fetchStargazers(api, repo, known, counts.stars, log);
   const traffic = options.traffic ? await fetchTraffic(api, repo) : undefined;
   const dockerPulls = config.docker
     ? await fetchDockerPulls(createClient({ fetch: fetchFn, baseUrl: 'https://hub.docker.com' }), config.docker, log)
@@ -90,7 +90,7 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
     releases,
   };
   await writeSnapshot(dir, snapshot);
-  await writeStargazers(dir, [...known, ...starred]);
+  await writeStargazers(dir, stargazers);
   if (traffic) {
     await writeTrafficSeries(dir, 'views', mergeTrafficDays(await readTrafficSeries(dir, 'views'), traffic.views));
     await writeTrafficSeries(dir, 'clones', mergeTrafficDays(await readTrafficSeries(dir, 'clones'), traffic.clones));
