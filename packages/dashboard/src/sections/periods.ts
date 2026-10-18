@@ -48,11 +48,24 @@ export function periods(d: Dataset): Section {
   const el = makeSection(
     `<div><h2>Periods<span class="est">estimated</span></h2>` +
     `<p class="note">GitHub only exposes cumulative counts per file, so per-day figures are estimates: each release's downloads are spread evenly over the days it was the latest release (until the next release, or now). Totals are exact. Medians are over whole calendar days (UTC) inside the period.</p></div>` +
-    `<div class="scroll"><table>${head}<tbody>${rows.join('')}${total}</tbody></table></div>${dashNote}` +
+    `<div class="scroll"><table class="periods">${head}<tbody>${rows.join('')}${total}</tbody></table></div>${dashNote}` +
     `${legend}<div class="scroll"><svg role="img" aria-label="Average estimated downloads per day by period"></svg></div>`,
   );
   const svg = el.querySelector('svg') as SVGSVGElement;
-  return { el, redraw: () => drawPeriods(svg, d) };
+  const box = el.querySelector('.scroll') as HTMLElement;
+  box.addEventListener('scroll', () => fadeEdge(box));
+  return {
+    el,
+    redraw: () => {
+      fadeEdge(box);
+      drawPeriods(svg, d);
+    },
+  };
+}
+
+/** Marks the table box as scrollable past its right edge, so the fade hints at the columns beyond. */
+function fadeEdge(box: HTMLElement): void {
+  box.classList.toggle('more', box.scrollWidth - box.clientWidth - box.scrollLeft > 1);
 }
 
 function drawPeriods(svg: SVGSVGElement, d: Dataset): void {
