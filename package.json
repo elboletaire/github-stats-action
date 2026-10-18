@@ -1,0 +1,25 @@
+{
+  "name": "github-stats-action",
+  "version": "0.0.0",
+  "private": true,
+  "description": "GitHub Action that keeps release, star, traffic and Docker Hub history on a data branch and turns it into a dashboard, charts and badges",
+  "type": "module",
+  "packageManager": "pnpm@10.32.1",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "stats": "tsx packages/action/src/cli.ts",
+    "fixtures": "tsx scripts/build-fixture-dataset.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "tsdown": "^0.23.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

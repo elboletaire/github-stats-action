@@ -1,0 +1,11 @@
+{
+  "name": "@github-stats-action/action",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/main.ts",
+  "dependencies": {
+    "@actions/core": "^3.0.1",
+    "@github-stats-action/core": "workspace:*"
+  }
+}
