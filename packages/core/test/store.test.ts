@@ -106,14 +106,18 @@ describe('pruneDerived', () => {
       { path: 'charts/downloads-per-day-light.svg', content: '<svg/>' },
       { path: 'charts/logo.svg', content: '<svg/>' },
       { path: 'badges/npm-passcore--core.json', content: '{}' },
+      { path: 'badges/stars-week.json', content: '{}' },
+      { path: 'badges/docker-pulls-month.svg', content: '<svg/>' },
+      { path: 'badges/downloads-app-week.json', content: '{}' },
       { path: 'badges/logo.svg', content: '<svg/>' },
+      { path: 'badges/stars-weekly.svg', content: '<svg/>' },
     ]);
     await mkdir(join(dir, 'charts', 'hand-made'));
     await writeFile(join(dir, 'charts', 'hand-made', 'x.svg'), '<svg/>');
     await pruneDerived(dir, [{ path: 'charts/stars-light.svg', content: '' }]);
     expect((await readdir(join(dir, 'charts'))).sort()).toEqual(['hand-made', 'logo.svg', 'stars-light.svg']);
     expect(await readdir(join(dir, 'charts', 'hand-made'))).toEqual(['x.svg']);
-    expect(await readdir(join(dir, 'badges')).then((names) => names.sort())).toEqual(['logo.svg']);
+    expect(await readdir(join(dir, 'badges')).then((names) => names.sort())).toEqual(['logo.svg', 'stars-weekly.svg']);
   });
 
   it('does nothing when the derived folders do not exist yet', async () => {

@@ -73,7 +73,7 @@ Traffic is collected only with `traffic: true`. The daily views and clones are m
 
 ## npm downloads
 
-npm publishes its download counts openly, so no token is needed. Each run fetches the days it lacks, and the week before the last stored day to pick up corrections. The first run backfills npm's 18-month window. npm keeps no daily counts older than that, so the days this action stores stay after they leave npm's window. A package npm doesn't know, or a failed request, is a warning; what was stored stays. The latest day can be provisional: a run early in the UTC day may read a day npm hasn't finished counting, and the next run's overlap corrects it. The dashboard gets an npm section, and the badges `npm-downloads` (combined, last 30 days) and `npm-<package>` are written, with `charts/npm-downloads-*.svg`.
+npm publishes its download counts openly, so no token is needed. Each run fetches the days it lacks, and the week before the last stored day to pick up corrections. The first run backfills npm's 18-month window. npm keeps no daily counts older than that, so the days this action stores stay after they leave npm's window. A package npm doesn't know, or a failed request, is a warning; what was stored stays. The latest day can be provisional: a run early in the UTC day may read a day npm hasn't finished counting, and the next run's overlap corrects it. The dashboard gets an npm section, and the npm badges are written (see [Badges](#badges)), with `charts/npm-downloads-*.svg`.
 
 ## Pages (optional)
 
@@ -163,18 +163,49 @@ github-stats render --from-branch origin/stats-data --out dir
 
 ## Badges and charts
 
-Files on the data branch are served by `raw.githubusercontent.com`. Replace `OWNER/REPO` with the repo that runs the action. It appears twice in each URL: as the repo, and as the `<owner>/<repo>` folder on the branch:
+Files on the data branch are served by `raw.githubusercontent.com`. Replace `OWNER/REPO` with the repo that runs the action. It appears twice in each URL: as the repo, and as the `<owner>/<repo>` folder on the branch.
+
+### Badges
+
+Each badge is written as `badges/<name>.json` (shields.io endpoint) and `badges/<name>.svg` (flat). Period badges only count days the action measured, so none is an estimate. A window is shown when a snapshot exists on the day before it and no gap spans its first day; gaps inside it are summed. Windows are UTC days ending on the latest stored day. A window whose sum is negative (a removed release lowered the count) is hidden. The star windows are signed instead, so a net loss shows as a minus.
+
+| Name | Shows | Written when |
+|---|---|---|
+| `downloads` | release downloads, all releases | release downloads are counted |
+| `downloads-week`, `downloads-month` | downloads over the last 7 / 30 days, e.g. `1.2k/week` | the measured history covers the window |
+| `downloads-<group>` | one group's downloads, e.g. `downloads (CLI)` | two or more groups |
+| `downloads-<group>-week`, `-month` | one group over the same windows | as above |
+| `release-latest` | downloads of the latest stable release | a stable release exists |
+| `stars` | stars | always |
+| `stars-week`, `stars-month` | stars gained, e.g. `+12 this month`; negative when stars were removed | stargazers were collected |
+| `docker-pulls` | Docker Hub pulls | a count was ever collected |
+| `docker-pulls-month` | pulls over the last 30 days, e.g. `3k/month` | the measured Docker counts cover the window |
+| `npm-downloads` | npm downloads over the last 30 days, all packages | a package has stored days |
+| `npm-downloads-week` | the same over the last 7 days | as above |
+| `npm-downloads-total` | npm downloads over every stored day, e.g. `113k total` | as above |
+| `npm-<package>`, `npm-<package>-week` | one package over the last 30 / 7 days | the package has stored days |
+| `counter-<name>` | downloads of a counter's assets | a counter is configured |
+
+Each `.json` file is a shields.io endpoint, so it works in any shields.io badge:
 
 ```md
-[![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FOWNER%2FREPO%2Fstats-data%2FOWNER%2FREPO%2Fbadges%2Fdownloads.json)](https://github.com/OWNER/REPO)
+[![Downloads per month](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FOWNER%2FREPO%2Fstats-data%2FOWNER%2FREPO%2Fbadges%2Fdownloads-month.json)](https://github.com/OWNER/REPO)
+```
 
+The SVG, as an image:
+
+```html
+<img alt="Stars this month" src="https://raw.githubusercontent.com/OWNER/REPO/stats-data/OWNER/REPO/badges/stars-month.svg">
+```
+
+### Charts
+
+```html
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/OWNER/REPO/stats-data/OWNER/REPO/charts/stars-dark.svg">
   <img alt="Stars over time" src="https://raw.githubusercontent.com/OWNER/REPO/stats-data/OWNER/REPO/charts/stars-light.svg">
 </picture>
 ```
-
-The badge JSON follows the shields.io endpoint schema, so any shields.io endpoint badge can read it.
 
 ## Config
 
@@ -205,13 +236,13 @@ npm:                        # optional npm packages, counted daily
   - { package: "@acme/core", label: Core }
 ```
 
-- `groups`: `name` (letters, digits, `-`, `_`; `other` and `ignored` are reserved), `label` (defaults to the name), `assets` (a glob). The first matching group wins, so list the more specific glob first. Without `groups`, every asset counts as `downloads`.
+- `groups`: `name` (letters, digits, `-`, `_`; `other` and `ignored` are reserved, and so are `week`, `month`, or a name ending in `-week`, `_week`, `-month` or `_month`, which the period badges use), `label` (defaults to the name), `assets` (a glob). The first matching group wins, so list the more specific glob first. Without `groups`, every asset counts as `downloads`.
 - `ignore`: globs on asset names.
 - `counters`: `name`, `label`, `assets`, and `from`, an optional quoted semver; releases before it aren't counted. A counter's assets still count as downloads unless `ignore` also names them.
 - `epochs`: `version` as a quoted semver (`"v1.11.0"`, so YAML doesn't read `1.11` as a number), `label` defaults to the version. Optional.
 - `platforms`: `match` and `label`. Without a matching rule, the asset name minus the tag, repo name and archive suffixes is used.
 - `releases`: `true` by default. Release downloads show only when some release has an asset that counts (not ignored), so a repo without release assets gets no download views. `false` hides them even when assets count. The snapshots keep the counts either way, so turning it back on restores the history.
-- `npm`: npm package names, or `{ package, label }` (the label defaults to the name). Scoped names work. Up to 8: each package takes one of the eight palette colours, and a ninth would repeat one in the stacked charts, where two touching segments of one colour can't be told apart. Absent means no npm requests at all.
+- `npm`: npm package names, or `{ package, label }` (the label defaults to the name). Scoped names work. `downloads`, `downloads-week`, `downloads-total` and names ending in `-week` are reserved for the badges. Up to 8: each package takes one of the eight palette colours, and a ninth would repeat one in the stacked charts, where two touching segments of one colour can't be told apart. Absent means no npm requests at all.
 - `charts`: `titles` (default `true`) shows or hides the title of the README SVGs (a note that says what the data is stays: estimated or measured); a chart's own `title` (`stars`, `downloads-per-day`, `downloads-per-release`, `npm-downloads`) overrides it. The dashboard keeps its headings.
   - Each chart can cover a window, set per chart (there is no global default). `from` is the first day: `2024-06-01`, `2024-06` or `2024`, quoted or not (`from: 2024` and `from: "2024"` both work). `range` is a length counted back from the latest day, inclusive: `30d`, `6m`, `1y`. `from` and `range` are exclusive. A window longer than the history shows all of it; absent means all history.
   - `stars` samples the window (the count on its first day is where the curve starts, and the y axis keeps the real total). `downloads-per-day` and `npm-downloads` start their x axis at the window start, and the bars or areas of `downloads-per-day` are chosen on the whole history, so a short window still shows bars. `downloads-per-release` takes the releases published in the window, or with `last: N` the last N releases; epoch markers outside it are hidden.

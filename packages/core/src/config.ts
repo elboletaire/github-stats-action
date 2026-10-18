@@ -163,6 +163,8 @@ function parseGroups(value: unknown): GroupRule[] {
     const name = expectString(obj.name, `${path}.name`);
     checkName(name, `${path}.name`);
     if (RESERVED_GROUPS.has(name)) throw new ConfigError(`${path}.name '${name}' is reserved`);
+    // a group named `foo-week` would take the period badge of group `foo`
+    if (/(^|[-_])(week|month)$/i.test(name)) throw new ConfigError(`${path}.name '${name}' ends in a badge period`);
     return {
       name,
       label: optionalString(obj, 'label', path) ?? name,
@@ -294,9 +296,12 @@ function parseNpm(value: unknown): NpmRule[] {
     if (name.length > NPM_NAME_MAX || !NPM_NAME_RE.test(name)) {
       throw new ConfigError(`${path}.package '${name}' is not an npm package name`);
     }
-    if (npmSlug(name) === 'downloads') {
-      throw new ConfigError(`${path}.package '${name}' clashes with the combined npm badge (npm-downloads)`);
+    const slug = npmSlug(name);
+    // the combined npm badges take these names, and a name ending in -week is another package's week badge
+    if (['downloads', 'downloads-week', 'downloads-total'].includes(slug)) {
+      throw new ConfigError(`${path}.package '${name}' clashes with the combined npm badge (npm-${slug})`);
     }
+    if (slug.endsWith('-week')) throw new ConfigError(`${path}.package '${name}' ends in -week, the week badge's suffix`);
     return { package: name, label: optionalString(obj, 'label', path) ?? name };
   });
   if (rules.length > NPM_MAX_PACKAGES) {
