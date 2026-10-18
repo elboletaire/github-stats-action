@@ -9,9 +9,8 @@ inputs:
     required: false
     default: ${{ github.token }}
   config:
-    description: Path to the stats config file. Only the default path may be missing (then the defaults apply); a path set here must exist.
+    description: Path to the stats config file; .github/stats.yml when unset, which may be missing (then the defaults apply). A path set here must exist.
     required: false
-    default: .github/stats.yml
   data-branch:
     description: Orphan branch the data lives on, created on first run.
     required: false

@@ -41,7 +41,7 @@ Use `@v1` (the latest 1.x release, moved by the release workflow) or pin a full 
 | Input | Default | Meaning |
 |---|---|---|
 | `token` | `${{ github.token }}` | API token. Traffic needs a PAT, see [Traffic](#traffic). |
-| `config` | `.github/stats.yml` | Config file. A missing file means the defaults. |
+| `config` | unset | Config file; `.github/stats.yml` when unset, which may be missing (then the defaults apply). A path set here must exist. |
 | `data-branch` | `stats-data` | Branch the data lives on, created on first run. |
 | `traffic` | `false` | Collect traffic: views, clones, referrers, paths. |
 | `pages` | `false` | Write the static site to `pages-dir`, for the Pages actions. |
