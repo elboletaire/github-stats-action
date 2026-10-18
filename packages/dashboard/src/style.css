@@ -158,7 +158,7 @@ section.kpis-wrap {
 .kpi {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 14px 14px 12px;
   min-width: 0;
   display: flex;
@@ -184,7 +184,7 @@ section.kpis-wrap {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .kpi .d {
@@ -258,6 +258,82 @@ section {
 }
 
 .scroll[hidden] {
+  display: none;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  line-height: normal;
+}
+
+th,
+td {
+  padding: 8px 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--grid);
+  white-space: nowrap;
+}
+
+th:first-child,
+td:first-child {
+  text-align: left;
+}
+
+th {
+  font-weight: 500;
+  color: var(--muted);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+tbody tr:hover td {
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
+}
+
+td small {
+  color: var(--muted);
+  display: block;
+  font-size: 11.5px;
+}
+
+/* the periods table has many columns: its headers wrap so it fits the card on a laptop */
+.periods th {
+  white-space: normal;
+  line-height: 1.3;
+}
+
+td.pos {
+  color: var(--good);
+}
+
+/* the "estimated" / "measured" tag beside a heading */
+.est {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--warn);
+  color: var(--warn);
+  border-radius: 4px;
+  padding: 0 6px;
+  margin-left: 8px;
+  vertical-align: 2px;
+}
+
+.meas {
+  border-color: var(--good);
+  color: var(--good);
+}
+
+[hidden] {
   display: none;
 }
 
