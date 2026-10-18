@@ -2,11 +2,11 @@
 
 import { join } from 'node:path';
 import { mkdir } from 'node:fs/promises';
+import { renderBadges } from '@github-stats-action/badges';
 import {
   deriveRepo,
   listRepos,
   readSnapshots,
-  renderBadges,
   renderCharts,
   renderDashboard,
   repoDir,

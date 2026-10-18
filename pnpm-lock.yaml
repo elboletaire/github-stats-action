@@ -29,6 +29,15 @@ importers:
       '@actions/core':
         specifier: ^3.0.1
         version: 3.0.1
+      '@github-stats-action/badges':
+        specifier: workspace:*
+        version: link:../badges
+      '@github-stats-action/core':
+        specifier: workspace:*
+        version: link:../core
+
+  packages/badges:
+    dependencies:
       '@github-stats-action/core':
         specifier: workspace:*
         version: link:../core

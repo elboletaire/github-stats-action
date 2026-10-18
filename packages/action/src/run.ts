@@ -3,6 +3,7 @@
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { renderBadges } from '@github-stats-action/badges';
 import {
   createClient,
   deriveRepo,
@@ -16,7 +17,6 @@ import {
   readDatasets,
   readStargazers,
   readTrafficSeries,
-  renderBadges,
   renderCharts,
   renderDashboard,
   repoDir,
