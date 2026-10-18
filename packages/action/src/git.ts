@@ -3,7 +3,7 @@
 
 import { execFile } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { mkdtemp } from 'node:fs/promises';
+import { mkdtemp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 
@@ -24,6 +24,8 @@ export interface DataBranch {
   dir: string;
   /** Commits and pushes what changed, false when nothing did; `rederive` rebuilds derived files after a rebase. */
   publish(message: string, rederive?: () => Promise<unknown>): Promise<boolean>;
+  /** Removes the worktree, its folder and any throwaway branch, leaving the workspace as it was. */
+  dispose(): Promise<void>;
 }
 
 async function git(args: string[], cwd: string): Promise<string> {
@@ -59,16 +61,23 @@ export async function checkoutDataBranch(options: { cwd: string; branch: string;
   const exists = await remoteBranchExists(cwd, branch);
   if (exists) await git(['fetch', '--quiet', '--no-tags', 'origin', `+refs/heads/${branch}:${remoteRef}`], cwd);
 
-  const dir = join(await mkdtemp(join(options.tmp, 'stats-data-')), 'worktree');
-  if (exists) {
-    await git(['worktree', 'add', '--quiet', '--detach', dir, remoteRef], cwd);
+  const root = await mkdtemp(join(options.tmp, 'stats-data-'));
+  const dir = join(root, 'worktree');
+  // A throwaway branch: `--orphan` refuses a name the workspace already has, and the push names the real one.
+  const throwaway = exists ? undefined : `orphan-${randomUUID()}`;
+  if (throwaway) {
+    await git(['worktree', 'add', '--quiet', '--orphan', '-b', throwaway, dir], cwd);
   } else {
-    // A throwaway branch: `--orphan` refuses a name the workspace already has, and the push names the real one.
-    await git(['worktree', 'add', '--quiet', '--orphan', '-b', `orphan-${randomUUID()}`, dir], cwd);
+    await git(['worktree', 'add', '--quiet', '--detach', dir, remoteRef], cwd);
   }
 
   return {
     dir,
+    async dispose(): Promise<void> {
+      await git(['worktree', 'remove', '--force', dir], cwd);
+      if (throwaway) await git(['branch', '-D', throwaway], cwd);
+      await rm(root, { recursive: true, force: true });
+    },
     async publish(message: string, rederive?: () => Promise<unknown>): Promise<boolean> {
       await git(['add', '-A'], dir);
       if (!(await hasStagedChanges(dir))) return false;

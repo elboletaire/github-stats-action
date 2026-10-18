@@ -21,34 +21,39 @@ async function main(): Promise<void> {
 
   const config = await loadConfig(join(workspace, configPath));
   const data = await checkoutDataBranch({ cwd: workspace, branch, tmp: process.env.RUNNER_TEMP ?? tmpdir() });
-  const pagesDir = join(workspace, pagesDirInput);
-  const pagesOptions = pages ? { dir: pagesDir, traffic: core.getBooleanInput('pages-traffic') } : undefined;
-  const result = await runStats({
-    repo,
-    token,
-    config,
-    dataDir: data.dir,
-    traffic: core.getBooleanInput('traffic'),
-    pages: pagesOptions,
-    importOld: core.getInput('import-old') || undefined,
-    now,
-    log: core,
-  });
+  try {
+    const pagesDir = join(workspace, pagesDirInput);
+    const pagesOptions = pages ? { dir: pagesDir, traffic: core.getBooleanInput('pages-traffic') } : undefined;
+    const result = await runStats({
+      repo,
+      token,
+      config,
+      dataDir: data.dir,
+      traffic: core.getBooleanInput('traffic'),
+      pages: pagesOptions,
+      importOld: core.getInput('import-old') || undefined,
+      now,
+      log: core,
+    });
 
-  if (dryRun) {
-    core.info('dry-run: nothing committed or pushed');
-  } else {
-    // After a rebase onto a moved branch, the outputs are rebuilt from the merged snapshots.
-    const rederive = async (): Promise<void> => {
-      const rebuilt = await writeDerivedOutputs(data.dir, repo, config, now);
-      if (pagesOptions) await writePagesSite(pagesOptions, repo, rebuilt);
-    };
-    const pushed = await data.publish(`stats: ${result.dataset.snapshotAt.slice(0, 10)}`, rederive);
-    core.info(pushed ? `pushed ${branch}` : `${branch} unchanged`);
+    if (dryRun) {
+      core.info('dry-run: nothing committed or pushed');
+    } else {
+      // After a rebase onto a moved branch, the outputs are rebuilt from the merged snapshots.
+      const rederive = async (): Promise<void> => {
+        const rebuilt = await writeDerivedOutputs(data.dir, repo, config, now);
+        if (pagesOptions) await writePagesSite(pagesOptions, repo, rebuilt);
+      };
+      const pushed = await data.publish(`stats: ${result.dataset.snapshotAt.slice(0, 10)}`, rederive);
+      core.info(pushed ? `pushed ${branch}` : `${branch} unchanged`);
+    }
+    core.setOutput('pages-dir', pages ? pagesDir : '');
+    core.setOutput('dataset', result.datasetPath);
+    core.setOutput('summary', result.summary);
+  } finally {
+    // a failed cleanup must not hide the run's own error
+    await data.dispose().catch((error: unknown) => core.warning(`could not remove the data worktree: ${String(error)}`));
   }
-  core.setOutput('pages-dir', pages ? pagesDir : '');
-  core.setOutput('dataset', result.datasetPath);
-  core.setOutput('summary', result.summary);
 }
 
 main().catch((error: unknown) => {

@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { mkdir, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -146,6 +147,23 @@ describe('checkoutDataBranch', () => {
       expect(git(remote, 'log', '-1', '--format=%s', 'stats-data')).toBe('mine');
       expect(git(remote, 'rev-parse', 'stats-data^')).toBe(git(other, 'rev-parse', 'HEAD'));
     });
+  });
+
+  it('leaves the workspace as it was after dispose, with or without a throwaway branch', async () => {
+    const { root, work } = await setup();
+    const first = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    await writeFile(join(first.dir, 'day1.json'), '{}\n');
+    await first.publish('stats: day 1');
+    await first.dispose();
+    expect(git(work, 'branch', '--list', 'orphan-*')).toBe('');
+    expect(git(work, 'worktree', 'list', '--porcelain')).not.toContain('stats-data');
+    expect(existsSync(first.dir)).toBe(false);
+
+    const second = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    expect(await second.publish('stats: day 1 again')).toBe(false);
+    await second.dispose();
+    expect(git(work, 'worktree', 'list', '--porcelain').split('\n').filter((l) => l.startsWith('worktree '))).toHaveLength(1);
+    expect(existsSync(second.dir)).toBe(false);
   });
 
   it('starts the orphan branch even when the workspace already has a local branch of that name', async () => {
