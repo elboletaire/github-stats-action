@@ -32,6 +32,9 @@ importers:
       '@github-stats-action/core':
         specifier: workspace:*
         version: link:../core
+      '@github-stats-action/svg':
+        specifier: workspace:*
+        version: link:../svg
 
   packages/core:
     dependencies:
@@ -41,6 +44,12 @@ importers:
       yaml:
         specifier: ^2.9.1
         version: 2.9.1
+
+  packages/svg:
+    dependencies:
+      '@github-stats-action/core':
+        specifier: workspace:*
+        version: link:../core
 
 packages:
 

@@ -17,7 +17,6 @@ import {
   readStargazers,
   readTrafficSeries,
   renderBadges,
-  renderCharts,
   renderDashboard,
   repoDir,
   utcDate,
@@ -33,6 +32,7 @@ import {
   type Snapshot,
   type StatsConfig,
 } from '@github-stats-action/core';
+import { renderCharts } from '@github-stats-action/svg';
 
 export interface RunOptions {
   /** owner/name. */

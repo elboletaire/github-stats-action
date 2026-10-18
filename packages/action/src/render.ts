@@ -6,7 +6,6 @@ import {
   deriveRepo,
   listRepos,
   renderBadges,
-  renderCharts,
   renderDashboard,
   repoDir,
   writeDerived,
@@ -15,6 +14,7 @@ import {
   type Logger,
   type StatsConfig,
 } from '@github-stats-action/core';
+import { renderCharts } from '@github-stats-action/svg';
 
 export interface RenderOptions {
   /** Folder holding `<owner>/<repo>/` (a data branch checkout, or an exported copy). */

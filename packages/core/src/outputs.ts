@@ -20,12 +20,6 @@ export function renderDashboard(datasets: readonly Dataset[], options: { mode: '
   return [];
 }
 
-/** SVG charts for one repo; paths are relative to `<owner>/<repo>/` (`charts/*.svg`). */
-export function renderCharts(dataset: Dataset): OutputFile[] {
-  void dataset;
-  return [];
-}
-
 /** Badges for one repo; paths are relative to `<owner>/<repo>/` (`badges/*`). */
 export function renderBadges(dataset: Dataset): OutputFile[] {
   void dataset;

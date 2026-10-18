@@ -1,0 +1,154 @@
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import type { Dataset, MeasuredDay, ReleaseRow } from '@github-stats-action/core';
+import { renderCharts } from '../src/index';
+
+const fixture = async (): Promise<Dataset> =>
+  JSON.parse(await readFile(resolve(import.meta.dirname, '../../../fixtures/dataset.json'), 'utf8')) as Dataset;
+
+const TAG = /<(\/?)([A-Za-z][\w:-]*)([^>]*?)(\/?)>/g;
+
+/** Tags nest and close, and nothing in the text is left unescaped. A small stand-in for an XML parser. */
+function expectWellFormed(svg: string): void {
+  const open: string[] = [];
+  for (const match of svg.matchAll(TAG)) {
+    const [, closing, name = '', , selfClosing] = match;
+    if (closing) expect(open.pop()).toBe(name);
+    else if (!selfClosing) open.push(name);
+  }
+  expect(open).toEqual([]);
+  expect(svg.replace(TAG, '').match(/&(?!(amp|lt|gt|quot|apos|#\d+);)/)).toBeNull();
+}
+
+/** Each bar or stacked segment is a path with a title child (the hover tooltip). */
+const segments = (svg: string): number => svg.match(/<path d="[^"]*" fill="[^"]*"><title>/g)?.length ?? 0;
+
+const day = (i: number, groups: Record<string, number>): MeasuredDay => ({
+  date: new Date(Date.UTC(2026, 8, 1) + i * 86_400_000).toISOString().slice(0, 10),
+  days: 1,
+  groups,
+  stars: 1,
+  docker: null,
+  counters: {},
+});
+
+const release = (tag: string, groups: Record<string, number>, epoch = -1): ReleaseRow => ({
+  tag,
+  publishedAt: '2026-01-01T00:00:00Z',
+  end: '2026-02-01T00:00:00Z',
+  days: 31,
+  epoch,
+  prerelease: false,
+  groups,
+  counters: {},
+  files: [],
+});
+
+function chart(files: { path: string; content: string }[], name: string): string {
+  const file = files.find((f) => f.path === name);
+  if (!file) throw new Error(`no ${name}`);
+  return file.content;
+}
+
+describe('renderCharts', () => {
+  it('writes a light and a dark file for each chart under charts/', async () => {
+    const files = renderCharts(await fixture());
+    expect(files.map((f) => f.path).sort()).toEqual([
+      'charts/downloads-per-day-dark.svg',
+      'charts/downloads-per-day-light.svg',
+      'charts/downloads-per-release-dark.svg',
+      'charts/downloads-per-release-light.svg',
+      'charts/stars-dark.svg',
+      'charts/stars-light.svg',
+    ]);
+  });
+
+  it('writes well-formed standalone SVG with a title and description and no scripts or external refs', async () => {
+    for (const { content } of renderCharts(await fixture())) {
+      expectWellFormed(content);
+      expect(content).toMatch(/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" width="800" height="300" viewBox="0 0 800 300"/);
+      expect(content).toContain('<title id="title">');
+      expect(content).toContain('<desc id="desc">');
+      expect(content).not.toMatch(/<script|href=|src=|xlink|NaN|Infinity|undefined/);
+    }
+  });
+
+  it('draws one bar segment per non-zero group of each release', async () => {
+    const dataset = await fixture();
+    const expected = dataset.releases.reduce((n, r) => n + dataset.groups.filter((g) => (r.groups[g.name] ?? 0) > 0).length, 0);
+    const svg = chart(renderCharts(dataset), 'charts/downloads-per-release-light.svg');
+    expect(segments(svg)).toBe(expected);
+  });
+
+  it('labels the configured epochs and no others', async () => {
+    const dataset = await fixture();
+    const svg = chart(renderCharts(dataset), 'charts/downloads-per-release-light.svg');
+    for (const epoch of dataset.epochs) expect(svg).toContain(`${epoch.version} ${epoch.label}`);
+    expect(svg.match(/<line [^>]*stroke-width="1"><title>/g)).toHaveLength(dataset.epochs.length);
+  });
+
+  it('draws estimated areas and says so on a fixture with one measured day', async () => {
+    const dataset = await fixture();
+    const svg = chart(renderCharts(dataset), 'charts/downloads-per-day-light.svg');
+    expect(svg).toContain('Estimated');
+    expect(svg).toContain('measured needs 14 days, have 1');
+    expect(svg.match(/fill-opacity="0.1"/g)).toHaveLength(2);
+  });
+
+  it('draws one bar per measured day and group once there are 14 measured days', async () => {
+    const dataset = await fixture();
+    const measured = Array.from({ length: 20 }, (_, i) => day(i, { app: i % 3, cli: 10 + i }));
+    const svg = chart(renderCharts({ ...dataset, measuredDaily: measured }), 'charts/downloads-per-day-dark.svg');
+    expectWellFormed(svg);
+    expect(svg).toContain('Measured, change between daily snapshots (20 days)');
+    expect(segments(svg)).toBe(measured.reduce((n, d) => n + Object.values(d.groups).filter((v) => v > 0).length, 0));
+  });
+
+  it('shows the estimate for a single measured day', async () => {
+    const dataset = await fixture();
+    const svg = chart(renderCharts({ ...dataset, measuredDaily: [day(0, { app: 5, cli: 7 })] }), 'charts/downloads-per-day-light.svg');
+    expect(svg).toContain('Estimated');
+    expect(segments(svg)).toBe(0);
+  });
+
+  it('handles zero stars without an empty path', async () => {
+    const dataset = { ...(await fixture()), stars: [], totals: { ...(await fixture()).totals, stars: 0 } };
+    const svg = chart(renderCharts(dataset), 'charts/stars-light.svg');
+    expectWellFormed(svg);
+    expect(svg).toContain('No stars yet');
+    expect(svg).not.toContain('<circle');
+  });
+
+  it('handles one release, no epochs and a group with zero downloads', async () => {
+    const dataset = await fixture();
+    const single: Dataset = {
+      ...dataset,
+      epochs: [],
+      releases: [release('v1.0.0', { app: 0, cli: 42 })],
+      groups: [...dataset.groups, { name: 'other', label: 'Other', color: 2 }],
+    };
+    const svg = chart(renderCharts(single), 'charts/downloads-per-release-dark.svg');
+    expectWellFormed(svg);
+    expect(segments(svg)).toBe(1);
+    expect(svg).toContain('>42<');
+    expect(svg).not.toContain('stroke-width="1"><title>');
+  });
+
+  it('draws no columns when there are no releases', async () => {
+    const dataset = { ...(await fixture()), releases: [], epochs: [] };
+    const svg = chart(renderCharts(dataset), 'charts/downloads-per-release-light.svg');
+    expectWellFormed(svg);
+    expect(svg).toContain('No releases yet');
+    expect(segments(svg)).toBe(0);
+  });
+
+  it('escapes group labels', async () => {
+    const dataset = await fixture();
+    const groups = [{ name: 'app', label: 'A & <B> "C"', color: 0 }, { name: 'cli', label: 'CLI', color: 1 }];
+    const svg = chart(renderCharts({ ...dataset, groups }), 'charts/downloads-per-release-light.svg');
+    expectWellFormed(svg);
+    expect(svg).toContain('A &amp; &lt;B&gt; &quot;C&quot;');
+    expect(svg).not.toContain('<B>');
+  });
+});

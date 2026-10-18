@@ -6,6 +6,7 @@
   "main": "./src/main.ts",
   "dependencies": {
     "@actions/core": "^3.0.1",
-    "@github-stats-action/core": "workspace:*"
+    "@github-stats-action/core": "workspace:*",
+    "@github-stats-action/svg": "workspace:*"
   }
 }
