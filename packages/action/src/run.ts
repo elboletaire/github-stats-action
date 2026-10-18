@@ -14,6 +14,7 @@ import {
   fetchStargazers,
   fetchTraffic,
   githubClient,
+  pruneDerived,
   mergeTrafficDays,
   readDatasets,
   readNpmSeries,
@@ -62,9 +63,15 @@ export interface RunResult {
 
 /** One line for the job summary and the `summary` output. */
 export function summaryLine(dataset: Dataset): string {
-  const groups = dataset.groups.map((g) => `${g.label} ${dataset.totals.groups[g.name] ?? 0}`).join(', ');
-  const docker = dataset.totals.docker === null ? '' : `, Docker ${dataset.totals.docker}`;
-  return `${dataset.repo}: ${dataset.totals.downloads} downloads (${groups}), ${dataset.totals.stars} stars${docker}`;
+  const parts: string[] = [];
+  if (dataset.releaseDownloads) {
+    const groups = dataset.groups.map((g) => `${g.label} ${dataset.totals.groups[g.name] ?? 0}`).join(', ');
+    parts.push(`${dataset.totals.downloads} downloads (${groups})`);
+  }
+  parts.push(`${dataset.totals.stars} stars`);
+  if (dataset.totals.docker !== null) parts.push(`Docker ${dataset.totals.docker}`);
+  if (dataset.npm) parts.push(`npm ${dataset.npm.totals.last30} in the last 30 days`);
+  return `${dataset.repo}: ${parts.join(', ')}`;
 }
 
 /** Rebuilds the derived files, charts, badges and dashboard from the stored snapshots of `repo`. */
@@ -72,7 +79,9 @@ export async function writeDerivedOutputs(dataDir: string, repo: string, config:
   const dir = repoDir(dataDir, repo);
   const { dataset, csv } = await deriveRepo(dir, repo, config, now);
   await writeDerived(dir, dataset, csv);
-  await writeOutputFiles(dir, [...renderCharts(dataset), ...renderBadges(dataset)]);
+  const files = [...renderCharts(dataset), ...renderBadges(dataset)];
+  await writeOutputFiles(dir, files);
+  await pruneDerived(dir, files);
   await writeOutputFiles(dataDir, dashboardFiles(await readDatasets(dataDir), { mode: 'standalone' }));
   return dataset;
 }

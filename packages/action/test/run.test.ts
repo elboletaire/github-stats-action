@@ -182,3 +182,22 @@ npm:
     expect(hosts).not.toContain('api.npmjs.org');
   });
 });
+
+describe('runStats with release downloads switched off', () => {
+  it('removes the download outputs an earlier run wrote, and keeps the snapshots', async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
+    const repo = join(dataDir, 'elboletaire', 'manga-downloader');
+    await runStats({ repo: REPO, config, dataDir, traffic: false, now, log, fetch: network() });
+    expect(await readdir(join(repo, 'charts'))).toContain('downloads-per-day-light.svg');
+    expect(await readdir(join(repo, 'badges'))).toContain('downloads.json');
+
+    const off = parseConfig('releases: false\ndocker: elboletaire/manga-downloader\n');
+    const result = await runStats({ repo: REPO, config: off, dataDir, traffic: false, now, log, fetch: network() });
+    expect(result.dataset.releaseDownloads).toBe(false);
+    expect(result.summary).toBe('elboletaire/manga-downloader: 3 stars, Docker 42');
+    expect((await readdir(join(repo, 'charts'))).sort()).toEqual(['stars-dark.svg', 'stars-light.svg']);
+    expect(await readdir(join(repo, 'badges'))).not.toContain('downloads.json');
+    expect(await readFile(join(repo, 'daily.csv'), 'utf8')).toMatch(/^date,docker_pulls,stars,forks,docker_delta,stars_delta\n/);
+    expect(await readdir(join(repo, 'snapshots'))).toEqual(['2026-01-03.json']);
+  });
+});

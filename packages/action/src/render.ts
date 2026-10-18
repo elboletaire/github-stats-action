@@ -7,6 +7,7 @@ import { dashboardFiles } from '@github-stats-action/dashboard';
 import {
   deriveRepo,
   listRepos,
+  pruneDerived,
   readSnapshots,
   repoDir,
   writeDerived,
@@ -50,7 +51,9 @@ export async function renderData(options: RenderOptions): Promise<RenderResult> 
   const dir = repoDir(options.outDir, repo);
   await mkdir(dir, { recursive: true });
   await writeDerived(dir, dataset, csv);
-  await writeOutputFiles(dir, [...renderCharts(dataset), ...renderBadges(dataset)]);
+  const files = [...renderCharts(dataset), ...renderBadges(dataset)];
+  await writeOutputFiles(dir, files);
+  await pruneDerived(dir, files);
   await writeOutputFiles(options.outDir, dashboardFiles([dataset], { mode: 'standalone' }));
   options.log.info(`rendered ${repo} into ${options.outDir}`);
   return { datasets: [dataset], datasetPaths: [join(dir, 'dataset.json')] };
