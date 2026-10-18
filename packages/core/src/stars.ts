@@ -12,7 +12,7 @@ const DAY_MS = 86_400_000;
 
 /**
  * Up to `count` points evenly spaced in time, from the first star's date to the last point's date, each with the
- * cumulative count on its day (the last point on or before it, since unchanged days may be missing).
+ * cumulative count on its day (the last point on or before it, since unchanged days may be missing). Points must be in ascending date order.
  */
 export function sampleStars(points: readonly StarPoint[], count = STAR_SAMPLES): StarPoint[] {
   const first = points[0];
