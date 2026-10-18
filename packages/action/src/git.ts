@@ -25,6 +25,17 @@ async function git(args: string[], cwd: string): Promise<string> {
   return stdout.trim();
 }
 
+/** `ls-remote --exit-code` exits 2 when no ref matches; any other failure (auth, network) is an error. */
+async function remoteBranchExists(cwd: string, branch: string): Promise<boolean> {
+  try {
+    await git(['ls-remote', '--exit-code', 'origin', `refs/heads/${branch}`], cwd);
+    return true;
+  } catch (error) {
+    if ((error as { code?: unknown }).code === 2) return false;
+    throw error;
+  }
+}
+
 async function hasStagedChanges(cwd: string): Promise<boolean> {
   try {
     await execFileAsync('git', ['diff', '--cached', '--quiet'], { cwd });
@@ -42,12 +53,8 @@ async function hasStagedChanges(cwd: string): Promise<boolean> {
 export async function checkoutDataBranch(options: { cwd: string; branch: string; tmp: string }): Promise<DataBranch> {
   const { cwd, branch } = options;
   const remoteRef = `refs/remotes/origin/${branch}`;
-  let exists = true;
-  try {
-    await git(['fetch', '--quiet', '--no-tags', 'origin', `+refs/heads/${branch}:${remoteRef}`], cwd);
-  } catch {
-    exists = false;
-  }
+  const exists = await remoteBranchExists(cwd, branch);
+  if (exists) await git(['fetch', '--quiet', '--no-tags', 'origin', `+refs/heads/${branch}:${remoteRef}`], cwd);
 
   const dir = join(await mkdtemp(join(options.tmp, 'stats-data-')), 'worktree');
   if (exists) {

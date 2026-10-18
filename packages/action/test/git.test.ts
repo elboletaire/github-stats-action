@@ -42,6 +42,13 @@ describe('checkoutDataBranch', () => {
     expect(git(remote, 'rev-list', '--count', 'stats-data')).toBe('2');
   });
 
+  it('fails without creating an orphan branch when the remote cannot be read', async () => {
+    const { root, work } = await setup();
+    git(work, 'remote', 'set-url', 'origin', join(root, 'missing.git'));
+    await expect(checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root })).rejects.toThrow();
+    expect(git(work, 'branch', '--list', 'stats-data')).toBe('');
+  });
+
   it('publishes nothing when the run changed no file', async () => {
     const { root, remote, work } = await setup();
     const data = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
