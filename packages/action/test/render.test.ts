@@ -131,6 +131,22 @@ describe('render from a git ref', () => {
     expect(await readdir(repo)).not.toContain(REPO.split('/')[0]);
   });
 
+  it('reads a ref whose name starts with a dash as a ref, not as an option', async () => {
+    const repo = await mkdtemp(join(tmpdir(), 'render-git-'));
+    git(repo, 'init', '-q', '-b', 'main');
+    git(repo, 'config', 'user.email', 'dev@example.com');
+    git(repo, 'config', 'user.name', 'dev');
+    await fixtureData(repo);
+    git(repo, 'add', '-A');
+    git(repo, 'commit', '-q', '-m', 'data');
+    git(repo, 'update-ref', 'refs/heads/-data', 'HEAD');
+
+    const out = await mkdtemp(join(tmpdir(), 'render-out-'));
+    const code = await runCli(['render', '--from-branch=-data', '--out', out, '--config', CONFIG], repo);
+    expect(code).toBe(0);
+    expect(JSON.parse(await readFile(join(out, REPO, 'dataset.json'), 'utf8')).repo).toBe(REPO);
+  });
+
   it('reports an unknown ref without writing anything', async () => {
     const repo = await mkdtemp(join(tmpdir(), 'render-git-'));
     git(repo, 'init', '-q', '-b', 'main');
