@@ -71,7 +71,7 @@ async function render(values: Values, cwd: string): Promise<void> {
     throw new Error('render needs exactly one of --data or --from-branch');
   }
   const config = await loadConfig(values.config);
-  const options = { outDir: values.out, config, repo: values.repo, now: new Date(), log };
+  const options = { outDir: values.out, config, repo: values.repo, log };
   if (values.data) {
     await renderData({ ...options, dataRoot: values.data });
     return;
