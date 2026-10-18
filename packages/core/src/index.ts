@@ -19,3 +19,4 @@ export * from './collectors/github';
 export * from './collectors/docker';
 export * from './collectors/npm';
 export * from './npm';
+export * from './window';

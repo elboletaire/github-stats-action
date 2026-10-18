@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { parse } from 'yaml';
 import { NPM_NAME_MAX, NPM_NAME_RE, npmSlug } from './npm';
 import { compareVersions, parseVersion } from './semver';
+import { RANGE_RE } from './window';
 
 export interface GroupRule {
   name: string;
@@ -41,6 +42,12 @@ export interface NpmRule {
 /** Options of one README chart; `title` overrides `charts.titles` for that chart. */
 export interface ChartConfig {
   title?: boolean;
+  /** The window's first day, YYYY-MM-DD. Exclusive with `range` and `last`. */
+  from?: string;
+  /** The window's length counted back from the latest day: `30d`, `6m` or `1y`. */
+  range?: string;
+  /** Downloads per release only: the last N releases. */
+  last?: number;
 }
 
 export interface ChartsConfig {
@@ -208,30 +215,67 @@ function optionalBoolean(obj: Obj, key: string, path: string): boolean | undefin
   return value;
 }
 
-function parseCharts(value: unknown): ChartsConfig {
-  const obj = expectObject(value, 'charts');
-  checkKeys(obj, ['titles', 'stars', 'downloads-per-day', 'downloads-per-release', 'npmDownloads'], 'charts');
-  const section = (name: string, keys: string[]): Obj => {
-    const sub = obj[name] === undefined ? {} : expectObject(obj[name], `charts.${name}`);
-    checkKeys(sub, keys, `charts.${name}`);
-    return sub;
-  };
-  const stars = section('stars', ['title']);
-  const perDay = section('downloads-per-day', ['title']);
-  const perRelease = section('downloads-per-release', ['title']);
-  const npm = section('npmDownloads', ['title']);
+/** The date a `from` names: `2024-06-01`, `2024-06` or `2024`, read as the first day of that span. */
+function parseFrom(value: unknown, path: string): string {
+  // YAML reads an unquoted 2024 as a number
+  const text = typeof value === 'number' && Number.isInteger(value) ? String(value) : value;
+  const match = typeof text === 'string' ? /^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?$/.exec(text) : null;
+  if (match) {
+    const [, year, month = '01', day = '01'] = match;
+    const date = `${year}-${month}-${day}`;
+    // Date rolls 2024-02-30 over to March, so the date must read back unchanged
+    const parsed = new Date(`${date}T00:00:00Z`);
+    if (!Number.isNaN(parsed.getTime()) && parsed.toISOString().startsWith(date)) return date;
+  }
+  throw new ConfigError(`${path} must be a date: 2024, 2024-06 or 2024-06-01`);
+}
+
+function parseRange(value: unknown, path: string): string {
+  const match = typeof value === 'string' ? RANGE_RE.exec(value) : null;
+  if (match && Number(match[1]) > 0) return value as string;
+  throw new ConfigError(`${path} must be a length such as 30d, 6m or 1y`);
+}
+
+/** A chart's options: its title, and the window it covers (`from` or `range`, or `last` for releases). */
+function parseChart(sub: Obj, chart: ChartName, path: string): ChartConfig {
+  const title = optionalBoolean(sub, 'title', path);
+  const hasFrom = sub.from !== undefined;
+  const hasRange = sub.range !== undefined;
+  const hasLast = sub.last !== undefined;
+  if (hasFrom && hasRange) throw new ConfigError(`${path}: from and range can't both be set`);
+  if (hasLast && chart !== 'downloads-per-release') throw new ConfigError(`${path}.last is only for downloads-per-release`);
+  if (hasLast && (hasFrom || hasRange)) throw new ConfigError(`${path}: last can't be combined with from or range`);
+  if (hasLast && (!Number.isInteger(sub.last) || (sub.last as number) < 1)) {
+    throw new ConfigError(`${path}.last must be a whole number above zero`);
+  }
   return {
-    titles: optionalBoolean(obj, 'titles', 'charts') ?? true,
-    stars: chartOptions(optionalBoolean(stars, 'title', 'charts.stars')),
-    'downloads-per-day': chartOptions(optionalBoolean(perDay, 'title', 'charts.downloads-per-day')),
-    'downloads-per-release': chartOptions(optionalBoolean(perRelease, 'title', 'charts.downloads-per-release')),
-    npmDownloads: chartOptions(optionalBoolean(npm, 'title', 'charts.npmDownloads')),
+    ...(title === undefined ? {} : { title }),
+    ...(hasFrom ? { from: parseFrom(sub.from, `${path}.from`) } : {}),
+    ...(hasRange ? { range: parseRange(sub.range, `${path}.range`) } : {}),
+    ...(hasLast ? { last: sub.last as number } : {}),
   };
 }
 
-/** `{ title }` when the chart sets one, else nothing, so an unset title stays out of the config. */
-function chartOptions(title: boolean | undefined): ChartConfig {
-  return title === undefined ? {} : { title };
+function parseCharts(value: unknown): ChartsConfig {
+  const obj = expectObject(value, 'charts');
+  checkKeys(obj, ['titles', 'stars', 'downloads-per-day', 'downloadsPerDay', 'downloads-per-release', 'downloadsPerRelease', 'npmDownloads'], 'charts');
+  // a chart may be named in camelCase or in the kebab-case of its file name, but not both
+  const section = (chart: ChartName, alias?: string): ChartConfig => {
+    if (alias !== undefined && obj[chart] !== undefined && obj[alias] !== undefined) {
+      throw new ConfigError(`charts.${chart} and charts.${alias} are the same chart; use one`);
+    }
+    const name = alias !== undefined && obj[alias] !== undefined ? alias : chart;
+    const sub = obj[name] === undefined ? {} : expectObject(obj[name], `charts.${name}`);
+    checkKeys(sub, ['title', 'from', 'range', 'last'], `charts.${name}`);
+    return parseChart(sub, chart, `charts.${name}`);
+  };
+  return {
+    titles: optionalBoolean(obj, 'titles', 'charts') ?? true,
+    stars: section('stars'),
+    'downloads-per-day': section('downloads-per-day', 'downloadsPerDay'),
+    'downloads-per-release': section('downloads-per-release', 'downloadsPerRelease'),
+    npmDownloads: section('npmDownloads'),
+  };
 }
 
 function parsePlatforms(value: unknown): PlatformRule[] {

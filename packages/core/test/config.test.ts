@@ -208,3 +208,49 @@ describe('releases', () => {
     expect(() => parseConfig('releases: "no"\n')).toThrow('top level.releases must be true or false');
   });
 });
+
+describe('chart windows', () => {
+  it('reads from as a year, a month or a day, each as the first day of its span', () => {
+    expect(parseConfig('charts: { stars: { from: 2024-01-01 } }').charts.stars).toEqual({ from: '2024-01-01' });
+    expect(parseConfig('charts: { stars: { from: "2024-06" } }').charts.stars).toEqual({ from: '2024-06-01' });
+    expect(parseConfig('charts: { stars: { from: 2024 } }').charts.stars).toEqual({ from: '2024-01-01' });
+    expect(parseConfig('charts: { stars: { from: "2024" } }').charts.stars).toEqual({ from: '2024-01-01' });
+  });
+
+  it('reads a range as a count of days, months or years', () => {
+    expect(parseConfig('charts: { downloads-per-day: { range: 90d } }').charts['downloads-per-day']).toEqual({ range: '90d' });
+    expect(parseConfig('charts: { npmDownloads: { range: 1y } }').charts.npmDownloads).toEqual({ range: '1y' });
+  });
+
+  it('reads last for downloads per release only', () => {
+    expect(parseConfig('charts: { downloads-per-release: { last: 20 } }').charts['downloads-per-release']).toEqual({ last: 20 });
+  });
+
+  it('reads the camelCase names of the download charts as those charts', () => {
+    const config = parseConfig('charts:\n  downloadsPerDay: { from: 2026-01-01 }\n  downloadsPerRelease: { last: 20 }\n');
+    expect(config.charts['downloads-per-day']).toEqual({ from: '2026-01-01' });
+    expect(config.charts['downloads-per-release']).toEqual({ last: 20 });
+  });
+
+  it('keeps the window out of the config when none is set', () => {
+    expect(parseConfig('charts: { stars: { title: false } }').charts.stars).toEqual({ title: false });
+  });
+
+  it.each([
+    ['a day that is not a date', 'charts: { stars: { from: 2024-02-30 } }', 'charts.stars.from must be a date'],
+    ['a text that is not a date', 'charts: { stars: { from: "last year" } }', 'charts.stars.from must be a date'],
+    ['a month out of range', 'charts: { stars: { from: 2024-13 } }', 'charts.stars.from must be a date'],
+    ['a range without a unit', 'charts: { stars: { range: 90 } }', 'charts.stars.range must be a length such as 30d, 6m or 1y'],
+    ['a range in weeks', 'charts: { stars: { range: 2w } }', 'charts.stars.range must be a length'],
+    ['a zero range', 'charts: { stars: { range: 0d } }', 'charts.stars.range must be a length'],
+    ['from and range together', 'charts: { stars: { from: 2024, range: 1y } }', "charts.stars: from and range can't both be set"],
+    ['last on a chart other than releases', 'charts: { stars: { last: 5 } }', 'charts.stars.last is only for downloads-per-release'],
+    ['last with from', 'charts: { downloads-per-release: { last: 5, from: 2024 } }', "charts.downloads-per-release: last can't be combined with from or range"],
+    ['last of zero', 'charts: { downloads-per-release: { last: 0 } }', 'charts.downloads-per-release.last must be a whole number above zero'],
+    ['last that is not whole', 'charts: { downloads-per-release: { last: 2.5 } }', 'charts.downloads-per-release.last must be a whole number above zero'],
+    ['the same chart named twice', 'charts:\n  downloads-per-day: { from: 2024 }\n  downloadsPerDay: { from: 2025 }\n', 'charts.downloads-per-day and charts.downloadsPerDay are the same chart; use one'],
+    ['an unknown key next to the window', 'charts: { stars: { from: 2024, every: 2 } }', 'charts.stars.every is not a known key'],
+  ])('rejects %s', (_, text, message) => {
+    expect(() => parseConfig(text)).toThrow(message);
+  });
+});
