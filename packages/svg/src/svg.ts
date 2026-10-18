@@ -210,9 +210,10 @@ export interface Segment {
 }
 
 // One stacked column, bottom-up: each segment gives 1px to each neighbour, so they sit 2px apart.
-// Only the top is rounded, the baseline stays square; zero segments are left out.
-export function stack(x: number, width: number, yOf: (v: number) => number, segments: Segment[]): string[] {
-  const shown = segments.filter((s) => finite(s.value) > 0);
+// Only the top is rounded, the baseline stays square; zero values are left out. `index` is the value's
+// position, so a caller can colour or group the bars by series.
+export function stackBars(x: number, width: number, yOf: (v: number) => number, values: readonly number[]): { index: number; d: string }[] {
+  const shown = values.flatMap((value, index) => (finite(value) > 0 ? [{ value, index }] : []));
   let base = 0;
   return shown.map((s, i) => {
     const lower = yOf(base);
@@ -221,7 +222,14 @@ export function stack(x: number, width: number, yOf: (v: number) => number, segm
     const top = upper + (i < shown.length - 1 ? 1 : 0);
     const bottom = lower - (i > 0 ? 1 : 0);
     const height = Math.max(1, bottom - top);
-    const d = barPath(x, bottom - height, width, height, i === shown.length - 1);
+    return { index: s.index, d: barPath(x, bottom - height, width, height, i === shown.length - 1) };
+  });
+}
+
+/** A stacked column of titled segments, one `<path>` each. */
+export function stack(x: number, width: number, yOf: (v: number) => number, segments: Segment[]): string[] {
+  return stackBars(x, width, yOf, segments.map((s) => s.value)).map(({ index, d }) => {
+    const s = segments[index]!;
     return `<path d="${d}" fill="${s.color}"><title>${esc(s.title)}</title></path>`;
   });
 }

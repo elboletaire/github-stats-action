@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Dataset } from '@github-stats-action/core';
+import { buildNpmData, type Dataset } from '@github-stats-action/core';
 import { describe, expect, it } from 'vitest';
 import { buildBadges, endpointJson, renderBadges } from '../src/badges';
 import { flatSvg } from '../src/svg';
@@ -89,5 +89,29 @@ describe('flatSvg', () => {
     // 58.4px + 31.4px of text, 10px padding each part; shields.io rounds the same badge to 110.
     expect(svg).toMatch(/<svg [^>]*width="109"/);
     expect(svg).toContain('<rect x="68" width="41"');
+  });
+});
+
+describe('npm and release badges', () => {
+  const npm = buildNpmData([
+    { label: 'Core', series: { schema: 1, package: '@passcore/core', days: [{ date: '2026-10-16', downloads: 90 }, { date: '2026-10-17', downloads: 10 }] } },
+    { label: 'plain', series: { schema: 1, package: 'plain', days: [{ date: '2026-10-17', downloads: 1200 }] } },
+  ]);
+
+  it('adds the combined npm badge and one per package, after Docker', () => {
+    const names = buildBadges({ ...fixture, npm }).map((b) => b.name);
+    expect(names.slice(names.indexOf('docker-pulls') + 1, names.indexOf('counter-updates'))).toEqual([
+      'npm-downloads',
+      'npm-passcore--core',
+      'npm-plain',
+    ]);
+    const combined = buildBadges({ ...fixture, npm }).find((b) => b.name === 'npm-downloads')!;
+    expect(combined).toMatchObject({ label: 'npm downloads/month', message: '1.3k' });
+    expect(buildBadges({ ...fixture, npm }).find((b) => b.name === 'npm-passcore--core')!.message).toBe('100');
+  });
+
+  it('leaves out the release badges without release downloads, keeping stars and npm', () => {
+    const badges = buildBadges({ ...fixture, releaseDownloads: false, groups: [], counters: [], releases: [], npm });
+    expect(badges.map((b) => b.name)).toEqual(['stars', 'docker-pulls', 'npm-downloads', 'npm-passcore--core', 'npm-plain']);
   });
 });

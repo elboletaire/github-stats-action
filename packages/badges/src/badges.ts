@@ -20,33 +20,40 @@ export const COLORS = {
   release: 'orange',
   stars: 'yellow',
   docker: '2496ed',
+  npm: 'cb3837',
   counter: '8957e5',
 } as const;
 
-/** Every badge for the dataset, in display order. Latest release is skipped when no stable one exists. */
+/**
+ * Every badge for the dataset, in display order. The release badges are left out without release
+ * downloads, and so is the latest release when no stable one exists.
+ */
 export function buildBadges(dataset: Dataset): Badge[] {
   const { totals } = dataset;
-  const badges: Badge[] = [
-    { name: 'downloads', label: 'downloads', message: formatCompact(totals.downloads), color: COLORS.total },
+  const badges: Badge[] = [];
+  if (dataset.releaseDownloads) {
+    badges.push({ name: 'downloads', label: 'downloads', message: formatCompact(totals.downloads), color: COLORS.total });
     // a single group would only repeat the total
-    ...(dataset.groups.length < 2 ? [] : dataset.groups).map((group) => ({
-      name: `downloads-${slug(group.name)}`,
-      label: `downloads (${group.label})`,
-      message: formatCompact(totals.groups[group.name] ?? 0),
-      color: COLORS.group,
-    })),
-  ];
+    for (const group of dataset.groups.length < 2 ? [] : dataset.groups) {
+      badges.push({
+        name: `downloads-${slug(group.name)}`,
+        label: `downloads (${group.label})`,
+        message: formatCompact(totals.groups[group.name] ?? 0),
+        color: COLORS.group,
+      });
+    }
 
-  // core sorts releases by publish date, so the last stable one is the latest
-  const latest = dataset.releases.filter((release) => !release.prerelease).at(-1);
-  if (latest) {
-    const downloads = Object.values(latest.groups).reduce((sum, count) => sum + count, 0);
-    badges.push({
-      name: 'release-latest',
-      label: `${latest.tag} downloads`,
-      message: formatCompact(downloads),
-      color: COLORS.release,
-    });
+    // core sorts releases by publish date, so the last stable one is the latest
+    const latest = dataset.releases.filter((release) => !release.prerelease).at(-1);
+    if (latest) {
+      const downloads = Object.values(latest.groups).reduce((sum, count) => sum + count, 0);
+      badges.push({
+        name: 'release-latest',
+        label: `${latest.tag} downloads`,
+        message: formatCompact(downloads),
+        color: COLORS.release,
+      });
+    }
   }
 
   badges.push({ name: 'stars', label: 'stars', message: formatCompact(totals.stars), color: COLORS.stars });
@@ -57,6 +64,23 @@ export function buildBadges(dataset: Dataset): Badge[] {
       message: formatCompact(totals.docker),
       color: COLORS.docker,
     });
+  }
+
+  if (dataset.npm) {
+    badges.push({
+      name: 'npm-downloads',
+      label: 'npm downloads/month',
+      message: formatCompact(dataset.npm.totals.last30),
+      color: COLORS.npm,
+    });
+    for (const pkg of dataset.npm.packages) {
+      badges.push({
+        name: `npm-${pkg.slug}`,
+        label: `${pkg.label} npm/month`,
+        message: formatCompact(pkg.totals.last30),
+        color: COLORS.npm,
+      });
+    }
   }
 
   for (const counter of dataset.counters) {
