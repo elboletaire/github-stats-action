@@ -9,6 +9,12 @@ const dateOf = (i: number, from = '2024-01-01'): string => new Date(Date.parse(f
 const oneADay = (total: number, from = '2024-01-01'): StarPoint[] =>
   Array.from({ length: total }, (_, i) => ({ date: dateOf(i, from), stars: i + 1 }));
 
+const dayOfDate = (date: string): number => Date.parse(date) / DAY;
+
+/** The cumulative count on `date`: the last point on or before it. */
+const countOn = (points: readonly StarPoint[], date: string): number =>
+  points.filter((p) => p.date <= date).at(-1)!.stars;
+
 describe('sampleStars', () => {
   it('gives nothing for no points', () => {
     expect(sampleStars([])).toEqual([]);
@@ -22,85 +28,96 @@ describe('sampleStars', () => {
     expect(sampleStars(oneADay(2))).toEqual(oneADay(2));
   });
 
-  it('keeps the first star and the latest total when a single star is days old', () => {
-    const points = [
-      { date: '2024-01-01', stars: 1 },
-      { date: '2024-01-02', stars: 1 },
-      { date: '2024-01-03', stars: 1 },
-    ];
-    expect(sampleStars(points)).toEqual([points[0], points[2]]);
-  });
-
-  it('gives first and last when every star landed on one day', () => {
-    const points = [0, 1, 2, 3].map((i) => ({ date: dateOf(i), stars: 7 }));
-    expect(sampleStars(points)).toEqual([points[0], points[3]]);
-  });
-
-  it('gives the first and last of a single day with every star', () => {
+  it('gives one point when every star landed on one day and the series stops there', () => {
     expect(sampleStars([{ date: '2024-01-01', stars: 9 }])).toEqual([{ date: '2024-01-01', stars: 9 }]);
   });
 
-  it('sets the levels by the peak, so a dip keeps the samples on the way up', () => {
+  it('gives every day of a series that stays on one count, from the first star to the last point', () => {
+    const points = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => ({ date: dateOf(i), stars: 9 }));
+    const samples = sampleStars(points);
+    expect(samples).toHaveLength(10);
+    expect(samples.map((p) => p.stars)).toEqual(points.map(() => 9));
+    expect(samples[0]!.date).toBe('2024-01-01');
+    expect(samples.at(-1)!.date).toBe('2024-01-10');
+  });
+
+  it('gives one point per day when the span is shorter than the sample count', () => {
+    const samples = sampleStars(oneADay(10));
+    expect(samples).toEqual(oneADay(10));
+  });
+
+  it('spaces the dates evenly in time, within a day of each other', () => {
+    const samples = sampleStars(oneADay(100));
+    expect(samples).toHaveLength(STAR_SAMPLES);
+    const gaps = samples.slice(1).map((p, i) => dayOfDate(p.date) - dayOfDate(samples[i]!.date));
+    expect(Math.max(...gaps) - Math.min(...gaps)).toBeLessThanOrEqual(1);
+  });
+
+  it('includes the first star and the last date exactly', () => {
+    const points = oneADay(100);
+    const samples = sampleStars(points);
+    expect(samples[0]).toEqual(points[0]);
+    expect(samples.at(-1)).toEqual(points.at(-1));
+  });
+
+  it('gives the cumulative count on each sampled date', () => {
+    // stars come in bursts, so the count between two bursts is the one before them
+    const points: StarPoint[] = [
+      { date: '2024-01-01', stars: 2 },
+      { date: '2024-02-10', stars: 9 },
+      { date: '2024-02-11', stars: 40 },
+      { date: '2024-06-01', stars: 41 },
+      { date: '2024-06-30', stars: 80 },
+    ];
+    const samples = sampleStars(points);
+    expect(samples).toHaveLength(STAR_SAMPLES);
+    for (const p of samples) expect(p.stars).toBe(countOn(points, p.date));
+  });
+
+  it('holds the count through days with no change', () => {
+    // 3 stars, then 5 more 10 days later, then 2 more 10 days after that: no point on the days between
+    const points: StarPoint[] = [
+      { date: '2024-01-01', stars: 3 },
+      { date: '2024-01-11', stars: 8 },
+      { date: '2024-01-21', stars: 10 },
+    ];
+    const samples = sampleStars(points);
+    expect(samples).toHaveLength(21);
+    expect(samples.find((p) => p.date === '2024-01-05')).toEqual({ date: '2024-01-05', stars: 3 });
+    expect(samples.find((p) => p.date === '2024-01-15')).toEqual({ date: '2024-01-15', stars: 8 });
+    expect(samples.at(-1)).toEqual({ date: '2024-01-21', stars: 10 });
+  });
+
+  it('shows a dip at its date, and the peak still sets the scale', () => {
     const points = [
       { date: '2024-01-01', stars: 1 },
       { date: '2024-01-02', stars: 50 },
       { date: '2024-01-03', stars: 60 },
       { date: '2024-01-04', stars: 10 },
     ];
-    const samples = sampleStars(points);
-    expect(samples.at(-1)).toEqual(points[3]);
-    expect(samples.map((p) => p.stars)).toContain(60);
-  });
-
-  it('takes at most 30 points, always the first star and the latest total', () => {
-    const points = oneADay(100);
-    const samples = sampleStars(points);
-    expect(samples).toHaveLength(STAR_SAMPLES);
-    expect(samples[0]).toEqual(points[0]);
-    expect(samples.at(-1)).toEqual(points.at(-1));
-  });
-
-  it('spaces the picks evenly by star count, the first reach of each level', () => {
-    const samples = sampleStars(oneADay(100));
-    // with one star a day the level of a day is its own count, so the picks are the levels themselves
-    const levels = samples.map((p) => p.stars);
-    expect(levels[0]).toBe(1);
-    expect(levels.at(-1)).toBe(100);
-    const steps = levels.slice(1).map((l, i) => l - (levels[i] ?? 0));
-    const expected = Math.max(...steps) - Math.min(...steps);
-    expect(expected).toBeLessThanOrEqual(1);
-    expect(levels.every((l, i) => i === 0 || l > (levels[i - 1] ?? 0))).toBe(true);
-  });
-
-  it('gives every sample a day of its own, and each day the count first reached', () => {
-    // 60 stars over 3 days: the first day holds 30, so the early levels are all on day 0
-    const points: StarPoint[] = [
-      { date: '2024-01-01', stars: 30 },
-      { date: '2024-01-02', stars: 45 },
-      { date: '2024-01-03', stars: 60 },
-    ];
     expect(sampleStars(points)).toEqual(points);
   });
 
-  it('never picks the same day twice', () => {
-    const points = [
-      { date: '2024-01-01', stars: 1 },
-      { date: '2024-01-02', stars: 50 },
-      { date: '2024-01-03', stars: 100 },
-    ];
-    const dates = sampleStars(points).map((p) => p.date);
-    expect(new Set(dates).size).toBe(dates.length);
-    expect(dates[0]).toBe('2024-01-01');
-    expect(dates.at(-1)).toBe('2024-01-03');
-  });
-
-  it('takes the whole series when there are fewer stars than samples', () => {
+  it('takes at most 30 points, and fewer than 30 only when the span is shorter', () => {
+    expect(sampleStars(oneADay(100))).toHaveLength(STAR_SAMPLES);
     expect(sampleStars(oneADay(5))).toHaveLength(5);
   });
 
-  it('samples the fixture series without going backwards', () => {
-    const points = oneADay(346).map((p, i) => ({ ...p, stars: Math.floor(i / 9) }));
+  it('never picks the same date twice', () => {
+    const dates = sampleStars(oneADay(31)).map((p) => p.date);
+    expect(new Set(dates).size).toBe(dates.length);
+  });
+
+  it('samples a long, sparse series without going backwards', () => {
+    // a year of stars that slow down: one change every few weeks
+    const points: StarPoint[] = [];
+    let stars = 0;
+    for (let i = 0; i < 400; i += 17) {
+      stars += 1 + (i % 5);
+      points.push({ date: dateOf(i), stars });
+    }
     const samples = sampleStars(points);
+    expect(samples).toHaveLength(STAR_SAMPLES);
     for (let i = 1; i < samples.length; i++) {
       expect(samples[i]!.stars).toBeGreaterThanOrEqual(samples[i - 1]!.stars);
       expect(samples[i]!.date > samples[i - 1]!.date).toBe(true);

@@ -5,25 +5,31 @@ import type { StarPoint } from './types';
 
 export type { StarPoint };
 
-/** The number of points the stars chart samples the series into (fewer when there are fewer stars). */
+/** The number of points the stars chart samples the series into (fewer when the span has fewer days). */
 export const STAR_SAMPLES = 30;
 
-/** Up to `count` points evenly spaced by star count: the first star, the days the count reached the levels between, and the latest total. */
+const DAY_MS = 86_400_000;
+
+/**
+ * Up to `count` points evenly spaced in time, from the first star's date to the last point's date, each with the
+ * cumulative count on its day (the last point on or before it, since unchanged days may be missing).
+ */
 export function sampleStars(points: readonly StarPoint[], count = STAR_SAMPLES): StarPoint[] {
-  const last = points.length - 1;
-  if (last < 0) return [];
-  // the peak, not the last count: a dip (stars removed) still sets the levels the samples reach
-  const total = Math.max(...points.map((p) => p.stars));
-  const n = Math.max(1, Math.min(count, total));
-  const indices = [0];
+  const first = points[0];
+  const last = points.at(-1);
+  if (!first || !last) return [];
+  const start = Date.parse(first.date);
+  const span = Math.round((Date.parse(last.date) - start) / DAY_MS);
+  const n = Math.max(1, Math.min(count, span + 1));
+  const offsets = Array.from({ length: n }, (_, i) => (n > 1 ? Math.round((i * span) / (n - 1)) : 0));
   let k = 0;
-  for (let i = 1; i < n - 1; i++) {
-    const level = 1 + Math.round((i * (total - 1)) / (n - 1));
-    while (k < last && points[k]!.stars < level) k++;
-    indices.push(k);
-  }
-  indices.push(last);
-  return indices.filter((index, i) => i === 0 || index !== indices[i - 1]).map((index) => points[index]!);
+  return offsets
+    .filter((offset, i) => i === 0 || offset !== offsets[i - 1])
+    .map((offset) => {
+      const date = new Date(start + offset * DAY_MS).toISOString().slice(0, 10);
+      while (k + 1 < points.length && points[k + 1]!.date <= date) k++;
+      return { date, stars: points[k]!.stars };
+    });
 }
 
 /** A point in plot coordinates. */

@@ -290,7 +290,8 @@ describe('chart options', () => {
   it('draws the stars as about 30 samples: a dot each, titled, and the end dot', async () => {
     const dataset = await fixture();
     const svg = chart(renderCharts(dataset), 'charts/stars-light.svg');
-    const samples = (dataset.stars.at(-1)?.stars ?? 0) === 18 ? 18 : 30;
+    // the fixture's 346 days are more than the samples, so there are 30
+    const samples = 30;
     expect(svg.match(/<circle [^>]*r="3"[^>]*><title>/g)).toHaveLength(samples - 1);
     expect(svg.match(/<circle [^>]*r="4"[^>]*><title>/g)).toHaveLength(1);
   });
@@ -318,9 +319,11 @@ describe('chart options', () => {
       { date: '2024-04-10', stars: 3 },
     ] };
     const svg = chart(renderCharts(dataset), 'charts/stars-light.svg');
-    // 100 days from the first star to the last, over the 716px plot: the second star is 1% of the way along
+    // 100 days from the first star to the last, 30 samples evenly spaced over the 716px plot: the second is day 3
     const dotX = [...svg.matchAll(/<circle cx="([\d.]+)" cy="[\d.]+" r="3"/g)].map((m) => Number(m[1]));
-    expect(dotX).toEqual([60, 67.2]);
+    expect(dotX).toHaveLength(29);
+    expect(dotX[0]).toBe(60);
+    expect(dotX[1]).toBeCloseTo(60 + (716 * 3) / 100, 1);
     expect(svg).toMatch(/<circle cx="776\.0" cy="[\d.]+" r="4"/);
   });
 
