@@ -1,0 +1,9832 @@
+{
+ "repo": "elboletaire/manga-downloader",
+ "generatedAt": "2026-10-18T13:00:00.000Z",
+ "snapshotAt": "2026-10-18T13:00:00Z",
+ "groups": [
+  {
+   "name": "app",
+   "label": "Desktop app",
+   "color": 0
+  },
+  {
+   "name": "cli",
+   "label": "CLI",
+   "color": 1
+  }
+ ],
+ "epochs": [
+  {
+   "version": "v1.11.0",
+   "label": "First desktop app"
+  },
+  {
+   "version": "v1.18.0",
+   "label": "Installer and updater"
+  },
+  {
+   "version": "v1.20.0",
+   "label": "Multilingual"
+  }
+ ],
+ "counters": [
+  {
+   "name": "updates",
+   "label": "In-app updates",
+   "assets": "manga-downloader-gui-*-SHA256SUMS.txt",
+   "from": "v1.19.0"
+  }
+ ],
+ "totals": {
+  "groups": {
+   "app": 373,
+   "cli": 11828
+  },
+  "downloads": 12201,
+  "stars": 271,
+  "forks": 33,
+  "docker": 37673,
+  "counters": {
+   "updates": {
+    "downloads": 4,
+    "all": 8
+   }
+  }
+ },
+ "releases": [
+  {
+   "tag": "v0.0.1",
+   "publishedAt": "2022-12-31T01:33:47Z",
+   "end": "2022-12-31T20:09:45.000Z",
+   "days": 0.7749768518518518,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 33
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-0.0.1-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.1-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.1-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-0.0.1-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.1-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-0.0.1-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.1-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-0.0.1-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.1-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-0.0.1-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.1-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.1-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.1-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-0.0.1-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 3
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.2",
+   "publishedAt": "2022-12-31T20:09:45Z",
+   "end": "2023-01-02T00:06:45.000Z",
+   "days": 1.1645833333333333,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 35
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-0.0.2-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-0.0.2-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-0.0.2-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.2-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.2-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.2-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.2-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.2-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.2-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-0.0.2-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.2-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-0.0.2-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-0.0.2-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-0.0.2-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 3
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.3",
+   "publishedAt": "2023-01-02T00:06:45Z",
+   "end": "2023-01-02T21:40:08.000Z",
+   "days": 0.8981828703703704,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 42
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-0.0.3-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-0.0.3-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.3-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-0.0.3-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.3-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.3-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-0.0.3-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.3-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-0.0.3-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.3-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.3-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-0.0.3-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.3-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-0.0.3-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 2
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.4",
+   "publishedAt": "2023-01-02T21:40:08Z",
+   "end": "2023-01-10T01:39:57.000Z",
+   "days": 7.166539351851852,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 40
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-0.0.4-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.4-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.4-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-0.0.4-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.4-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.4-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.4-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.4-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.4-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.4-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.4-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-0.0.4-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-0.0.4-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-0.0.4-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 2
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.5",
+   "publishedAt": "2023-01-10T01:39:57Z",
+   "end": "2023-01-14T03:41:05.000Z",
+   "days": 4.08412037037037,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 42
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-0.0.5-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-0.0.5-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.5-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.5-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.5-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.5-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.5-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-0.0.5-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.5-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-0.0.5-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.5-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-0.0.5-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-0.0.5-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-0.0.5-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 2
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.6",
+   "publishedAt": "2023-01-14T03:41:05Z",
+   "end": "2023-01-15T03:19:27.000Z",
+   "days": 0.9849768518518518,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 46
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v0.0.6-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-v0.0.6-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.6-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-v0.0.6-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.6-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v0.0.6-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 13
+    },
+    {
+     "name": "manga-downloader-v0.0.6-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-v0.0.6-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.6-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-v0.0.6-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.6-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-v0.0.6-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.6-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v0.0.6-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 14
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.7",
+   "publishedAt": "2023-01-15T03:19:27Z",
+   "end": "2023-01-18T17:57:50.000Z",
+   "days": 3.609988425925926,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 53
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v0.0.7-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v0.0.7-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 15
+    },
+    {
+     "name": "manga-downloader-v0.0.7-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v0.0.7-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 15
+    },
+    {
+     "name": "manga-downloader-v0.0.7-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-v0.0.7-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 15
+    },
+    {
+     "name": "manga-downloader-v0.0.7-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v0.0.7-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 15
+    },
+    {
+     "name": "manga-downloader-v0.0.7-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v0.0.7-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 15
+    },
+    {
+     "name": "manga-downloader-v0.0.7-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-v0.0.7-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 19
+    },
+    {
+     "name": "manga-downloader-v0.0.7-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v0.0.7-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 15
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.8",
+   "publishedAt": "2023-01-18T17:57:50Z",
+   "end": "2023-01-20T16:59:51.000Z",
+   "days": 1.9597337962962964,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 75
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v0.0.8-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 11
+    },
+    {
+     "name": "manga-downloader-v0.0.8-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 13
+    },
+    {
+     "name": "manga-downloader-v0.0.8-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 11
+    },
+    {
+     "name": "manga-downloader-v0.0.8-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.8-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 16
+    },
+    {
+     "name": "manga-downloader-v0.0.8-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.8-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-v0.0.8-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.8-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-v0.0.8-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.8-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 10
+    },
+    {
+     "name": "manga-downloader-v0.0.8-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 13
+    },
+    {
+     "name": "manga-downloader-v0.0.8-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 11
+    },
+    {
+     "name": "manga-downloader-v0.0.8-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 15
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.9",
+   "publishedAt": "2023-01-20T16:59:51Z",
+   "end": "2023-01-20T18:43:38.000Z",
+   "days": 0.07207175925925927,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 65
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v0.0.9-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v0.0.9-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.9-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v0.0.9-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.9-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-v0.0.9-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 13
+    },
+    {
+     "name": "manga-downloader-v0.0.9-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v0.0.9-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.9-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-v0.0.9-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.9-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 11
+    },
+    {
+     "name": "manga-downloader-v0.0.9-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 13
+    },
+    {
+     "name": "manga-downloader-v0.0.9-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 11
+    },
+    {
+     "name": "manga-downloader-v0.0.9-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 14
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.10",
+   "publishedAt": "2023-01-20T18:43:38Z",
+   "end": "2024-01-05T18:15:46.000Z",
+   "days": 349.98064814814813,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 323
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v0.0.10-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 96
+    },
+    {
+     "name": "manga-downloader-v0.0.10-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 27
+    },
+    {
+     "name": "manga-downloader-v0.0.10-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 32
+    },
+    {
+     "name": "manga-downloader-v0.0.10-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 19
+    },
+    {
+     "name": "manga-downloader-v0.0.10-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 20
+    },
+    {
+     "name": "manga-downloader-v0.0.10-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 16
+    },
+    {
+     "name": "manga-downloader-v0.0.10-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 37
+    },
+    {
+     "name": "manga-downloader-v0.0.10-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 15
+    },
+    {
+     "name": "manga-downloader-v0.0.10-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 19
+    },
+    {
+     "name": "manga-downloader-v0.0.10-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.10-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 42
+    },
+    {
+     "name": "manga-downloader-v0.0.10-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 16
+    },
+    {
+     "name": "manga-downloader-v0.0.10-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 77
+    },
+    {
+     "name": "manga-downloader-v0.0.10-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 19
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.11",
+   "publishedAt": "2024-01-05T18:15:46Z",
+   "end": "2024-01-05T21:26:02.000Z",
+   "days": 0.13212962962962962,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 81
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v0.0.11-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.11-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v0.0.11-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v0.0.11-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v0.0.11-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v0.0.11-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v0.0.11-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v0.0.11-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v0.0.11-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v0.0.11-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v0.0.11-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 15
+    },
+    {
+     "name": "manga-downloader-v0.0.11-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v0.0.11-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 16
+    },
+    {
+     "name": "manga-downloader-v0.0.11-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 5
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.12",
+   "publishedAt": "2024-01-05T21:26:02Z",
+   "end": "2024-03-20T21:54:03.000Z",
+   "days": 75.01945601851853,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 653
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v0.0.12-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 213
+    },
+    {
+     "name": "manga-downloader-v0.0.12-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 22
+    },
+    {
+     "name": "manga-downloader-v0.0.12-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 31
+    },
+    {
+     "name": "manga-downloader-v0.0.12-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 11
+    },
+    {
+     "name": "manga-downloader-v0.0.12-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 36
+    },
+    {
+     "name": "manga-downloader-v0.0.12-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v0.0.12-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 38
+    },
+    {
+     "name": "manga-downloader-v0.0.12-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v0.0.12-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 17
+    },
+    {
+     "name": "manga-downloader-v0.0.12-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v0.0.12-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 134
+    },
+    {
+     "name": "manga-downloader-v0.0.12-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 17
+    },
+    {
+     "name": "manga-downloader-v0.0.12-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 184
+    },
+    {
+     "name": "manga-downloader-v0.0.12-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 17
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.13",
+   "publishedAt": "2024-03-20T21:54:03Z",
+   "end": "2025-05-17T16:06:34.000Z",
+   "days": 422.75869212962965,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 5060
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v0.0.13-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 1772
+    },
+    {
+     "name": "manga-downloader-v0.0.13-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 171
+    },
+    {
+     "name": "manga-downloader-v0.0.13-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 260
+    },
+    {
+     "name": "manga-downloader-v0.0.13-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 30
+    },
+    {
+     "name": "manga-downloader-v0.0.13-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 157
+    },
+    {
+     "name": "manga-downloader-v0.0.13-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.13-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 312
+    },
+    {
+     "name": "manga-downloader-v0.0.13-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 17
+    },
+    {
+     "name": "manga-downloader-v0.0.13-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 101
+    },
+    {
+     "name": "manga-downloader-v0.0.13-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 25
+    },
+    {
+     "name": "manga-downloader-v0.0.13-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 1046
+    },
+    {
+     "name": "manga-downloader-v0.0.13-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 84
+    },
+    {
+     "name": "manga-downloader-v0.0.13-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 1412
+    },
+    {
+     "name": "manga-downloader-v0.0.13-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 115
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.14",
+   "publishedAt": "2025-05-17T16:06:34Z",
+   "end": "2025-07-11T10:56:52.000Z",
+   "days": 54.784930555555555,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 683
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v0.0.14-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 182
+    },
+    {
+     "name": "manga-downloader-v0.0.14-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 15
+    },
+    {
+     "name": "manga-downloader-v0.0.14-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 40
+    },
+    {
+     "name": "manga-downloader-v0.0.14-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v0.0.14-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 21
+    },
+    {
+     "name": "manga-downloader-v0.0.14-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v0.0.14-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 52
+    },
+    {
+     "name": "manga-downloader-v0.0.14-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v0.0.14-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 18
+    },
+    {
+     "name": "manga-downloader-v0.0.14-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v0.0.14-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 151
+    },
+    {
+     "name": "manga-downloader-v0.0.14-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v0.0.14-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 219
+    },
+    {
+     "name": "manga-downloader-v0.0.14-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 18
+    }
+   ]
+  },
+  {
+   "tag": "v0.0.15",
+   "publishedAt": "2025-07-11T10:56:52Z",
+   "end": "2026-07-20T22:55:39.000Z",
+   "days": 374.4991550925926,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 2708
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v0.0.15-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 740
+    },
+    {
+     "name": "manga-downloader-v0.0.15-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 62
+    },
+    {
+     "name": "manga-downloader-v0.0.15-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 149
+    },
+    {
+     "name": "manga-downloader-v0.0.15-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 23
+    },
+    {
+     "name": "manga-downloader-v0.0.15-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 76
+    },
+    {
+     "name": "manga-downloader-v0.0.15-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 12
+    },
+    {
+     "name": "manga-downloader-v0.0.15-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 338
+    },
+    {
+     "name": "manga-downloader-v0.0.15-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 16
+    },
+    {
+     "name": "manga-downloader-v0.0.15-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 69
+    },
+    {
+     "name": "manga-downloader-v0.0.15-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v0.0.15-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 518
+    },
+    {
+     "name": "manga-downloader-v0.0.15-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 25
+    },
+    {
+     "name": "manga-downloader-v0.0.15-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 818
+    },
+    {
+     "name": "manga-downloader-v0.0.15-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 42
+    }
+   ]
+  },
+  {
+   "tag": "v1.0.0",
+   "publishedAt": "2026-07-20T22:55:39Z",
+   "end": "2026-07-20T23:48:39.000Z",
+   "days": 0.03680555555555556,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 22
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.0.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.0.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.0.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.0.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.0.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.0.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.0.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.0.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.0.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.0.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.0.0-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.0.0-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.0.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.0.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.1.0",
+   "publishedAt": "2026-07-20T23:48:39Z",
+   "end": "2026-07-21T16:50:07.000Z",
+   "days": 0.7093518518518519,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 20
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.1.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.1.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.1.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.1.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.1.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.1.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.1.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.1.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.1.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.1.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.1.0-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.1.0-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.1.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.1.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.1.1",
+   "publishedAt": "2026-07-21T16:50:07Z",
+   "end": "2026-07-21T20:51:24.000Z",
+   "days": 0.16755787037037037,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 16
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.1.1-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.1.1-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.1.1-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.1.1-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.1.1-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.1.1-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.1.1-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.1.1-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.1.1-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.1.1-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.1.1-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.1.1-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.1.1-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.1.1-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.2.0",
+   "publishedAt": "2026-07-21T20:51:24Z",
+   "end": "2026-07-21T22:20:57.000Z",
+   "days": 0.0621875,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 26
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.2.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.2.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.2.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.2.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.2.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.2.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.2.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.2.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.2.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.2.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.2.0-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.2.0-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.2.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.2.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.3.0",
+   "publishedAt": "2026-07-21T22:20:57Z",
+   "end": "2026-07-22T22:38:51.000Z",
+   "days": 1.0124305555555555,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 29
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.3.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.3.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.3.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.3.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.3.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.3.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.3.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-v1.3.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.3.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.3.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.3.0-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.3.0-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.3.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.3.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.4.0",
+   "publishedAt": "2026-07-22T22:38:51Z",
+   "end": "2026-07-22T23:13:21.000Z",
+   "days": 0.023958333333333335,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 22
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.4.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.4.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.4.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.4.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.4.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.4.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.4.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.4.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.4.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.4.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.4.0-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.4.0-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.4.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.4.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.4.1",
+   "publishedAt": "2026-07-22T23:13:21Z",
+   "end": "2026-08-03T00:47:31.000Z",
+   "days": 11.065393518518519,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 136
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.4.1-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 34
+    },
+    {
+     "name": "manga-downloader-v1.4.1-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.4.1-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v1.4.1-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.4.1-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-v1.4.1-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.4.1-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v1.4.1-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.4.1-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.4.1-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.4.1-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 22
+    },
+    {
+     "name": "manga-downloader-v1.4.1-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.4.1-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 46
+    },
+    {
+     "name": "manga-downloader-v1.4.1-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 7
+    }
+   ]
+  },
+  {
+   "tag": "v1.5.0",
+   "publishedAt": "2026-08-03T00:47:31Z",
+   "end": "2026-08-10T15:45:18.000Z",
+   "days": 7.623460648148148,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 100
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.5.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 28
+    },
+    {
+     "name": "manga-downloader-v1.5.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.5.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 10
+    },
+    {
+     "name": "manga-downloader-v1.5.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.5.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.5.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.5.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 21
+    },
+    {
+     "name": "manga-downloader-v1.5.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.5.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.5.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.5.0-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-v1.5.0-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.5.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 24
+    },
+    {
+     "name": "manga-downloader-v1.5.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 3
+    }
+   ]
+  },
+  {
+   "tag": "v1.6.0",
+   "publishedAt": "2026-08-10T15:45:18Z",
+   "end": "2026-08-17T11:44:07.000Z",
+   "days": 6.832511574074074,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 94
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.6.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 21
+    },
+    {
+     "name": "manga-downloader-v1.6.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v1.6.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 10
+    },
+    {
+     "name": "manga-downloader-v1.6.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.6.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v1.6.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.6.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v1.6.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.6.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v1.6.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.6.0-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 12
+    },
+    {
+     "name": "manga-downloader-v1.6.0-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.6.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 28
+    },
+    {
+     "name": "manga-downloader-v1.6.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.6.1",
+   "publishedAt": "2026-08-17T11:44:07Z",
+   "end": "2026-08-18T08:10:39.000Z",
+   "days": 0.8517592592592592,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 37
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.6.1-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-v1.6.1-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.6.1-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.6.1-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.6.1-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.6.1-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.6.1-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.6.1-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.6.1-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.6.1-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.6.1-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.6.1-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.6.1-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v1.6.1-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.7.0",
+   "publishedAt": "2026-08-18T08:10:39Z",
+   "end": "2026-08-24T13:39:27.000Z",
+   "days": 6.2283333333333335,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 127
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.7.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 26
+    },
+    {
+     "name": "manga-downloader-v1.7.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.7.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v1.7.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.7.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-v1.7.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.7.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 21
+    },
+    {
+     "name": "manga-downloader-v1.7.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.7.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 12
+    },
+    {
+     "name": "manga-downloader-v1.7.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.7.0-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 24
+    },
+    {
+     "name": "manga-downloader-v1.7.0-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.7.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 29
+    },
+    {
+     "name": "manga-downloader-v1.7.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 6
+    }
+   ]
+  },
+  {
+   "tag": "v1.7.1",
+   "publishedAt": "2026-08-24T13:39:27Z",
+   "end": "2026-09-02T08:26:22.000Z",
+   "days": 8.782581018518519,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 169
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.7.1-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 35
+    },
+    {
+     "name": "manga-downloader-v1.7.1-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.7.1-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 12
+    },
+    {
+     "name": "manga-downloader-v1.7.1-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.7.1-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v1.7.1-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.7.1-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 33
+    },
+    {
+     "name": "manga-downloader-v1.7.1-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.7.1-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v1.7.1-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.7.1-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 25
+    },
+    {
+     "name": "manga-downloader-v1.7.1-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.7.1-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 48
+    },
+    {
+     "name": "manga-downloader-v1.7.1-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 2
+    }
+   ]
+  },
+  {
+   "tag": "v1.8.0",
+   "publishedAt": "2026-09-02T08:26:22Z",
+   "end": "2026-09-03T18:31:48.000Z",
+   "days": 1.4204398148148147,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 37
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.8.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-v1.8.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.8.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.8.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.8.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.8.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.8.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.8.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.8.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.8.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.8.0-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.8.0-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.8.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 14
+    },
+    {
+     "name": "manga-downloader-v1.8.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 3
+    }
+   ]
+  },
+  {
+   "tag": "v1.9.0",
+   "publishedAt": "2026-09-03T18:31:48Z",
+   "end": "2026-10-08T18:42:14.000Z",
+   "days": 35.00724537037037,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 644
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.9.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 117
+    },
+    {
+     "name": "manga-downloader-v1.9.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.9.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 55
+    },
+    {
+     "name": "manga-downloader-v1.9.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.9.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 23
+    },
+    {
+     "name": "manga-downloader-v1.9.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.9.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 84
+    },
+    {
+     "name": "manga-downloader-v1.9.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-v1.9.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 18
+    },
+    {
+     "name": "manga-downloader-v1.9.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.9.0-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 101
+    },
+    {
+     "name": "manga-downloader-v1.9.0-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v1.9.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 246
+    },
+    {
+     "name": "manga-downloader-v1.9.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 48
+    }
+   ]
+  },
+  {
+   "tag": "v1.10.0",
+   "publishedAt": "2026-10-08T18:42:14Z",
+   "end": "2026-10-10T23:19:36.000Z",
+   "days": 2.1926157407407407,
+   "epoch": -1,
+   "prerelease": false,
+   "groups": {
+    "app": 0,
+    "cli": 73
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-v1.10.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.10.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.10.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 10
+    },
+    {
+     "name": "manga-downloader-v1.10.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.10.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.10.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.10.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 16
+    },
+    {
+     "name": "manga-downloader-v1.10.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.10.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.10.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.10.0-windows-386.zip",
+     "label": "windows-386",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.10.0-windows-386.zip.md5",
+     "label": "windows-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.10.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 31
+    },
+    {
+     "name": "manga-downloader-v1.10.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 14
+    }
+   ]
+  },
+  {
+   "tag": "v1.11.0",
+   "publishedAt": "2026-10-10T23:19:36Z",
+   "end": "2026-10-10T23:46:00.000Z",
+   "days": 0.018333333333333333,
+   "epoch": 0,
+   "prerelease": false,
+   "groups": {
+    "app": 5,
+    "cli": 8
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.11.0-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.11.0-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.11.0-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.11.0-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.0-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.11.1",
+   "publishedAt": "2026-10-10T23:46:00Z",
+   "end": "2026-10-11T15:09:27.000Z",
+   "days": 0.6412847222222222,
+   "epoch": 0,
+   "prerelease": false,
+   "groups": {
+    "app": 31,
+    "cli": 46
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.11.1-darwin-universal.zip",
+     "label": "gui-darwin-universal",
+     "group": "app",
+     "downloads": 12
+    },
+    {
+     "name": "manga-downloader-gui-v1.11.1-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-gui-v1.11.1-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.11.1-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 12
+    },
+    {
+     "name": "manga-downloader-gui-v1.11.1-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.11.1-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.11.1-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.1-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v1.11.1-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.11.1-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.11.1-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.1-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 17
+    },
+    {
+     "name": "manga-downloader-v1.11.1-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.1-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.11.1-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.1-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.1-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.11.1-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.11.1-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.11.1-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.11.1-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.12.0",
+   "publishedAt": "2026-10-11T15:09:27Z",
+   "end": "2026-10-11T16:54:41.000Z",
+   "days": 0.0730787037037037,
+   "epoch": 0,
+   "prerelease": false,
+   "groups": {
+    "app": 9,
+    "cli": 10
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.12.0-darwin-universal.zip",
+     "label": "gui-darwin-universal",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.12.0-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.12.0-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.12.0-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-gui-v1.12.0-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.12.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.12.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.12.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.12.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.12.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.12.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.12.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.12.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.12.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.12.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.12.0-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.12.0-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.12.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.12.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.12.0-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.12.0-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.13.0",
+   "publishedAt": "2026-10-11T16:54:41Z",
+   "end": "2026-10-11T20:39:58.000Z",
+   "days": 0.15644675925925927,
+   "epoch": 0,
+   "prerelease": false,
+   "groups": {
+    "app": 18,
+    "cli": 17
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.13.0-darwin-universal.zip",
+     "label": "gui-darwin-universal",
+     "group": "app",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-gui-v1.13.0-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-gui-v1.13.0-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.13.0-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-gui-v1.13.0-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.13.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.13.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.13.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.13.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.13.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.13.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.13.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.13.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.13.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.13.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.13.0-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.13.0-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.13.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.13.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.13.0-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.13.0-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.14.0",
+   "publishedAt": "2026-10-11T20:39:58Z",
+   "end": "2026-10-12T23:05:01.000Z",
+   "days": 1.1007291666666668,
+   "epoch": 0,
+   "prerelease": false,
+   "groups": {
+    "app": 38,
+    "cli": 40
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.14.0-darwin-universal.zip",
+     "label": "gui-darwin-universal",
+     "group": "app",
+     "downloads": 10
+    },
+    {
+     "name": "manga-downloader-gui-v1.14.0-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-gui-v1.14.0-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.14.0-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 22
+    },
+    {
+     "name": "manga-downloader-gui-v1.14.0-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.14.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.14.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.14.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v1.14.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.14.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.14.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.14.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 10
+    },
+    {
+     "name": "manga-downloader-v1.14.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.14.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.14.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.14.0-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.14.0-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.14.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-v1.14.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v1.14.0-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.14.0-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 2
+    }
+   ]
+  },
+  {
+   "tag": "v1.15.0",
+   "publishedAt": "2026-10-12T23:05:01Z",
+   "end": "2026-10-13T16:56:53.000Z",
+   "days": 0.7443518518518518,
+   "epoch": 0,
+   "prerelease": false,
+   "groups": {
+    "app": 29,
+    "cli": 21
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.15.0-darwin-universal.zip",
+     "label": "gui-darwin-universal",
+     "group": "app",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-gui-v1.15.0-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-gui-v1.15.0-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.15.0-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 12
+    },
+    {
+     "name": "manga-downloader-gui-v1.15.0-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.15.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.15.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.15.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.15.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.15.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.0-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.15.0-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.15.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.0-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.0-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.15.1",
+   "publishedAt": "2026-10-13T16:56:53Z",
+   "end": "2026-10-14T23:27:31.000Z",
+   "days": 1.271273148148148,
+   "epoch": 0,
+   "prerelease": false,
+   "groups": {
+    "app": 35,
+    "cli": 27
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.15.1-darwin-universal.zip",
+     "label": "gui-darwin-universal",
+     "group": "app",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-gui-v1.15.1-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-gui-v1.15.1-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.15.1-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 17
+    },
+    {
+     "name": "manga-downloader-gui-v1.15.1-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.15.1-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.15.1-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.1-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 7
+    },
+    {
+     "name": "manga-downloader-v1.15.1-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.1-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.15.1-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.1-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.15.1-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.1-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.15.1-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.1-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.1-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.15.1-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.15.1-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.15.1-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.15.1-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.16.0",
+   "publishedAt": "2026-10-14T23:27:31Z",
+   "end": "2026-10-15T00:18:05.000Z",
+   "days": 0.03511574074074074,
+   "epoch": 0,
+   "prerelease": false,
+   "groups": {
+    "app": 7,
+    "cli": 14
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.16.0-darwin-universal.zip",
+     "label": "gui-darwin-universal",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.16.0-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.16.0-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.16.0-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.16.0-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.16.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.16.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.16.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.16.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.16.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.0-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.0-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.0-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.0-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.16.1",
+   "publishedAt": "2026-10-15T00:18:05Z",
+   "end": "2026-10-15T23:55:11.000Z",
+   "days": 0.9840972222222222,
+   "epoch": 0,
+   "prerelease": false,
+   "groups": {
+    "app": 42,
+    "cli": 38
+   },
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.16.1-darwin-universal.zip",
+     "label": "gui-darwin-universal",
+     "group": "app",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-gui-v1.16.1-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-gui-v1.16.1-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.16.1-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 23
+    },
+    {
+     "name": "manga-downloader-gui-v1.16.1-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.1-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.16.1-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.16.1-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-v1.16.1-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.16.1-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.16.1-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.1-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 9
+    },
+    {
+     "name": "manga-downloader-v1.16.1-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.16.1-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.16.1-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.1-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.1-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.16.1-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 10
+    },
+    {
+     "name": "manga-downloader-v1.16.1-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.16.1-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.16.1-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 1
+    }
+   ]
+  },
+  {
+   "tag": "v1.17.0",
+   "publishedAt": "2026-10-15T23:55:11Z",
+   "end": "2026-10-16T20:37:08.000Z",
+   "days": 0.8624652777777778,
+   "epoch": 0,
+   "prerelease": false,
+   "groups": {
+    "app": 47,
+    "cli": 37
+   },
+   "counters": {
+    "updates": {
+     "downloads": 1,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.17.0-darwin-universal.zip",
+     "label": "gui-darwin-universal",
+     "group": "app",
+     "downloads": 11
+    },
+    {
+     "name": "manga-downloader-gui-v1.17.0-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-gui-v1.17.0-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-gui-v1.17.0-SHA256SUMS.txt",
+     "label": "gui-SHA256SUMS.txt",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.17.0-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 23
+    },
+    {
+     "name": "manga-downloader-gui-v1.17.0-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.17.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.17.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.17.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.17.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.17.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.17.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.17.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-v1.17.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.17.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.17.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.17.0-SHA256SUMS.txt",
+     "label": "SHA256SUMS.txt",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.17.0-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.17.0-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.17.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 10
+    },
+    {
+     "name": "manga-downloader-v1.17.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.17.0-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.17.0-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 2
+    }
+   ]
+  },
+  {
+   "tag": "v1.18.0",
+   "publishedAt": "2026-10-16T20:37:08Z",
+   "end": "2026-10-17T14:41:53.000Z",
+   "days": 0.7532986111111111,
+   "epoch": 1,
+   "prerelease": false,
+   "groups": {
+    "app": 54,
+    "cli": 34
+   },
+   "counters": {
+    "updates": {
+     "downloads": 3,
+     "counted": false
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.18.0-darwin-universal.zip",
+     "label": "gui-darwin-universal",
+     "group": "app",
+     "downloads": 8
+    },
+    {
+     "name": "manga-downloader-gui-v1.18.0-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-gui-v1.18.0-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-gui-v1.18.0-SHA256SUMS.txt",
+     "label": "gui-SHA256SUMS.txt",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-gui-v1.18.0-windows-amd64-installer.exe",
+     "label": "Windows amd64 installer",
+     "group": "app",
+     "downloads": 25
+    },
+    {
+     "name": "manga-downloader-gui-v1.18.0-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-gui-v1.18.0-windows-arm64-installer.exe",
+     "label": "gui-windows-arm64-installer.exe",
+     "group": "app",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-gui-v1.18.0-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.18.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.18.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.18.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 5
+    },
+    {
+     "name": "manga-downloader-v1.18.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.18.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.18.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.18.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-v1.18.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.18.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.18.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.18.0-SHA256SUMS.txt",
+     "label": "SHA256SUMS.txt",
+     "group": "ignored",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.18.0-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.18.0-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.18.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.18.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.18.0-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.18.0-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 2
+    }
+   ]
+  },
+  {
+   "tag": "v1.19.0",
+   "publishedAt": "2026-10-17T14:41:53Z",
+   "end": "2026-10-17T18:12:58.000Z",
+   "days": 0.14658564814814815,
+   "epoch": 1,
+   "prerelease": false,
+   "groups": {
+    "app": 14,
+    "cli": 14
+   },
+   "counters": {
+    "updates": {
+     "downloads": 2,
+     "counted": true
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.19.0-darwin-universal.zip",
+     "label": "gui-darwin-universal",
+     "group": "app",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.0-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.0-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.0-SHA256SUMS.txt",
+     "label": "gui-SHA256SUMS.txt",
+     "group": "ignored",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.0-windows-amd64-installer.exe",
+     "label": "Windows amd64 installer",
+     "group": "app",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.0-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.0-windows-arm64-installer.exe",
+     "label": "gui-windows-arm64-installer.exe",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.0-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.19.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.19.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.19.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.19.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.19.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.19.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.0-SHA256SUMS.txt",
+     "label": "SHA256SUMS.txt",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.0-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.19.0-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.19.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.0-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.19.0-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 0
+    }
+   ]
+  },
+  {
+   "tag": "v1.19.1",
+   "publishedAt": "2026-10-17T18:12:58Z",
+   "end": "2026-10-18T12:36:07.000Z",
+   "days": 0.7660763888888888,
+   "epoch": 1,
+   "prerelease": false,
+   "groups": {
+    "app": 34,
+    "cli": 18
+   },
+   "counters": {
+    "updates": {
+     "downloads": 1,
+     "counted": true
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.19.1-darwin-universal.zip",
+     "label": "gui-darwin-universal",
+     "group": "app",
+     "downloads": 10
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.1-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 6
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.1-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.1-SHA256SUMS.txt",
+     "label": "gui-SHA256SUMS.txt",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.1-windows-amd64-installer.exe",
+     "label": "Windows amd64 installer",
+     "group": "app",
+     "downloads": 10
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.1-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.1-windows-arm64-installer.exe",
+     "label": "gui-windows-arm64-installer.exe",
+     "group": "app",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-gui-v1.19.1-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.19.1-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.19.1-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.19.1-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 3
+    },
+    {
+     "name": "manga-downloader-v1.19.1-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.1-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.19.1-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.1-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 4
+    },
+    {
+     "name": "manga-downloader-v1.19.1-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.1-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.19.1-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.1-SHA256SUMS.txt",
+     "label": "SHA256SUMS.txt",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.1-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.19.1-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.1-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.19.1-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.19.1-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.19.1-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 0
+    }
+   ]
+  },
+  {
+   "tag": "v1.20.0",
+   "publishedAt": "2026-10-18T12:36:07Z",
+   "end": "2026-10-18T13:00:00.000Z",
+   "days": 0.016585648148148148,
+   "epoch": 2,
+   "prerelease": false,
+   "groups": {
+    "app": 10,
+    "cli": 13
+   },
+   "counters": {
+    "updates": {
+     "downloads": 1,
+     "counted": true
+    }
+   },
+   "files": [
+    {
+     "name": "manga-downloader-gui-v1.20.0-darwin-universal.zip",
+     "label": "gui-darwin-universal",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.20.0-linux-amd64.tar.gz",
+     "label": "gui-linux-amd64",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.20.0-linux-arm64.tar.gz",
+     "label": "gui-linux-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.20.0-SHA256SUMS.txt",
+     "label": "gui-SHA256SUMS.txt",
+     "group": "ignored",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.20.0-windows-amd64-installer.exe",
+     "label": "Windows amd64 installer",
+     "group": "app",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-gui-v1.20.0-windows-amd64.zip",
+     "label": "gui-windows-amd64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.20.0-windows-arm64-installer.exe",
+     "label": "gui-windows-arm64-installer.exe",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-gui-v1.20.0-windows-arm64.zip",
+     "label": "gui-windows-arm64",
+     "group": "app",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.20.0-darwin-amd64.tar.gz",
+     "label": "darwin-amd64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.20.0-darwin-amd64.tar.gz.md5",
+     "label": "darwin-amd64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.20.0-darwin-arm64.tar.gz",
+     "label": "darwin-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.20.0-darwin-arm64.tar.gz.md5",
+     "label": "darwin-arm64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.20.0-linux-386.tar.gz",
+     "label": "linux-386",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.20.0-linux-386.tar.gz.md5",
+     "label": "linux-386",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.20.0-linux-amd64.tar.gz",
+     "label": "linux-amd64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.20.0-linux-amd64.tar.gz.md5",
+     "label": "linux-amd64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.20.0-linux-arm64.tar.gz",
+     "label": "linux-arm64",
+     "group": "cli",
+     "downloads": 2
+    },
+    {
+     "name": "manga-downloader-v1.20.0-linux-arm64.tar.gz.md5",
+     "label": "linux-arm64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.20.0-SHA256SUMS.txt",
+     "label": "SHA256SUMS.txt",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.20.0-windows-32bit-legacy.zip",
+     "label": "windows-32bit-legacy",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.20.0-windows-32bit-legacy.zip.md5",
+     "label": "windows-32bit-legacy",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.20.0-windows-amd64.zip",
+     "label": "windows-amd64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.20.0-windows-amd64.zip.md5",
+     "label": "windows-amd64",
+     "group": "ignored",
+     "downloads": 0
+    },
+    {
+     "name": "manga-downloader-v1.20.0-windows-arm64.zip",
+     "label": "windows-arm64",
+     "group": "cli",
+     "downloads": 1
+    },
+    {
+     "name": "manga-downloader-v1.20.0-windows-arm64.zip.md5",
+     "label": "windows-arm64",
+     "group": "ignored",
+     "downloads": 0
+    }
+   ]
+  }
+ ],
+ "periods": [
+  {
+   "epoch": -1,
+   "version": null,
+   "label": null,
+   "start": "2022-12-31T01:33:47Z",
+   "end": "2026-10-10T23:19:36.000Z",
+   "days": 1379.9068171296296,
+   "releases": 30,
+   "firstTag": "v0.0.1",
+   "lastTag": "v1.10.0",
+   "groups": {
+    "app": 0,
+    "cli": 11491
+   },
+   "downloads": 11491,
+   "avgPerDay": {
+    "app": 0,
+    "cli": 8.327373890291119
+   },
+   "avgPerDayTotal": 8.327373890291119,
+   "medianPerDay": {
+    "app": 0,
+    "cli": 7.230990946643026
+   },
+   "medianPerDayTotal": 7.230990946643026,
+   "fullDays": 1378,
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   }
+  },
+  {
+   "epoch": 0,
+   "version": "v1.11.0",
+   "label": "First desktop app",
+   "start": "2026-10-10T23:19:36Z",
+   "end": "2026-10-16T20:37:08.000Z",
+   "days": 5.887175925925926,
+   "releases": 10,
+   "firstTag": "v1.11.0",
+   "lastTag": "v1.17.0",
+   "groups": {
+    "app": 261,
+    "cli": 258
+   },
+   "downloads": 519,
+   "avgPerDay": {
+    "app": 44.33365051154817,
+    "cli": 43.82406832176026
+   },
+   "avgPerDayTotal": 88.15771883330842,
+   "medianPerDay": {
+    "app": 35.601988296763125,
+    "cli": 36.029232275948914
+   },
+   "medianPerDayTotal": 70.72123900601927,
+   "fullDays": 5,
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   }
+  },
+  {
+   "epoch": 1,
+   "version": "v1.18.0",
+   "label": "Installer and updater",
+   "start": "2026-10-16T20:37:08Z",
+   "end": "2026-10-18T12:36:07.000Z",
+   "days": 1.6659606481481481,
+   "releases": 3,
+   "firstTag": "v1.18.0",
+   "lastTag": "v1.19.1",
+   "groups": {
+    "app": 102,
+    "cli": 66
+   },
+   "downloads": 168,
+   "avgPerDay": {
+    "app": 61.22593598677217,
+    "cli": 39.61678210908788
+   },
+   "avgPerDayTotal": 100.84271809586005,
+   "medianPerDay": {
+    "app": 68.59693900574987,
+    "cli": 47.30393465260639
+   },
+   "medianPerDayTotal": 115.90087365835626,
+   "fullDays": 1,
+   "counters": {
+    "updates": {
+     "downloads": 3,
+     "counted": true
+    }
+   }
+  },
+  {
+   "epoch": 2,
+   "version": "v1.20.0",
+   "label": "Multilingual",
+   "start": "2026-10-18T12:36:07Z",
+   "end": "2026-10-18T13:00:00.000Z",
+   "days": 0.016585648148148148,
+   "releases": 1,
+   "firstTag": "v1.20.0",
+   "lastTag": "v1.20.0",
+   "groups": {
+    "app": 10,
+    "cli": 13
+   },
+   "downloads": 23,
+   "avgPerDay": {
+    "app": 602.9309141660851,
+    "cli": 783.8101884159107
+   },
+   "avgPerDayTotal": 1386.7411025819958,
+   "medianPerDay": {
+    "app": null,
+    "cli": null
+   },
+   "medianPerDayTotal": null,
+   "fullDays": 0,
+   "counters": {
+    "updates": {
+     "downloads": 1,
+     "counted": true
+    }
+   }
+  }
+ ],
+ "estimatedDaily": {
+  "start": "2022-12-31",
+  "groups": {
+   "app": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    5.469976717743245,
+    62.32562384165025,
+    34.69200673007036,
+    35.601988296763125,
+    31.407108434867276,
+    44.68557653233649,
+    56.916636247675484,
+    68.59693900574987,
+    33.30414419314388
+   ],
+   "cli": [
+    37.805456171735244,
+    30.05366726296959,
+    42.68300505917992,
+    5.581494503293825,
+    5.581494503293825,
+    5.581494503293825,
+    5.581494503293825,
+    5.581494503293825,
+    5.581494503293825,
+    5.581494503293825,
+    9.957351150860609,
+    10.283732160467936,
+    10.283732160467936,
+    10.283732160467936,
+    41.11036572321775,
+    19.116496165894322,
+    14.68148751374626,
+    14.68148751374626,
+    20.614234356886598,
+    38.27050395402814,
+    92.30704919398181,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    0.9229081713777296,
+    82.63297277212811,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.704408624861358,
+    8.989947267464766,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    11.969002871379075,
+    12.132708575380963,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    12.466931929527458,
+    9.619404210733782,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    7.230990946643026,
+    29.130085512673933,
+    63.748035976346216,
+    49.42789782567406,
+    12.290570576852675,
+    12.290570576852675,
+    12.290570576852675,
+    12.290570576852675,
+    12.290570576852675,
+    12.290570576852675,
+    12.290570576852675,
+    12.290570576852675,
+    12.290570576852675,
+    12.290570576852675,
+    12.290570576852675,
+    13.09011873665831,
+    13.117402268521118,
+    13.117402268521118,
+    13.117402268521118,
+    13.117402268521118,
+    13.117402268521118,
+    13.117402268521118,
+    13.337389093924482,
+    13.757752033188273,
+    13.757752033188273,
+    13.757752033188273,
+    13.757752033188273,
+    13.757752033188273,
+    13.757752033188273,
+    28.926020639313176,
+    28.24409178219247,
+    20.39068771742039,
+    20.39068771742039,
+    20.39068771742039,
+    20.39068771742039,
+    20.39068771742039,
+    19.89594870547993,
+    19.242634897834122,
+    19.242634897834122,
+    19.242634897834122,
+    19.242634897834122,
+    19.242634897834122,
+    19.242634897834122,
+    19.242634897834122,
+    19.242634897834122,
+    23.655112611342943,
+    24.304233942663522,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    18.396191793630024,
+    21.683614985469532,
+    33.293567424330405,
+    41.05688270078832,
+    77.35061578186142,
+    36.029232275948914,
+    26.16331230173379,
+    29.75286287567057,
+    43.150089414767606,
+    43.21507978818484,
+    47.30393465260639,
+    25.337488102252642
+   ]
+  }
+ },
+ "measuredDaily": [
+  {
+   "date": "2026-10-18",
+   "days": 1,
+   "groups": {
+    "app": 73,
+    "cli": 55
+   },
+   "stars": 2,
+   "docker": 2136,
+   "counters": {
+    "updates": 4
+   }
+  }
+ ],
+ "stars": [
+  {
+   "date": "2025-11-07",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-08",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-09",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-10",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-11",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-12",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-13",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-14",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-15",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-16",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-17",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-18",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-19",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-20",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-21",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-22",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-23",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-24",
+   "stars": 1
+  },
+  {
+   "date": "2025-11-25",
+   "stars": 2
+  },
+  {
+   "date": "2025-11-26",
+   "stars": 2
+  },
+  {
+   "date": "2025-11-27",
+   "stars": 2
+  },
+  {
+   "date": "2025-11-28",
+   "stars": 2
+  },
+  {
+   "date": "2025-11-29",
+   "stars": 2
+  },
+  {
+   "date": "2025-11-30",
+   "stars": 2
+  },
+  {
+   "date": "2025-12-01",
+   "stars": 2
+  },
+  {
+   "date": "2025-12-02",
+   "stars": 2
+  },
+  {
+   "date": "2025-12-03",
+   "stars": 2
+  },
+  {
+   "date": "2025-12-04",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-05",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-06",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-07",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-08",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-09",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-10",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-11",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-12",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-13",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-14",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-15",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-16",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-17",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-18",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-19",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-20",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-21",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-22",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-23",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-24",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-25",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-26",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-27",
+   "stars": 3
+  },
+  {
+   "date": "2025-12-28",
+   "stars": 4
+  },
+  {
+   "date": "2025-12-29",
+   "stars": 4
+  },
+  {
+   "date": "2025-12-30",
+   "stars": 4
+  },
+  {
+   "date": "2025-12-31",
+   "stars": 4
+  },
+  {
+   "date": "2026-01-01",
+   "stars": 4
+  },
+  {
+   "date": "2026-01-02",
+   "stars": 4
+  },
+  {
+   "date": "2026-01-03",
+   "stars": 4
+  },
+  {
+   "date": "2026-01-04",
+   "stars": 4
+  },
+  {
+   "date": "2026-01-05",
+   "stars": 4
+  },
+  {
+   "date": "2026-01-06",
+   "stars": 4
+  },
+  {
+   "date": "2026-01-07",
+   "stars": 4
+  },
+  {
+   "date": "2026-01-08",
+   "stars": 4
+  },
+  {
+   "date": "2026-01-09",
+   "stars": 4
+  },
+  {
+   "date": "2026-01-10",
+   "stars": 4
+  },
+  {
+   "date": "2026-01-11",
+   "stars": 5
+  },
+  {
+   "date": "2026-01-12",
+   "stars": 5
+  },
+  {
+   "date": "2026-01-13",
+   "stars": 5
+  },
+  {
+   "date": "2026-01-14",
+   "stars": 5
+  },
+  {
+   "date": "2026-01-15",
+   "stars": 5
+  },
+  {
+   "date": "2026-01-16",
+   "stars": 5
+  },
+  {
+   "date": "2026-01-17",
+   "stars": 5
+  },
+  {
+   "date": "2026-01-18",
+   "stars": 5
+  },
+  {
+   "date": "2026-01-19",
+   "stars": 5
+  },
+  {
+   "date": "2026-01-20",
+   "stars": 5
+  },
+  {
+   "date": "2026-01-21",
+   "stars": 5
+  },
+  {
+   "date": "2026-01-22",
+   "stars": 6
+  },
+  {
+   "date": "2026-01-23",
+   "stars": 6
+  },
+  {
+   "date": "2026-01-24",
+   "stars": 6
+  },
+  {
+   "date": "2026-01-25",
+   "stars": 6
+  },
+  {
+   "date": "2026-01-26",
+   "stars": 6
+  },
+  {
+   "date": "2026-01-27",
+   "stars": 6
+  },
+  {
+   "date": "2026-01-28",
+   "stars": 6
+  },
+  {
+   "date": "2026-01-29",
+   "stars": 6
+  },
+  {
+   "date": "2026-01-30",
+   "stars": 6
+  },
+  {
+   "date": "2026-01-31",
+   "stars": 6
+  },
+  {
+   "date": "2026-02-01",
+   "stars": 6
+  },
+  {
+   "date": "2026-02-02",
+   "stars": 6
+  },
+  {
+   "date": "2026-02-03",
+   "stars": 6
+  },
+  {
+   "date": "2026-02-04",
+   "stars": 6
+  },
+  {
+   "date": "2026-02-05",
+   "stars": 6
+  },
+  {
+   "date": "2026-02-06",
+   "stars": 6
+  },
+  {
+   "date": "2026-02-07",
+   "stars": 6
+  },
+  {
+   "date": "2026-02-08",
+   "stars": 6
+  },
+  {
+   "date": "2026-02-09",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-10",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-11",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-12",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-13",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-14",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-15",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-16",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-17",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-18",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-19",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-20",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-21",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-22",
+   "stars": 7
+  },
+  {
+   "date": "2026-02-23",
+   "stars": 8
+  },
+  {
+   "date": "2026-02-24",
+   "stars": 8
+  },
+  {
+   "date": "2026-02-25",
+   "stars": 8
+  },
+  {
+   "date": "2026-02-26",
+   "stars": 8
+  },
+  {
+   "date": "2026-02-27",
+   "stars": 8
+  },
+  {
+   "date": "2026-02-28",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-01",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-02",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-03",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-04",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-05",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-06",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-07",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-08",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-09",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-10",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-11",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-12",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-13",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-14",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-15",
+   "stars": 8
+  },
+  {
+   "date": "2026-03-16",
+   "stars": 9
+  },
+  {
+   "date": "2026-03-17",
+   "stars": 9
+  },
+  {
+   "date": "2026-03-18",
+   "stars": 9
+  },
+  {
+   "date": "2026-03-19",
+   "stars": 9
+  },
+  {
+   "date": "2026-03-20",
+   "stars": 9
+  },
+  {
+   "date": "2026-03-21",
+   "stars": 9
+  },
+  {
+   "date": "2026-03-22",
+   "stars": 9
+  },
+  {
+   "date": "2026-03-23",
+   "stars": 9
+  },
+  {
+   "date": "2026-03-24",
+   "stars": 9
+  },
+  {
+   "date": "2026-03-25",
+   "stars": 9
+  },
+  {
+   "date": "2026-03-26",
+   "stars": 9
+  },
+  {
+   "date": "2026-03-27",
+   "stars": 9
+  },
+  {
+   "date": "2026-03-28",
+   "stars": 9
+  },
+  {
+   "date": "2026-03-29",
+   "stars": 10
+  },
+  {
+   "date": "2026-03-30",
+   "stars": 10
+  },
+  {
+   "date": "2026-03-31",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-01",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-02",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-03",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-04",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-05",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-06",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-07",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-08",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-09",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-10",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-11",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-12",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-13",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-14",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-15",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-16",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-17",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-18",
+   "stars": 10
+  },
+  {
+   "date": "2026-04-19",
+   "stars": 11
+  },
+  {
+   "date": "2026-04-20",
+   "stars": 11
+  },
+  {
+   "date": "2026-04-21",
+   "stars": 11
+  },
+  {
+   "date": "2026-04-22",
+   "stars": 11
+  },
+  {
+   "date": "2026-04-23",
+   "stars": 11
+  },
+  {
+   "date": "2026-04-24",
+   "stars": 11
+  },
+  {
+   "date": "2026-04-25",
+   "stars": 11
+  },
+  {
+   "date": "2026-04-26",
+   "stars": 11
+  },
+  {
+   "date": "2026-04-27",
+   "stars": 11
+  },
+  {
+   "date": "2026-04-28",
+   "stars": 12
+  },
+  {
+   "date": "2026-04-29",
+   "stars": 12
+  },
+  {
+   "date": "2026-04-30",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-01",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-02",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-03",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-04",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-05",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-06",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-07",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-08",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-09",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-10",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-11",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-12",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-13",
+   "stars": 12
+  },
+  {
+   "date": "2026-05-14",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-15",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-16",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-17",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-18",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-19",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-20",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-21",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-22",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-23",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-24",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-25",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-26",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-27",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-28",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-29",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-30",
+   "stars": 13
+  },
+  {
+   "date": "2026-05-31",
+   "stars": 13
+  },
+  {
+   "date": "2026-06-01",
+   "stars": 13
+  },
+  {
+   "date": "2026-06-02",
+   "stars": 13
+  },
+  {
+   "date": "2026-06-03",
+   "stars": 13
+  },
+  {
+   "date": "2026-06-04",
+   "stars": 13
+  },
+  {
+   "date": "2026-06-05",
+   "stars": 13
+  },
+  {
+   "date": "2026-06-06",
+   "stars": 13
+  },
+  {
+   "date": "2026-06-07",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-08",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-09",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-10",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-11",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-12",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-13",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-14",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-15",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-16",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-17",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-18",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-19",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-20",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-21",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-22",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-23",
+   "stars": 14
+  },
+  {
+   "date": "2026-06-24",
+   "stars": 15
+  },
+  {
+   "date": "2026-06-25",
+   "stars": 15
+  },
+  {
+   "date": "2026-06-26",
+   "stars": 15
+  },
+  {
+   "date": "2026-06-27",
+   "stars": 15
+  },
+  {
+   "date": "2026-06-28",
+   "stars": 15
+  },
+  {
+   "date": "2026-06-29",
+   "stars": 15
+  },
+  {
+   "date": "2026-06-30",
+   "stars": 15
+  },
+  {
+   "date": "2026-07-01",
+   "stars": 15
+  },
+  {
+   "date": "2026-07-02",
+   "stars": 15
+  },
+  {
+   "date": "2026-07-03",
+   "stars": 15
+  },
+  {
+   "date": "2026-07-04",
+   "stars": 15
+  },
+  {
+   "date": "2026-07-05",
+   "stars": 15
+  },
+  {
+   "date": "2026-07-06",
+   "stars": 16
+  },
+  {
+   "date": "2026-07-07",
+   "stars": 16
+  },
+  {
+   "date": "2026-07-08",
+   "stars": 16
+  },
+  {
+   "date": "2026-07-09",
+   "stars": 16
+  },
+  {
+   "date": "2026-07-10",
+   "stars": 16
+  },
+  {
+   "date": "2026-07-11",
+   "stars": 16
+  },
+  {
+   "date": "2026-07-12",
+   "stars": 16
+  },
+  {
+   "date": "2026-07-13",
+   "stars": 16
+  },
+  {
+   "date": "2026-07-14",
+   "stars": 16
+  },
+  {
+   "date": "2026-07-15",
+   "stars": 16
+  },
+  {
+   "date": "2026-07-16",
+   "stars": 16
+  },
+  {
+   "date": "2026-07-17",
+   "stars": 16
+  },
+  {
+   "date": "2026-07-18",
+   "stars": 16
+  },
+  {
+   "date": "2026-07-19",
+   "stars": 17
+  },
+  {
+   "date": "2026-07-20",
+   "stars": 17
+  },
+  {
+   "date": "2026-07-21",
+   "stars": 17
+  },
+  {
+   "date": "2026-07-22",
+   "stars": 17
+  },
+  {
+   "date": "2026-07-23",
+   "stars": 17
+  },
+  {
+   "date": "2026-07-24",
+   "stars": 17
+  },
+  {
+   "date": "2026-07-25",
+   "stars": 17
+  },
+  {
+   "date": "2026-07-26",
+   "stars": 17
+  },
+  {
+   "date": "2026-07-27",
+   "stars": 17
+  },
+  {
+   "date": "2026-07-28",
+   "stars": 17
+  },
+  {
+   "date": "2026-07-29",
+   "stars": 17
+  },
+  {
+   "date": "2026-07-30",
+   "stars": 17
+  },
+  {
+   "date": "2026-07-31",
+   "stars": 17
+  },
+  {
+   "date": "2026-08-01",
+   "stars": 17
+  },
+  {
+   "date": "2026-08-02",
+   "stars": 17
+  },
+  {
+   "date": "2026-08-03",
+   "stars": 17
+  },
+  {
+   "date": "2026-08-04",
+   "stars": 17
+  },
+  {
+   "date": "2026-08-05",
+   "stars": 17
+  },
+  {
+   "date": "2026-08-06",
+   "stars": 17
+  },
+  {
+   "date": "2026-08-07",
+   "stars": 17
+  },
+  {
+   "date": "2026-08-08",
+   "stars": 17
+  },
+  {
+   "date": "2026-08-09",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-10",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-11",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-12",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-13",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-14",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-15",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-16",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-17",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-18",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-19",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-20",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-21",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-22",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-23",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-24",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-25",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-26",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-27",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-28",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-29",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-30",
+   "stars": 18
+  },
+  {
+   "date": "2026-08-31",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-01",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-02",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-03",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-04",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-05",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-06",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-07",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-08",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-09",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-10",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-11",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-12",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-13",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-14",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-15",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-16",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-17",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-18",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-19",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-20",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-21",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-22",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-23",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-24",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-25",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-26",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-27",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-28",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-29",
+   "stars": 18
+  },
+  {
+   "date": "2026-09-30",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-01",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-02",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-03",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-04",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-05",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-06",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-07",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-08",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-09",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-10",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-11",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-12",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-13",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-14",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-15",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-16",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-17",
+   "stars": 18
+  },
+  {
+   "date": "2026-10-18",
+   "stars": 18
+  }
+ ],
+ "traffic": {
+  "views": [
+   {
+    "date": "2026-10-05",
+    "count": 21,
+    "uniques": 7
+   },
+   {
+    "date": "2026-10-06",
+    "count": 12,
+    "uniques": 3
+   },
+   {
+    "date": "2026-10-07",
+    "count": 10,
+    "uniques": 2
+   },
+   {
+    "date": "2026-10-08",
+    "count": 22,
+    "uniques": 5
+   },
+   {
+    "date": "2026-10-09",
+    "count": 14,
+    "uniques": 7
+   },
+   {
+    "date": "2026-10-10",
+    "count": 40,
+    "uniques": 10
+   },
+   {
+    "date": "2026-10-11",
+    "count": 15,
+    "uniques": 5
+   },
+   {
+    "date": "2026-10-12",
+    "count": 9,
+    "uniques": 2
+   },
+   {
+    "date": "2026-10-13",
+    "count": 7,
+    "uniques": 1
+   },
+   {
+    "date": "2026-10-14",
+    "count": 6,
+    "uniques": 1
+   },
+   {
+    "date": "2026-10-15",
+    "count": 16,
+    "uniques": 5
+   },
+   {
+    "date": "2026-10-16",
+    "count": 37,
+    "uniques": 12
+   },
+   {
+    "date": "2026-10-17",
+    "count": 23,
+    "uniques": 7
+   },
+   {
+    "date": "2026-10-18",
+    "count": 40,
+    "uniques": 13
+   }
+  ],
+  "clones": [
+   {
+    "date": "2026-10-05",
+    "count": 26,
+    "uniques": 8
+   },
+   {
+    "date": "2026-10-06",
+    "count": 18,
+    "uniques": 9
+   },
+   {
+    "date": "2026-10-07",
+    "count": 18,
+    "uniques": 9
+   },
+   {
+    "date": "2026-10-08",
+    "count": 39,
+    "uniques": 13
+   },
+   {
+    "date": "2026-10-09",
+    "count": 36,
+    "uniques": 12
+   },
+   {
+    "date": "2026-10-10",
+    "count": 24,
+    "uniques": 6
+   },
+   {
+    "date": "2026-10-11",
+    "count": 31,
+    "uniques": 10
+   },
+   {
+    "date": "2026-10-12",
+    "count": 7,
+    "uniques": 3
+   },
+   {
+    "date": "2026-10-13",
+    "count": 35,
+    "uniques": 11
+   },
+   {
+    "date": "2026-10-14",
+    "count": 13,
+    "uniques": 4
+   },
+   {
+    "date": "2026-10-15",
+    "count": 12,
+    "uniques": 4
+   },
+   {
+    "date": "2026-10-16",
+    "count": 29,
+    "uniques": 14
+   },
+   {
+    "date": "2026-10-17",
+    "count": 7,
+    "uniques": 1
+   },
+   {
+    "date": "2026-10-18",
+    "count": 39,
+    "uniques": 13
+   }
+  ],
+  "referrers": [
+   {
+    "referrer": "github.com",
+    "count": 61,
+    "uniques": 22
+   },
+   {
+    "referrer": "google",
+    "count": 33,
+    "uniques": 19
+   },
+   {
+    "referrer": "reddit.com",
+    "count": 12,
+    "uniques": 9
+   },
+   {
+    "referrer": "t.co",
+    "count": 5,
+    "uniques": 4
+   }
+  ],
+  "paths": [
+   {
+    "path": "/elboletaire/manga-downloader",
+    "title": "elboletaire/manga-downloader",
+    "count": 98,
+    "uniques": 41
+   },
+   {
+    "path": "/elboletaire/manga-downloader/releases",
+    "title": "Releases",
+    "count": 27,
+    "uniques": 15
+   },
+   {
+    "path": "/elboletaire/manga-downloader/blob/master/README.md",
+    "title": "manga-downloader",
+    "count": 9,
+    "uniques": 7
+   }
+  ],
+  "asOf": "2026-10-18"
+ }
+}
