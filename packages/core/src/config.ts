@@ -4,6 +4,7 @@
 import { readFile } from 'node:fs/promises';
 import { parse } from 'yaml';
 import { compareVersions, parseVersion } from './semver';
+import { DEFAULT_STARS_SPACING, type StarsSpacing } from './stars';
 
 export interface GroupRule {
   name: string;
@@ -31,12 +32,34 @@ export interface PlatformRule {
   label: string;
 }
 
+/** Options of one README chart; `title` overrides `charts.titles` for that chart. */
+export interface ChartConfig {
+  title?: boolean;
+}
+
+export interface StarsChartConfig extends ChartConfig {
+  /** `even` spaces the points by star count, `time` by day. */
+  spacing: StarsSpacing;
+}
+
+export interface ChartsConfig {
+  /** Shows the visible title and note of the README charts; the dashboard keeps its headings. */
+  titles: boolean;
+  stars: StarsChartConfig;
+  'downloads-per-day': ChartConfig;
+  'downloads-per-release': ChartConfig;
+}
+
+/** The charts the README SVGs are made of, by file name. */
+export type ChartName = Exclude<keyof ChartsConfig, 'titles'>;
+
 export interface StatsConfig {
   groups: GroupRule[];
   ignore: string[];
   counters: CounterRule[];
   epochs: EpochRule[];
   platforms: PlatformRule[];
+  charts: ChartsConfig;
   /** Docker Hub image, `namespace/name`. */
   docker?: string;
 }
@@ -54,6 +77,7 @@ export const DEFAULT_CONFIG: StatsConfig = {
   counters: [],
   epochs: [],
   platforms: [],
+  charts: { titles: true, stars: { spacing: DEFAULT_STARS_SPACING }, 'downloads-per-day': {}, 'downloads-per-release': {} },
 };
 
 /** Names the dataset uses for its own buckets, so a group can't take them. */
@@ -167,6 +191,39 @@ function parseEpochs(value: unknown): EpochRule[] {
   return epochs.sort((a, b) => compareVersions(parseVersion(a.version)!, parseVersion(b.version)!));
 }
 
+function optionalBoolean(obj: Obj, key: string, path: string): boolean | undefined {
+  const value = obj[key];
+  if (value === undefined) return undefined;
+  if (typeof value !== 'boolean') throw new ConfigError(`${path}.${key} must be true or false`);
+  return value;
+}
+
+function parseCharts(value: unknown): ChartsConfig {
+  const obj = expectObject(value, 'charts');
+  checkKeys(obj, ['titles', 'stars', 'downloads-per-day', 'downloads-per-release'], 'charts');
+  const section = (name: string, keys: string[]): Obj => {
+    const sub = obj[name] === undefined ? {} : expectObject(obj[name], `charts.${name}`);
+    checkKeys(sub, keys, `charts.${name}`);
+    return sub;
+  };
+  const stars = section('stars', ['title', 'spacing']);
+  const spacing = stars.spacing ?? DEFAULT_STARS_SPACING;
+  if (spacing !== 'even' && spacing !== 'time') throw new ConfigError(`charts.stars.spacing must be 'even' or 'time'`);
+  const perDay = section('downloads-per-day', ['title']);
+  const perRelease = section('downloads-per-release', ['title']);
+  return {
+    titles: optionalBoolean(obj, 'titles', 'charts') ?? true,
+    stars: { spacing, ...chartOptions(optionalBoolean(stars, 'title', 'charts.stars')) },
+    'downloads-per-day': chartOptions(optionalBoolean(perDay, 'title', 'charts.downloads-per-day')),
+    'downloads-per-release': chartOptions(optionalBoolean(perRelease, 'title', 'charts.downloads-per-release')),
+  };
+}
+
+/** `{ title }` when the chart sets one, else nothing, so an unset title stays out of the config. */
+function chartOptions(title: boolean | undefined): ChartConfig {
+  return title === undefined ? {} : { title };
+}
+
 function parsePlatforms(value: unknown): PlatformRule[] {
   return expectList(value, 'platforms').map((item, i) => {
     const path = `platforms[${i}]`;
@@ -189,7 +246,7 @@ export function parseConfig(text: string): StatsConfig {
   }
   if (doc === null || doc === undefined) return structuredClone(DEFAULT_CONFIG);
   const root = expectObject(doc, 'the file');
-  checkKeys(root, ['groups', 'ignore', 'counters', 'epochs', 'platforms', 'docker'], 'top level');
+  checkKeys(root, ['groups', 'ignore', 'counters', 'epochs', 'platforms', 'charts', 'docker'], 'top level');
 
   const config: StatsConfig = {
     groups: root.groups === undefined ? structuredClone(DEFAULT_CONFIG.groups) : parseGroups(root.groups),
@@ -197,6 +254,7 @@ export function parseConfig(text: string): StatsConfig {
     counters: root.counters === undefined ? [] : parseCounters(root.counters),
     epochs: root.epochs === undefined ? [] : parseEpochs(root.epochs),
     platforms: root.platforms === undefined ? [] : parsePlatforms(root.platforms),
+    charts: root.charts === undefined ? structuredClone(DEFAULT_CONFIG.charts) : parseCharts(root.charts),
   };
   if (root.docker !== undefined) {
     const docker = expectString(root.docker, 'docker');

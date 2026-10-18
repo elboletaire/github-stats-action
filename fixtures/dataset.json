@@ -9677,6 +9677,14 @@
    "stars": 18
   }
  ],
+ "charts": {
+  "titles": true,
+  "stars": {
+   "spacing": "even"
+  },
+  "downloads-per-day": {},
+  "downloads-per-release": {}
+ },
  "traffic": {
   "views": [
    {

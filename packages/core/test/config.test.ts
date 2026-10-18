@@ -114,3 +114,38 @@ describe('the example config', () => {
     expect(config.docker).toBe('acme/acme');
   });
 });
+
+describe('charts', () => {
+  it('defaults to even star spacing with every title shown', () => {
+    expect(parseConfig('').charts).toEqual({ titles: true, stars: { spacing: 'even' }, 'downloads-per-day': {}, 'downloads-per-release': {} });
+  });
+
+  it('reads the spacing, the global titles switch and a title per chart', () => {
+    const config = parseConfig(`
+charts:
+  titles: false
+  stars: { spacing: time, title: true }
+  downloads-per-day: { title: false }
+`);
+    expect(config.charts).toEqual({
+      titles: false,
+      stars: { spacing: 'time', title: true },
+      'downloads-per-day': { title: false },
+      'downloads-per-release': {},
+    });
+  });
+
+  it('rejects a spacing other than even or time', () => {
+    expect(() => parseConfig('charts: { stars: { spacing: linear } }')).toThrow("charts.stars.spacing must be 'even' or 'time'");
+  });
+
+  it('rejects a title that is not true or false', () => {
+    expect(() => parseConfig('charts: { titles: "no" }')).toThrow('charts.titles must be true or false');
+    expect(() => parseConfig('charts: { downloads-per-release: { title: 0 } }')).toThrow('charts.downloads-per-release.title must be true or false');
+  });
+
+  it('rejects unknown chart keys', () => {
+    expect(() => parseConfig('charts: { pie: {} }')).toThrow('charts.pie is not a known key');
+    expect(() => parseConfig('charts: { stars: { colour: red } }')).toThrow('charts.stars.colour is not a known key');
+  });
+});

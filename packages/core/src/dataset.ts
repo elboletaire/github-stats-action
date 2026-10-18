@@ -183,6 +183,7 @@ export function buildDataset(input: BuildInput): Dataset {
     estimatedDaily: daily,
     measuredDaily: buildMeasured(snapshots, config, repo, names),
     stars: buildStars(input.stargazers ?? [], nowMs),
+    charts: config.charts,
     ...(input.traffic ? { traffic: input.traffic } : {}),
   };
 }

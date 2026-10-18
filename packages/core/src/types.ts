@@ -1,6 +1,8 @@
 // Types shared by the collectors, the store and the outputs. Snapshot is what is
 // stored per day on the data branch; Dataset is what every output reads.
 
+import type { ChartsConfig } from './config';
+
 /** One downloadable file of a release, as GitHub counted it that day. */
 export interface SnapshotAsset {
   name: string;
@@ -217,6 +219,8 @@ export interface Dataset {
   estimatedDaily: EstimatedDaily;
   measuredDaily: MeasuredDay[];
   stars: StarPoint[];
+  /** The chart options of the config; absent in older datasets, which get the defaults. */
+  charts?: ChartsConfig;
   /** Present only when traffic was collected. */
   traffic?: TrafficData;
 }
