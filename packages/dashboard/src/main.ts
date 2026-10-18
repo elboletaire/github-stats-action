@@ -33,14 +33,17 @@ async function boot(): Promise<void> {
   const root = document.getElementById('app') as HTMLElement;
   const config = readConfig();
   let datasets: Dataset[];
+  let failed = 0;
   try {
-    datasets = config.datasets ?? (await Promise.all((config.repos ?? []).map(load)));
+    const results = config.datasets ? null : await Promise.allSettled((config.repos ?? []).map(load));
+    datasets = config.datasets ?? (results ?? []).flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []));
+    failed = results?.filter((r) => r.status === 'rejected').length ?? 0;
   } catch (error) {
     root.textContent = `Could not load the stats: ${error instanceof Error ? error.message : String(error)}`;
     return;
   }
   if (datasets.length === 0) {
-    root.textContent = 'No stats yet.';
+    root.textContent = failed ? 'Could not load any repository stats.' : 'No stats yet.';
     return;
   }
 
@@ -57,6 +60,12 @@ async function boot(): Promise<void> {
         }
       : undefined;
     mount(root, datasets[selected]!, choice);
+    if (failed) {
+      const note = document.createElement('p');
+      note.className = 'note';
+      note.textContent = `${failed} repositor${failed === 1 ? 'y' : 'ies'} could not be loaded and ${failed === 1 ? 'is' : 'are'} left out.`;
+      root.querySelector('header')?.after(note);
+    }
   };
   show();
 

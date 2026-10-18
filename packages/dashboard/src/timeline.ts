@@ -3,7 +3,7 @@
 import { esc, f0 } from './format';
 import { niceMax, ticks } from './scale';
 import { type DayAxis, xTicks } from './days';
-import { hideTip, showTip } from './tooltip';
+import { showTip, tipOn } from './tooltip';
 import { resetSvg, svgEl, widthOf } from './svg';
 
 export interface TimelineSeries {
@@ -64,7 +64,8 @@ export function drawTimeline(svg: SVGSVGElement, o: TimelineOptions): void {
   const cross = svgEl('line', { y1: m.t, y2: y(0), stroke: 'var(--muted)', 'stroke-width': 1, visibility: 'hidden' }, svg);
   const dots = o.series.map((s) => svgEl('circle', { r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, visibility: 'hidden' }, svg));
   const hit = svgEl('rect', { x: m.l, y: m.t, width: pw, height: H - m.t - m.b, fill: 'transparent' }, svg);
-  hit.addEventListener('pointermove', (ev) => {
+  // tipOn handles the tooltip for mouse and tap; the crosshair follows the same pointer
+  tipOn(hit, (ev) => {
     const px = ev.clientX - svg.getBoundingClientRect().left;
     const target = first + ((px - m.l) / pw) * (last - first);
     let k = 0;
@@ -86,8 +87,8 @@ export function drawTimeline(svg: SVGSVGElement, o: TimelineOptions): void {
     const rows = o.series.map((s) => `${esc(s.label)}: ${s.values[k] == null ? '—' : f0(s.values[k] as number)} ${esc(o.unit)}`);
     showTip(`<b>${esc(o.axis.long(day))}</b><br>${rows.join('<br>')}`, ev);
   });
-  hit.addEventListener('pointerleave', () => {
-    hideTip();
+  hit.addEventListener('pointerleave', (ev) => {
+    if (ev.pointerType === 'touch') return;
     cross.setAttribute('visibility', 'hidden');
     dots.forEach((d) => d.setAttribute('visibility', 'hidden'));
   });

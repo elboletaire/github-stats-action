@@ -99,7 +99,7 @@ export function estimated(d: Dataset): Section {
     }
 
     // the first group is drawn last, so it sits on top
-    groups.forEach((g, j) => {
+    [...groups.entries()].reverse().forEach(([j, g]) => {
       const s = series[j] ?? [];
       const color = colorVar(g);
       const pts = s.slice(a, b + 1).map((v, k) => `${x(a + k).toFixed(1)},${y(v).toFixed(1)}`).join('L');

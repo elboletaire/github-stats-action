@@ -178,6 +178,8 @@ header {
 }
 
 .kpi .l {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: 11.5px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -380,6 +382,11 @@ svg .sep {
   white-space: nowrap;
 }
 
+.brow > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .brow .t {
   background: var(--grid);
   height: 10px;
@@ -546,6 +553,10 @@ details > .bars {
 
 .presets .note {
   margin: 0 0 0 auto;
+}
+
+footer code {
+  overflow-wrap: anywhere;
 }
 
 footer {
