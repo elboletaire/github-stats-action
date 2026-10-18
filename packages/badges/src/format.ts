@@ -24,10 +24,7 @@ const EM_WIDTHS: Record<string, number> = {
 /** Width of characters outside the table (non-ASCII letters, mostly). */
 const DEFAULT_EM = 600;
 
-/**
- * Compact count: `999`, `1.2k`, `12.2k`, `123k`, `1.2M`. One decimal below 100 of a unit,
- * whole numbers above. Expects a finite, non-negative number.
- */
+/** Compact count: `999`, `1.2k`, `12.2k`, `123k`, `1.2M`, one decimal below 100 of a unit. */
 export function formatCompact(value: number): string {
   if (!Number.isFinite(value) || value < 0) throw new RangeError(`not a count: ${value}`);
   let scaled = Math.round(value);

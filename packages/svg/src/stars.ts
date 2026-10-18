@@ -74,10 +74,8 @@ export function starsChart(dataset: Dataset, theme: Theme): string {
 
 const STRIP = 4;
 
-/**
- * Hover targets along the line: one transparent strip per 4px, titled with the last day in it,
- * so a tooltip is at most a few px from any point without a rect per day.
- */
+// Hover targets along the line: one transparent strip per 4px, titled with the last day in it,
+// so a tooltip is at most a few px from any point without a rect per day.
 function hoverStrips(dataset: Dataset, xOf: (day: number) => number, box: Box): string[] {
   const strips = new Map<number, { x: number; date: string; stars: number }>();
   for (const p of dataset.stars) {

@@ -18,10 +18,7 @@ const AS_BOT = ['-c', `user.name=${BOT.name}`, '-c', `user.email=${BOT.email}`];
 export interface DataBranch {
   /** The worktree holding the branch; the run writes here. */
   dir: string;
-  /**
-   * Commits and pushes what changed. Returns false when nothing did. After a rebase onto a
-   * moved branch, `rederive` rebuilds the derived files over the rebased tree first.
-   */
+  /** Commits and pushes what changed, false when nothing did; `rederive` rebuilds derived files after a rebase. */
   publish(message: string, rederive?: () => Promise<unknown>): Promise<boolean>;
 }
 
@@ -50,11 +47,8 @@ async function hasStagedChanges(cwd: string): Promise<boolean> {
   }
 }
 
-/**
- * Checks out `branch` from origin into a worktree under `tmp`, or starts an orphan one
- * when the branch doesn't exist yet. A push rejected as non-fast-forward is rebased
- * once onto the new remote tip, keeping this run's files where they conflict.
- */
+// Checks out `branch` into a worktree under `tmp`, starting an orphan one when it doesn't exist yet.
+// A push rejected as non-fast-forward rebases onto the new remote tip, keeping this run's files.
 export async function checkoutDataBranch(options: { cwd: string; branch: string; tmp: string }): Promise<DataBranch> {
   const { cwd, branch } = options;
   const remoteRef = `refs/remotes/origin/${branch}`;

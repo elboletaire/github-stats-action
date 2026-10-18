@@ -11,10 +11,8 @@ const CONFIG_PLACEHOLDER = '<script id="gsa-config" type="application/json">__GS
 const embedJson = (value: unknown): string =>
   `<script id="gsa-config" type="application/json">${JSON.stringify(value).replace(/</g, '\\u003c')}</script>`;
 
-/**
- * `standalone`: one self-contained page with every dataset inlined, at `dashboard/index.html`.
- * `pages`: the static site with each dataset at `data/<owner>/<repo>/dataset.json`, fetched by the page.
- */
+// `standalone`: one page with every dataset inlined, at `dashboard/index.html`.
+// `pages`: the static site, each dataset fetched from `data/<owner>/<repo>/dataset.json`.
 export function dashboardFiles(datasets: readonly Dataset[], options: { mode: 'pages' | 'standalone' }): OutputFile[] {
   if (options.mode === 'standalone') {
     const html = STANDALONE_HTML.replace(CONFIG_PLACEHOLDER, () => embedJson({ datasets }));

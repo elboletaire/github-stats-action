@@ -118,10 +118,8 @@ function edgeAnchor(k: number, count: number): 'start' | 'middle' | 'end' {
   return k === 0 ? 'start' : 'end';
 }
 
-/**
- * The band between `base` and `upper`: a 10% wash, with a 2px line along `upper`. A point that lies
- * on a straight run (equal to both neighbours on both edges) is dropped; the shape is unchanged.
- */
+// The band between `base` and `upper`: a 10% wash, with a 2px line along `upper`.
+// A point on a straight run (equal to both neighbours on both edges) is dropped; the shape is unchanged.
 function areaShape(xOf: (i: number) => number, yOf: (v: number) => number, upper: number[], base: number[], color: string): string {
   const bends = (a: number[], i: number): boolean => a[i] !== a[i - 1] || a[i] !== a[i + 1];
   const kept = upper.map((_, i) => i).filter((i) => bends(upper, i) || bends(base, i));

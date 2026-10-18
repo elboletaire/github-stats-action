@@ -10,10 +10,7 @@ export interface Segment {
   top: boolean;
 }
 
-/**
- * Stacks the positive values bottom-up; `scale` maps a value to a pixel row. Every segment but
- * the top one starts `gap` pixels lower, so the segment above shows a surface gap.
- */
+/** Stacks positive values bottom-up (`scale` maps a value to a row); each segment but the top starts `gap` px lower. */
 export function stackSegments(values: readonly number[], scale: (value: number) => number, gap = 2): Segment[] {
   const positive = values.map((v) => Math.max(0, v));
   let topIndex = -1;

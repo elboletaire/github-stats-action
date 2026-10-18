@@ -43,10 +43,7 @@ export interface ImportResult {
   kept: string[];
 }
 
-/**
- * Imports `<oldDir>/snapshots/*.json` into `<repoDir>/snapshots`. A day that already has a
- * snapshot keeps it, so re-running the import never rewrites newer data.
- */
+/** Imports `<oldDir>/snapshots/*.json` into `<repoDir>/snapshots`; a day already there is kept, never rewritten. */
 export async function importOldSnapshots(oldDir: string, repoDir: string, dockerImage?: string): Promise<ImportResult> {
   const result: ImportResult = { imported: [], kept: [] };
   const files = (await readdir(join(oldDir, 'snapshots'))).filter((f) => SNAPSHOT_RE.test(f)).sort();

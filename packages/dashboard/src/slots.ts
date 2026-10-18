@@ -20,10 +20,7 @@ export function measuredSeries(entries: readonly MeasuredDay[]): MeasuredSeries 
   return { axis, last: Math.max(...byDay.keys()), byDay };
 }
 
-/**
- * Slots that get a label: one per day, or only month starts once slots are narrower than 8px.
- * A label is kept only if it clears the previous one by `minGap` pixels.
- */
+/** Slots to label: each day, or month starts once slots are under 8px; a label must clear the last by `minGap` px. */
 export function slotLabelDays(series: MeasuredSeries, slotWidth: number, minGap = 56): number[] {
   const monthly = slotWidth < 8;
   const out: number[] = [];

@@ -132,10 +132,8 @@ export interface SpanCounter {
   counted: boolean;
 }
 
-/**
- * The span of one epoch (or the span before the first one, `epoch` -1), with the
- * averages and medians over its whole UTC days. Spans without releases have null dates.
- */
+// The span of one epoch (`epoch` -1 is the span before the first), with averages and medians over
+// its whole UTC days. Spans without releases have null dates.
 export interface Period {
   /** Index into `epochs`, -1 for the span before the first epoch. */
   epoch: number;
@@ -202,10 +200,7 @@ export interface StarPoint {
   stars: number;
 }
 
-/**
- * The derived view of one repository, written as dataset.json and inlined in the
- * standalone dashboard. Built from the snapshots only; nothing here calls an API.
- */
+/** One repo's derived view, written as dataset.json and inlined in the standalone dashboard; snapshots only. */
 export interface Dataset {
   /** owner/name. */
   repo: string;

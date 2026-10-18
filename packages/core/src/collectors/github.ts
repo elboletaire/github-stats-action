@@ -93,10 +93,8 @@ async function listStarredFrom(api: Client, repo: string, from: number): Promise
   }
 }
 
-/**
- * The stored list brought up to `total` stars: new stars by position, or the whole list when the
- * count or the last stored star disagrees. Past GitHub's 422 limit the stored list is kept.
- */
+// The stored list brought up to `total` stars: new stars by position, or the whole list when the count
+// or the last stored star disagrees. Past GitHub's 422 limit the stored list is kept.
 export async function fetchStargazers(
   api: Client,
   repo: string,

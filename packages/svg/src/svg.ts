@@ -182,11 +182,8 @@ export interface Segment {
   title: string;
 }
 
-/**
- * One stacked column, bottom-up. Each segment gives 1px to its neighbour on every shared
- * edge, so neighbours sit 2px apart; the baseline stays square and only the top is rounded.
- * Zero segments are left out.
- */
+// One stacked column, bottom-up: each segment gives 1px to each neighbour, so they sit 2px apart.
+// Only the top is rounded, the baseline stays square; zero segments are left out.
 export function stack(x: number, width: number, yOf: (v: number) => number, segments: Segment[]): string[] {
   const shown = segments.filter((s) => finite(s.value) > 0);
   let base = 0;

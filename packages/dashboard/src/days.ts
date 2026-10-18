@@ -38,10 +38,8 @@ export function dayAxis(startIso: string): DayAxis {
   };
 }
 
-/**
- * Ticks for the days a..b: days while the span is short, month starts up to 400 days, years beyond.
- * Each step is the finest one that leaves at most `max` labels.
- */
+// Ticks for the days a..b: days while the span is short, month starts up to 400 days, years beyond.
+// Each step is the finest one that leaves at most `max` labels.
 export function xTicks(axis: DayAxis, a: number, b: number, max: number): Array<[number, string]> {
   const span = b - a;
   const out: Array<[number, string]> = [];
