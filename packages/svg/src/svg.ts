@@ -1,39 +1,22 @@
 // Shared pieces of the SVG charts: document, scales, text, legend and bars. Plain strings,
-// no DOM, so each chart is a standalone file for READMEs.
+// no DOM, so each chart is a standalone file for READMEs. Colours and sizes come from the
+// theme the dashboard shares.
 
-export type Theme = 'light' | 'dark';
+import { FONT, INK, MARK, TYPE, seriesColor as slotColor, type Ink, type Theme } from '@github-stats-action/core';
+
+export type { Theme };
 
 export const WIDTH = 800;
 export const HEIGHT = 300;
 export const DAY_MS = 86_400_000;
 
-export interface Ink {
-  surface: string;
-  primary: string;
-  secondary: string;
-  muted: string;
-  grid: string;
-  axis: string;
-}
-
-/** Chart chrome per mode: surface, text tokens, gridline and baseline. */
-const INK: Record<Theme, Ink> = {
-  light: { surface: '#fcfcfb', primary: '#0b0b0b', secondary: '#52514e', muted: '#898781', grid: '#e1e0d9', axis: '#c3c2b7' },
-  dark: { surface: '#1a1a19', primary: '#f0efec', secondary: '#c3c2b7', muted: '#898781', grid: '#2c2c2a', axis: '#383835' },
-};
+/** The side margin of every chart, and where the plot starts after the value axis. */
+export const PAD = 24;
+export const PLOT_LEFT = 60;
 
 export const ink = (theme: Theme): Ink => INK[theme];
 
-/** The categorical slots of the reference palette, in their fixed order, per mode. */
-const CATEGORICAL: Record<Theme, string[]> = {
-  light: ['#2a78d6', '#eb6834', '#0c9080', '#b57f00', '#c44a80', '#008300', '#6250d6', '#e34948'],
-  dark: ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767'],
-};
-
-/** A series' colour by its slot. Past the eighth there is no hue left, so it takes the muted ink. */
-export function seriesColor(theme: Theme, slot: number): string {
-  return CATEGORICAL[theme][slot] ?? INK[theme].muted;
-}
+export const seriesColor = (theme: Theme, slot: number): string => slotColor(theme, slot);
 
 /** A NaN or Infinity from an empty series becomes 0, so it can't corrupt the markup. */
 export const finite = (n: number): number => (Number.isFinite(n) ? n : 0);
@@ -49,7 +32,7 @@ export const esc = (text: string): string => text.replace(/[&<>"']/g, (c) => ESC
 export const plural = (n: number, word: string): string => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 /** Rough width of a sans label at `size`: enough to keep labels apart, not to typeset them. */
-export const textWidth = (value: string, size = 11): number => value.length * size * 0.6;
+export const textWidth = (value: string, size: number = TYPE.xs): number => value.length * size * 0.6;
 
 const short = (v: number): string => (Math.abs(v) >= 10 ? Math.round(v) : Math.round(v * 10) / 10).toString();
 
@@ -82,6 +65,15 @@ export function monthLabel(day: number): string {
   return `${MONTHS[d.getUTCMonth()] ?? ''} ${d.getUTCFullYear()}`;
 }
 
+/** Labels for a time axis spanning `span` days: `Sep 9` while under four months, `Sep 2026` beyond. */
+export function timeLabel(span: number): (day: number) => string {
+  if (span > 120) return monthLabel;
+  return (day) => {
+    const d = new Date(day * DAY_MS);
+    return `${MONTHS[d.getUTCMonth()] ?? ''} ${d.getUTCDate()}`;
+  };
+}
+
 export function dayLabel(day: number): string {
   return new Date(day * DAY_MS).toISOString().slice(0, 10);
 }
@@ -110,14 +102,16 @@ export function svgText(o: TextOptions): string {
   return `<text x="${px(o.x)}" y="${px(o.y)}" fill="${o.fill}"${anchor}${size}${weight}>${esc(o.value)}</text>`;
 }
 
-/** The whole file: fixed viewBox, a surface rect, and the title and description for screen readers. */
+// The whole file: fixed viewBox, a rounded card with a hairline ring, and the title and description
+// for screen readers. Figures are tabular so ticks and labels line up.
 export function svgDocument(theme: Theme, title: string, desc: string, body: string[]): string {
+  const c = INK[theme];
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-labelledby="title desc">`,
     `<title id="title">${esc(title)}</title>`,
     `<desc id="desc">${esc(desc)}</desc>`,
-    `<rect width="${WIDTH}" height="${HEIGHT}" fill="${INK[theme].surface}"/>`,
-    `<g font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="${INK[theme].secondary}">`,
+    `<rect x="0.5" y="0.5" width="${WIDTH - 1}" height="${HEIGHT - 1}" rx="${MARK.radius}" fill="${c.surface}" stroke="${c.border}"/>`,
+    `<g font-family='${FONT.sans}' font-size="${TYPE.xs}" fill="${c.secondary}" style="font-variant-numeric:tabular-nums">`,
     ...body,
     '</g>',
     '</svg>',
@@ -125,22 +119,27 @@ export function svgDocument(theme: Theme, title: string, desc: string, body: str
   ].join('\n');
 }
 
+/** A vertical fade for an area: the series hue at the line, almost nothing at the baseline. */
+export function areaGradient(id: string, color: string): string {
+  return `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop stop-color="${color}" stop-opacity="${MARK.areaTop}"/><stop offset="1" stop-color="${color}" stop-opacity="${MARK.areaBottom}"/></linearGradient>`;
+}
+
 export interface Key {
   label: string;
   color: string;
 }
 
-/** Legend on the title line, right-aligned: a swatch and a text label per series. */
+/** Legend on the title line, right-aligned: a dot and a text label per series. */
 function legend(keys: Key[], theme: Theme, right: number, y: number): string[] {
-  const widths = keys.map((k) => 16 + textWidth(k.label));
-  const total = widths.reduce((sum, w) => sum + w, 0) + 16 * Math.max(0, keys.length - 1);
+  const widths = keys.map((k) => 14 + textWidth(k.label, TYPE.sm));
+  const total = widths.reduce((sum, w) => sum + w, 0) + 18 * Math.max(0, keys.length - 1);
   let x = right - total;
   return keys.flatMap((k, i) => {
     const at = x;
-    x += (widths[i] ?? 0) + 16;
+    x += (widths[i] ?? 0) + 18;
     return [
-      `<rect x="${px(at)}" y="${px(y - 9)}" width="10" height="10" rx="2" fill="${k.color}"/>`,
-      svgText({ x: at + 16, y, value: k.label, fill: INK[theme].secondary }),
+      `<circle cx="${px(at + 4)}" cy="${px(y - 4)}" r="4" fill="${k.color}"/>`,
+      svgText({ x: at + 14, y, value: k.label, fill: INK[theme].secondary, size: TYPE.sm }),
     ];
   });
 }
@@ -148,20 +147,20 @@ function legend(keys: Key[], theme: Theme, right: number, y: number): string[] {
 /** Title, note line and legend (when there is more than one series). */
 export function heading(title: string, note: string, theme: Theme, keys: Key[] = []): string[] {
   return [
-    svgText({ x: 24, y: 28, value: title, fill: INK[theme].primary, size: 14, weight: 600 }),
-    svgText({ x: 24, y: 46, value: note, fill: INK[theme].secondary }),
-    ...(keys.length > 1 ? legend(keys, theme, WIDTH - 24, 28) : []),
+    `<text x="${PAD}" y="32" fill="${INK[theme].primary}" font-size="${TYPE.lg}" font-weight="600" letter-spacing="-0.2">${esc(title)}</text>`,
+    svgText({ x: PAD, y: 50, value: note, fill: INK[theme].muted, size: TYPE.sm }),
+    ...(keys.length > 1 ? legend(keys, theme, WIDTH - PAD, 32) : []),
   ];
 }
 
-/** Gridlines with a value at each tick; the zero tick is the baseline. */
+/** Hairline gridlines with a value at each tick; the zero tick is the baseline, one step darker. */
 export function valueAxis(ticks: number[], yOf: (v: number) => number, box: Box, theme: Theme): string[] {
   const c = INK[theme];
   return ticks.flatMap((v) => {
     const y = yOf(v);
     return [
-      `<line x1="${px(box.left)}" x2="${px(box.right)}" y1="${px(y)}" y2="${px(y)}" stroke="${v === 0 ? c.axis : c.grid}" stroke-width="1"/>`,
-      svgText({ x: box.left - 8, y: y + 4, value: compact(v), fill: c.muted, anchor: 'end' }),
+      `<line x1="${px(box.left)}" x2="${px(box.right)}" y1="${px(y)}" y2="${px(y)}" stroke="${v === 0 ? c.axis : c.grid}"/>`,
+      svgText({ x: box.left - 10, y: y + 4, value: compact(v), fill: c.muted, anchor: 'end' }),
     ];
   });
 }
@@ -171,10 +170,15 @@ export function xLabels(items: { x: number; value: string; anchor?: 'start' | 'm
   return items.map((item) => svgText({ x: item.x, y, value: item.value, fill: INK[theme].muted, anchor: item.anchor ?? 'middle' }));
 }
 
-/** A bar from the baseline: square on the baseline, 4px rounded at the data end only. */
+/** A centred message on an empty plot. */
+export function emptyNote(message: string, box: Box, theme: Theme): string {
+  return svgText({ x: (box.left + box.right) / 2, y: (box.top + box.bottom) / 2 + 4, value: message, fill: INK[theme].muted, anchor: 'middle', size: TYPE.md });
+}
+
+/** A bar from the baseline: square on the baseline, rounded at the data end only. */
 export function barPath(x: number, top: number, width: number, height: number, roundTop: boolean): string {
   const bottom = top + height;
-  const r = roundTop ? Math.min(4, width / 2, height) : 0;
+  const r = roundTop ? Math.min(MARK.barRadius, width / 2, height) : 0;
   if (r === 0) return `M${px(x)} ${px(bottom)}V${px(top)}H${px(x + width)}V${px(bottom)}Z`;
   return `M${px(x)} ${px(bottom)}V${px(top + r)}Q${px(x)} ${px(top)} ${px(x + r)} ${px(top)}H${px(x + width - r)}Q${px(x + width)} ${px(top)} ${px(x + width)} ${px(top + r)}V${px(bottom)}Z`;
 }
@@ -200,4 +204,28 @@ export function stack(x: number, width: number, yOf: (v: number) => number, segm
     const d = barPath(x, bottom - height, width, height, i === shown.length - 1);
     return `<path d="${d}" fill="${s.color}"><title>${esc(s.title)}</title></path>`;
   });
+}
+
+/** An end-point dot with a surface ring, titled for hover. */
+export function endDot(x: number, y: number, color: string, theme: Theme, title: string): string {
+  return `<circle cx="${px(x)}" cy="${px(y)}" r="${MARK.dot}" fill="${color}" stroke="${INK[theme].surface}" stroke-width="2"><title>${esc(title)}</title></circle>`;
+}
+
+/** The bar width for slots of `slot` px: capped, with air between neighbours (a hairline once they are dense). */
+export function barWidth(slot: number): number {
+  const gap = slot < 6 ? 1 : MARK.gap;
+  return Math.min(MARK.barMax, Math.max(1, slot - gap));
+}
+
+/** Up to five indices spread over `count` items, the first and last included. */
+export function sample(count: number): number[] {
+  if (count === 0) return [];
+  if (count === 1) return [0];
+  return [...new Set([0, 1, 2, 3, 4].map((k) => Math.round((k * (count - 1)) / 4)))];
+}
+
+/** Labels at the plot's edges hang off them; the ones between are centred. */
+export function edgeAnchor(k: number, count: number): 'start' | 'middle' | 'end' {
+  if (count === 1 || (k > 0 && k < count - 1)) return 'middle';
+  return k === 0 ? 'start' : 'end';
 }

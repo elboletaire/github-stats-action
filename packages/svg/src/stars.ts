@@ -1,13 +1,23 @@
 // Cumulative stars over time: one area and line in the first slot, the count at the end.
 
 import type { Dataset } from '@github-stats-action/core';
+import { TYPE } from '@github-stats-action/core';
 import {
+  areaGradient,
+  compact,
   dayOf,
+  edgeAnchor,
+  emptyNote,
+  endDot,
   esc,
   finite,
   heading,
-  monthLabel,
+  ink,
+  timeLabel,
   niceTicks,
+  PAD,
+  PLOT_LEFT,
+  plural,
   px,
   seriesColor,
   svgDocument,
@@ -15,14 +25,11 @@ import {
   valueAxis,
   WIDTH,
   xLabels,
-  ink,
-  compact,
   type Box,
   type Theme,
-  plural,
 } from './svg';
 
-const box: Box = { left: 56, right: WIDTH - 24, top: 72, bottom: 256 };
+const box: Box = { left: PLOT_LEFT, right: WIDTH - PAD, top: 80, bottom: 252 };
 
 export function starsChart(dataset: Dataset, theme: Theme): string {
   const title = 'Stars over time';
@@ -33,10 +40,7 @@ export function starsChart(dataset: Dataset, theme: Theme): string {
 
   if (!head || !last) {
     const message = dataset.totals.stars === 0 ? 'No stars yet' : 'No stargazer history';
-    return svgDocument(theme, title, `${title}: ${message}.`, [
-      ...heading(title, note, theme),
-      svgText({ x: WIDTH / 2, y: (box.top + box.bottom) / 2, value: message, fill: c.secondary, anchor: 'middle', size: 13 }),
-    ]);
+    return svgDocument(theme, title, `${title}: ${message}.`, [...heading(title, note, theme), emptyNote(message, box, theme)]);
   }
 
   const first = dayOf(head.date);
@@ -49,26 +53,34 @@ export function starsChart(dataset: Dataset, theme: Theme): string {
   const yOf = (v: number): number => box.bottom - (finite(v) / top) * (box.bottom - box.top);
 
   const color = seriesColor(theme, 0);
-  const points = dataset.stars.map((p) => `${xOf(dayOf(p.date)).toFixed(1)},${yOf(p.stars).toFixed(1)}`);
-  const line = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p}`).join('');
+  // the count only changes on some days: a day inside a flat run adds nothing to the line, so it is left out
+  const kept = dataset.stars.filter((p, i, all) => {
+    const prev = all[i - 1];
+    const next = all[i + 1];
+    return !prev || !next || prev.stars !== p.stars || next.stars !== p.stars;
+  });
+  const line = kept.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(xOf(dayOf(p.date)))} ${px(yOf(p.stars))}`).join('');
   const lastX = xOf(dayOf(last.date));
   const lastY = yOf(last.stars);
 
   const marks = span > 0 ? [0, 1, 2, 3].map((k) => first + (span * k) / 3) : [first];
-  const axisLabels = marks.map((day, k) => ({
-    x: xOf(day),
-    value: monthLabel(day),
-    anchor: marks.length === 1 || (k > 0 && k < marks.length - 1) ? ('middle' as const) : k === 0 ? ('start' as const) : ('end' as const),
-  }));
+  const label = timeLabel(span);
+  const axisLabels = marks.map((day, k) => ({ x: xOf(day), value: label(day), anchor: edgeAnchor(k, marks.length) }));
+
+  // the end label sits above the dot, inside the plot: to its left when it would run past the right edge
+  const count = compact(last.stars);
+  const labelX = lastX + 8 + count.length * 8 > box.right ? lastX - 8 : lastX + 8;
+  const labelAnchor = labelX < lastX ? 'end' : 'start';
 
   return svgDocument(theme, title, `${title}: ${last.stars} stargazers on ${last.date}.`, [
+    `<defs>${areaGradient('a', color)}</defs>`,
     ...heading(title, note, theme),
     ...valueAxis(ticks, yOf, box, theme),
-    ...xLabels(axisLabels, box.bottom + 16, theme),
-    `<path d="${line}L${px(lastX)} ${px(box.bottom)}L${px(xOf(first))} ${px(box.bottom)}Z" fill="${color}" fill-opacity="0.1"/>`,
+    ...xLabels(axisLabels, box.bottom + 20, theme),
+    `<path d="${line}L${px(lastX)} ${px(box.bottom)}L${px(xOf(first))} ${px(box.bottom)}Z" fill="url(#a)"/>`,
     `<path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`,
-    `<circle cx="${px(lastX)}" cy="${px(lastY)}" r="4" fill="${color}" stroke="${c.surface}" stroke-width="2"><title>${esc(last.date)}: ${plural(last.stars, 'star')}</title></circle>`,
-    svgText({ x: lastX - 8, y: lastY - 8, value: compact(last.stars), fill: c.primary, anchor: 'end' }),
+    endDot(lastX, lastY, color, theme, `${last.date}: ${plural(last.stars, 'star')}`),
+    svgText({ x: labelX, y: Math.max(box.top + 10, lastY - 10), value: count, fill: c.primary, anchor: labelAnchor, size: TYPE.md, weight: 600 }),
     ...hoverStrips(dataset, xOf, box),
   ]);
 }
@@ -78,13 +90,11 @@ const STRIP = 4;
 // Hover targets along the line: one transparent strip per 4px, titled with the last day in it,
 // so a tooltip is at most a few px from any point without a rect per day.
 function hoverStrips(dataset: Dataset, xOf: (day: number) => number, box: Box): string[] {
-  const strips = new Map<number, { x: number; date: string; stars: number }>();
-  for (const p of dataset.stars) {
-    const x = xOf(dayOf(p.date));
-    strips.set(Math.floor((x - box.left) / STRIP), { x, date: p.date, stars: p.stars });
-  }
+  const strips = new Map<number, { date: string; stars: number }>();
+  for (const p of dataset.stars) strips.set(Math.floor((xOf(dayOf(p.date)) - box.left) / STRIP), { date: p.date, stars: p.stars });
+  const height = box.bottom - box.top;
   return [...strips].map(([bucket, p]) => {
     const left = box.left + bucket * STRIP;
-    return `<rect x="${px(left)}" y="${px(box.top)}" width="${STRIP}" height="${box.bottom - box.top}" fill-opacity="0"><title>${esc(p.date)}: ${plural(p.stars, 'star')}</title></rect>`;
+    return `<rect x="${left}" y="${box.top}" width="${STRIP}" height="${height}" fill-opacity="0"><title>${esc(p.date)}: ${plural(p.stars, 'star')}</title></rect>`;
   });
 }
