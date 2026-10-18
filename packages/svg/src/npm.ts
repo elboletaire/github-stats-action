@@ -6,6 +6,7 @@ import {
   barWidth,
   dayOf,
   edgeAnchor,
+  emptyNote,
   finite,
   heading,
   niceTicks,
@@ -76,6 +77,14 @@ export function npmDownloadsChart(dataset: Dataset, theme: Theme): string {
   const legendY0 = titled ? 68 : 40;
   const { ends, sums } = weeklySums(npm);
   const count = ends.length;
+  if (count === 0) {
+    const box: Box = { left: PLOT_LEFT, right: WIDTH - PAD, top: plotTop(titled), bottom: 252 };
+    const message = 'No npm downloads in this window';
+    return svgDocument(theme, title, `${title}: ${message.toLowerCase()}.`, [
+      ...heading(title, `Weekly sums of npm's daily counts`, theme, [], titled),
+      emptyNote(message, box, theme),
+    ]);
+  }
 
   const totals = ends.map((_, w) => sums.reduce((sum, row) => sum + finite(row[w] ?? 0), 0));
   const ticks = niceTicks(Math.max(0, ...totals));

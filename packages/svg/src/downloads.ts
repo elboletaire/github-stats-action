@@ -71,10 +71,12 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, tit
     return stack(x, width, yOf, segments);
   });
 
+  // the labels follow the window's length, like the estimate's: days, months or years
+  const label = timeLabel(dayOf(days.at(-1)!.date) - dayOf(days[0]!.date));
   const picks = sample(days.length);
   const labels = picks.map((i, k) => ({
     x: box.left + i * slot + slot / 2,
-    value: days[i]?.date ?? '',
+    value: label(dayOf(days[i]!.date)),
     anchor: edgeAnchor(k, picks.length),
   }));
 

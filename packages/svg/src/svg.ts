@@ -185,9 +185,30 @@ export function valueAxis(ticks: number[], yOf: (v: number) => number, box: Box,
   });
 }
 
-/** Labels under the plot, one per mark. */
-export function xLabels(items: { x: number; value: string; anchor?: 'start' | 'middle' | 'end' }[], y: number, theme: Theme): string[] {
-  return items.map((item) => svgText({ x: item.x, y, value: item.value, fill: INK[theme].muted, anchor: item.anchor ?? 'middle' }));
+/** The clear space kept between an edge label's text and a centred one. */
+export const EDGE_GAP = 12;
+
+type AxisItem = { x: number; value: string; anchor?: 'start' | 'middle' | 'end' };
+
+/** Drops the centred labels whose text would come within EDGE_GAP of a start or end label: the edge labels win. */
+export function clearOfEdges(items: AxisItem[]): AxisItem[] {
+  const extent = (item: AxisItem): [number, number] => {
+    const width = textWidth(item.value, TYPE.xs);
+    if (item.anchor === 'start') return [item.x, item.x + width];
+    if (item.anchor === 'end') return [item.x - width, item.x];
+    return [item.x - width / 2, item.x + width / 2];
+  };
+  const edges = items.filter((item) => item.anchor === 'start' || item.anchor === 'end').map(extent);
+  return items.filter((item) => {
+    if (item.anchor === 'start' || item.anchor === 'end') return true;
+    const [left, right] = extent(item);
+    return edges.every(([from, to]) => right + EDGE_GAP <= from || left >= to + EDGE_GAP);
+  });
+}
+
+/** Labels under the plot, one per mark; a centred one that runs into an edge label is left out. */
+export function xLabels(items: AxisItem[], y: number, theme: Theme): string[] {
+  return clearOfEdges(items).map((item) => svgText({ x: item.x, y, value: item.value, fill: INK[theme].muted, anchor: item.anchor ?? 'middle' }));
 }
 
 /** A centred message on an empty plot. */
