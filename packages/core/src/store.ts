@@ -72,8 +72,12 @@ export async function readNpmSeries(dir: string, pkg: string): Promise<NpmSeries
   return series;
 }
 
+/** One day per line, so a run's new days are the only lines a diff adds. */
 export async function writeNpmSeries(dir: string, series: NpmSeries): Promise<void> {
-  await writeJson(join(dir, 'npm', `${npmSlug(series.package)}.json`), series);
+  const days = series.days.map((day) => `  ${JSON.stringify(day)}`).join(',\n');
+  const text = `{\n"schema": ${series.schema},\n"package": ${JSON.stringify(series.package)},\n"days": [\n${days}\n]\n}\n`;
+  await mkdir(join(dir, 'npm'), { recursive: true });
+  await writeFile(join(dir, 'npm', `${npmSlug(series.package)}.json`), text);
 }
 
 export async function readTrafficSeries(dir: string, kind: 'views' | 'clones'): Promise<TrafficDay[]> {
@@ -144,7 +148,9 @@ async function listDirs(dir: string): Promise<string[]> {
 
 /** Writes the derived files of a repo: dataset.json and daily.csv. */
 export async function writeDerived(dir: string, dataset: Dataset, csv: string): Promise<void> {
-  await writeJson(join(dir, 'dataset.json'), dataset);
+  // compact: the file is rebuilt whole on every run, so indentation only adds bytes
+  await mkdir(dir, { recursive: true });
+  await writeFile(join(dir, 'dataset.json'), `${JSON.stringify(dataset)}\n`);
   await mkdir(dir, { recursive: true });
   await writeFile(join(dir, 'daily.csv'), csv);
 }

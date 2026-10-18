@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   pruneDerived,
+  readNpmSeries,
+  writeNpmSeries,
   readSnapshots,
   readStargazers,
   readTraffic,
@@ -117,5 +119,26 @@ describe('pruneDerived', () => {
   it('does nothing when the derived folders do not exist yet', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'stats-prune-'));
     await expect(pruneDerived(dir, [])).resolves.toBeUndefined();
+  });
+});
+
+describe('writeNpmSeries', () => {
+  it('writes one line per day and reads back the same series', async () => {
+    const dir = await tmp();
+    const series = {
+      schema: 1 as const,
+      package: '@passcore/core',
+      days: [
+        { date: '2026-10-16', downloads: 3 },
+        { date: '2026-10-17', downloads: 5 },
+      ],
+    };
+    await writeNpmSeries(dir, series);
+    const text = await readFile(join(dir, 'npm', 'passcore--core.json'), 'utf8');
+    expect(text.split('\n').filter((line) => line.includes('"date"'))).toEqual([
+      '  {"date":"2026-10-16","downloads":3},',
+      '  {"date":"2026-10-17","downloads":5}',
+    ]);
+    expect(await readNpmSeries(dir, '@passcore/core')).toEqual(series);
   });
 });

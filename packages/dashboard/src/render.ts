@@ -23,6 +23,6 @@ export function dashboardFiles(datasets: readonly Dataset[], options: { mode: 'p
     .filter(([path]) => path !== 'index.html')
     .map(([path, content]) => ({ path, content }));
   const fonts = Object.entries(PAGES_BLOBS).map(([path, content]) => ({ path, content, encoding: 'base64' as const }));
-  const data = datasets.map((d) => ({ path: `data/${d.repo}/dataset.json`, content: `${JSON.stringify(d, null, 1)}\n` }));
+  const data = datasets.map((d) => ({ path: `data/${d.repo}/dataset.json`, content: `${JSON.stringify(d)}\n` }));
   return [{ path: 'index.html', content: index }, ...assets, ...fonts, ...data];
 }
