@@ -15,10 +15,15 @@ interface RangeResponse {
 /** The URL path of a package: each segment encoded, so a scope's `@` and `/` survive. */
 export const npmPath = (pkg: string): string => pkg.split('/').map(encodeURIComponent).join('/');
 
-/** The days to fetch, ending today: the full window when nothing is stored, else from a week before the last day. */
+/**
+ * The days to fetch, ending today: the full window when nothing is stored, else from a week before the last day.
+ * Never starts before npm's window, which it can't serve, so a long gap still makes a valid request.
+ */
 export function npmRange(stored: readonly NpmDay[], today: string): { start: string; end: string } {
+  const floor = addMonths(today, -WINDOW_MONTHS);
   const last = stored.at(-1)?.date;
-  return { start: last ? addDays(last, -OVERLAP_DAYS) : addMonths(today, -WINDOW_MONTHS), end: today };
+  const start = last ? addDays(last, -OVERLAP_DAYS) : floor;
+  return { start: start < floor ? floor : start, end: today };
 }
 
 /**

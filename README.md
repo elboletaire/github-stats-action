@@ -73,7 +73,7 @@ Traffic is collected only with `traffic: true`. The daily views and clones are m
 
 ## npm downloads
 
-npm publishes its download counts openly, so no token is needed. Each run fetches the days it lacks, and the week before the last stored day to pick up corrections. The first run backfills npm's 18-month window. npm keeps no daily counts older than that, so the days this action stores stay after they leave npm's window. A package npm doesn't know, or a failed request, is a warning; what was stored stays. The dashboard gets an npm section, and the badges `npm-downloads` (combined, last 30 days) and `npm-<package>` are written, with `charts/npm-downloads-*.svg`.
+npm publishes its download counts openly, so no token is needed. Each run fetches the days it lacks, and the week before the last stored day to pick up corrections. The first run backfills npm's 18-month window. npm keeps no daily counts older than that, so the days this action stores stay after they leave npm's window. A package npm doesn't know, or a failed request, is a warning; what was stored stays. The latest day can be provisional: a run early in the UTC day may read a day npm hasn't finished counting, and the next run's overlap corrects it. The dashboard gets an npm section, and the badges `npm-downloads` (combined, last 30 days) and `npm-<package>` are written, with `charts/npm-downloads-*.svg`.
 
 ## Pages (optional)
 

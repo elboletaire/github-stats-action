@@ -51,6 +51,11 @@ describe('npmRange', () => {
     expect(npmRange([], '2026-10-18')).toEqual({ start: '2025-04-18', end: '2026-10-18' });
   });
 
+  it('starts no earlier than npm\'s window, after a gap longer than the window', () => {
+    const days = [{ date: '2024-01-01', downloads: 1 }];
+    expect(npmRange(days, '2026-10-18')).toEqual({ start: '2025-04-18', end: '2026-10-18' });
+  });
+
   it('refetches from a week before the last stored day', () => {
     const days = [
       { date: '2026-10-10', downloads: 1 },
