@@ -59,15 +59,19 @@ export async function fetchReleases(api: Client, repo: string): Promise<Snapshot
 
 interface StarPages {
   starredAt: string[];
+  /** The star just before `from`, to check the stored list still ends where GitHub's does. */
+  previous?: string;
   /** GitHub refused a page past its limit (422), so the list stops there. */
   limited: boolean;
 }
 
-/** Starred-at timestamps from position `from` on. Stops early at GitHub's limit (422). */
+/** Starred-at timestamps from position `from` on, plus the one before it. Stops at GitHub's 422 limit. */
 async function listStarredFrom(api: Client, repo: string, from: number): Promise<StarPages> {
-  const startPage = Math.floor(from / PER_PAGE) + 1;
-  const skip = from - (startPage - 1) * PER_PAGE;
+  const start = Math.max(from - 1, 0);
+  const startPage = Math.floor(start / PER_PAGE) + 1;
+  const skip = start - (startPage - 1) * PER_PAGE;
   const starredAt: string[] = [];
+  let previous: string | undefined;
   for (let page = startPage; ; page++) {
     let batch: { starred_at: string }[];
     try {
@@ -76,18 +80,22 @@ async function listStarredFrom(api: Client, repo: string, from: number): Promise
         headers: { Accept: 'application/vnd.github.star+json' },
       });
     } catch (error) {
-      if (isResponseError(error) && error.status === 422) return { starredAt, limited: true };
+      if (isResponseError(error) && error.status === 422) return { starredAt, previous, limited: true };
       throw error;
     }
-    const stamps = batch.map((s) => s.starred_at);
-    starredAt.push(...(page === startPage ? stamps.slice(skip) : stamps));
-    if (batch.length < PER_PAGE) return { starredAt, limited: false };
+    let stamps = batch.map((s) => s.starred_at);
+    if (page === startPage) {
+      stamps = stamps.slice(skip);
+      if (from > 0) previous = stamps.shift();
+    }
+    starredAt.push(...stamps);
+    if (batch.length < PER_PAGE) return { starredAt, previous, limited: false };
   }
 }
 
 /**
- * The stored starred-at list brought up to `total` stars: new stars by position, or the whole
- * list when the count disagrees (a star was removed). Past GitHub's limit (422) the stored list is kept.
+ * The stored list brought up to `total` stars: new stars by position, or the whole list when the
+ * count or the last stored star disagrees. Past GitHub's 422 limit the stored list is kept.
  */
 export async function fetchStargazers(
   api: Client,
@@ -101,12 +109,13 @@ export async function fetchStargazers(
     log.warning(`stargazers: GitHub stops listing past ${known.length + incremental.starredAt.length} stars; keeping those`);
   }
   let stargazers = [...known, ...incremental.starredAt];
-  if (stargazers.length === total || incremental.limited) {
+  const aligned = known.length === 0 || incremental.previous === known[known.length - 1];
+  if (incremental.limited || (aligned && stargazers.length === total)) {
     log.info(`stargazers: ${incremental.starredAt.length} new, ${stargazers.length} stored`);
     return stargazers;
   }
 
-  log.info(`stargazers: the stored list has ${stargazers.length} of ${total} stars, refetching all of them`);
+  log.info('stargazers: the stored list no longer matches GitHub, refetching all of it');
   const full = await listStarredFrom(api, repo, 0);
   if (full.limited) {
     log.warning(`stargazers: GitHub stops listing past ${full.starredAt.length} stars; keeping the stored list`);

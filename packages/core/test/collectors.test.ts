@@ -119,7 +119,16 @@ describe('fetchStargazers', () => {
     const all = await fetchStargazers(githubClient(fake.fetch), 'o/r', stored(3), 2, log);
     expect(all).toEqual([stamp(0), stamp(2)]);
     expect(fake.calls.map((c) => c.url.searchParams.get('page'))).toEqual(['1', '1']);
-    expect(log.info).toHaveBeenCalledWith(expect.stringContaining('refetching all of them'));
+    expect(log.info).toHaveBeenCalledWith(expect.stringContaining('refetching all of it'));
+  });
+
+  it('refetches when one star was added and another removed, leaving the count the same', async () => {
+    // Stored: stars 0, 1, 2. Star 1 was removed and star 3 added, so GitHub lists 0, 2, 3.
+    // Fetching by position alone would see one new star past the stored list and keep the stale 1.
+    const fake = fakeFetch(() => json([{ starred_at: stamp(0) }, { starred_at: stamp(2) }, { starred_at: stamp(3) }]));
+    const all = await fetchStargazers(githubClient(fake.fetch), 'o/r', stored(3), 3, logger());
+    expect(all).toEqual([stamp(0), stamp(2), stamp(3)]);
+    expect(fake.calls.map((c) => c.url.searchParams.get('page'))).toEqual(['1', '1']);
   });
 
   it("keeps the stored list when the refetch hits GitHub's limit", async () => {
