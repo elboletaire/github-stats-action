@@ -228,6 +228,8 @@ export interface NpmTotals {
 export interface NpmPackageStats {
   package: string;
   label: string;
+  /** Index into the palette: the package's position in the config, so its colour holds when others are dropped. */
+  color: number;
   /** The file name the package is stored under, and its badge's suffix. */
   slug: string;
   /** First stored day. */
@@ -268,6 +270,11 @@ export interface Dataset {
   charts?: ChartsConfig;
   /** Present only when traffic was collected. */
   traffic?: TrafficData;
+  /**
+   * Whether release downloads are shown: the config's `releases` switch is on and some release has an asset
+   * that counts as a download. When false, the release parts of the dataset are empty.
+   */
+  releaseDownloads: boolean;
   /** Present only when the config lists npm packages with stored days. */
   npm?: NpmData;
 }

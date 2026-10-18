@@ -37,10 +37,11 @@ export async function deriveRepo(dir: string, repo: string, config: StatsConfig,
     npm: await readNpmInputs(dir, config),
     now,
   });
-  const names = groupNames(config, snapshots);
+  const names = dataset.releaseDownloads ? groupNames(config, snapshots) : [];
   const csv = buildDailyCsv(
     snapshots.map((s) => summariseDay(s, config, repo, names)),
     names,
+    dataset.releaseDownloads,
   );
   return { dataset, csv };
 }

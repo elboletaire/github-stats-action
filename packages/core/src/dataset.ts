@@ -6,7 +6,7 @@ import { DAY_MS, estimateDaily, utcDate, utcMidnight } from './estimate';
 import { buildNpmData, type NpmInput } from './npm';
 import { buildPeriods } from './periods';
 import { parseVersion, compareVersions } from './semver';
-import { groupNames, summariseDay, summariseRelease } from './summary';
+import { countsReleaseDownloads, groupNames, summariseDay, summariseRelease } from './summary';
 import type {
   Dataset,
   EpochInfo,
@@ -162,12 +162,17 @@ export function buildDataset(input: BuildInput): Dataset {
   const snapshots = [...input.snapshots].sort((a, b) => a.date.localeCompare(b.date));
   const latest = snapshots[snapshots.length - 1];
   if (!latest) throw new Error('buildDataset needs at least one snapshot');
-  const names = groupNames(config, snapshots);
+  // Without release downloads the release parts are empty: no groups, counters, releases or periods.
+  const releaseDownloads = countsReleaseDownloads(config, snapshots);
+  const effective: StatsConfig = releaseDownloads ? config : { ...config, counters: [] };
+  const names = releaseDownloads ? groupNames(config, snapshots) : [];
   const nowMs = input.now.getTime();
 
-  const releases = buildReleases(latest, config, repo, names, nowMs);
+  const releases = releaseDownloads ? buildReleases(latest, config, repo, names, nowMs) : [];
   const { d0, daily } = estimateDaily(releases, names, nowMs);
-  const periods = buildPeriods({ releases, epochs: config.epochs, counters: config.counters, names, d0, daily });
+  const periods = releaseDownloads
+    ? buildPeriods({ releases, epochs: config.epochs, counters: config.counters, names, d0, daily })
+    : [];
   const npm = input.npm ? buildNpmData(input.npm) : undefined;
 
   return {
@@ -180,14 +185,15 @@ export function buildDataset(input: BuildInput): Dataset {
       color,
     })),
     epochs: config.epochs.map((e) => ({ version: e.version, label: e.label })),
-    counters: config.counters.map((c) => ({ ...c })),
-    totals: buildTotals(releases, snapshots, config, names),
+    counters: effective.counters.map((c) => ({ ...c })),
+    totals: buildTotals(releases, snapshots, effective, names),
     releases,
     periods,
     estimatedDaily: daily,
-    measuredDaily: buildMeasured(snapshots, config, repo, names),
+    measuredDaily: buildMeasured(snapshots, effective, repo, names),
     stars: buildStars(input.stargazers ?? [], nowMs),
     charts: config.charts,
+    releaseDownloads,
     ...(input.traffic ? { traffic: input.traffic } : {}),
     ...(npm ? { npm } : {}),
   };

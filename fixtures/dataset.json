@@ -9684,6 +9684,7 @@
   "downloads-per-release": {},
   "npmDownloads": {}
  },
+ "releaseDownloads": true,
  "traffic": {
   "views": [
    {

@@ -56,6 +56,8 @@ export interface ChartsConfig {
 export type ChartName = Exclude<keyof ChartsConfig, 'titles'>;
 
 export interface StatsConfig {
+  /** Shows release downloads in every output; false hides them even when the assets have counts. */
+  releases: boolean;
   groups: GroupRule[];
   ignore: string[];
   counters: CounterRule[];
@@ -76,6 +78,7 @@ export class ConfigError extends Error {
 }
 
 export const DEFAULT_CONFIG: StatsConfig = {
+  releases: true,
   groups: [{ name: 'downloads', label: 'Downloads', assets: '*' }],
   ignore: [],
   counters: [],
@@ -274,9 +277,10 @@ export function parseConfig(text: string): StatsConfig {
   }
   if (doc === null || doc === undefined) return structuredClone(DEFAULT_CONFIG);
   const root = expectObject(doc, 'the file');
-  checkKeys(root, ['groups', 'ignore', 'counters', 'epochs', 'platforms', 'charts', 'docker', 'npm'], 'top level');
+  checkKeys(root, ['releases', 'groups', 'ignore', 'counters', 'epochs', 'platforms', 'charts', 'docker', 'npm'], 'top level');
 
   const config: StatsConfig = {
+    releases: optionalBoolean(root, 'releases', 'top level') ?? true,
     groups: root.groups === undefined ? structuredClone(DEFAULT_CONFIG.groups) : parseGroups(root.groups),
     ignore: root.ignore === undefined ? [] : parseIgnore(root.ignore),
     counters: root.counters === undefined ? [] : parseCounters(root.counters),

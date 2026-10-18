@@ -197,3 +197,14 @@ npm:
     expect(() => parseConfig(text)).toThrow(message);
   });
 });
+
+describe('releases', () => {
+  it('is on by default, and a boolean switches it off', () => {
+    expect(parseConfig('').releases).toBe(true);
+    expect(parseConfig('releases: false\n').releases).toBe(false);
+  });
+
+  it('rejects a value that is not a boolean', () => {
+    expect(() => parseConfig('releases: "no"\n')).toThrow('top level.releases must be true or false');
+  });
+});

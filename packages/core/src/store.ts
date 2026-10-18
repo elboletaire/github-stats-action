@@ -1,7 +1,7 @@
 // Files of one repo on the data branch (`<owner>/<repo>/`). Reads treat a missing file as
 // empty; writes create their folders.
 
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { OutputFile } from './outputs';
 import { npmSlug } from './npm';
@@ -146,6 +146,27 @@ export async function writeDerived(dir: string, dataset: Dataset, csv: string): 
   await writeJson(join(dir, 'dataset.json'), dataset);
   await mkdir(dir, { recursive: true });
   await writeFile(join(dir, 'daily.csv'), csv);
+}
+
+/** Folders whose files are all rebuilt on every run, so a file no run produces any more is stale. */
+const REBUILT_DIRS = ['charts', 'badges'];
+
+/** Removes the files of `charts/` and `badges/` that `files` no longer produces, e.g. the download charts once release downloads are off. */
+export async function pruneDerived(dir: string, files: readonly OutputFile[]): Promise<void> {
+  const keep = new Set(files.map((file) => file.path));
+  for (const sub of REBUILT_DIRS) {
+    let names: string[];
+    try {
+      names = await readdir(join(dir, sub));
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue;
+      throw error;
+    }
+    for (const name of names) {
+      const path = `${sub}/${name}`;
+      if (!keep.has(path)) await rm(join(dir, path), { force: true });
+    }
+  }
 }
 
 /** Writes rendered output files under `root`, creating their folders. */

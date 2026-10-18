@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  pruneDerived,
   readSnapshots,
   readStargazers,
   readTraffic,
@@ -76,5 +77,28 @@ describe('snapshot store', () => {
     const dir = await tmp();
     await writeOutputFiles(dir, [{ path: 'charts/stars-light.svg', content: '<svg/>' }]);
     expect(await readFile(join(dir, 'charts', 'stars-light.svg'), 'utf8')).toBe('<svg/>');
+  });
+});
+
+describe('pruneDerived', () => {
+  it('removes the chart and badge files no run produces, and nothing else', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'stats-prune-'));
+    await writeOutputFiles(dir, [
+      { path: 'charts/stars-light.svg', content: '<svg/>' },
+      { path: 'charts/downloads-per-day-light.svg', content: '<svg/>' },
+      { path: 'badges/downloads.json', content: '{}' },
+      { path: 'snapshots/2026-01-01.json', content: '{}' },
+      { path: 'npm/passcore--core.json', content: '{}' },
+    ]);
+    await pruneDerived(dir, [{ path: 'charts/stars-light.svg', content: '' }]);
+    expect(await readdir(join(dir, 'charts'))).toEqual(['stars-light.svg']);
+    expect(await readdir(join(dir, 'badges'))).toEqual([]);
+    expect(await readdir(join(dir, 'snapshots'))).toEqual(['2026-01-01.json']);
+    expect(await readdir(join(dir, 'npm'))).toEqual(['passcore--core.json']);
+  });
+
+  it('does nothing when the derived folders do not exist yet', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'stats-prune-'));
+    await expect(pruneDerived(dir, [])).resolves.toBeUndefined();
   });
 });

@@ -15,6 +15,17 @@ export function groupNames(config: StatsConfig, snapshots: readonly Snapshot[]):
   return hasOther ? [...names, OTHER] : names;
 }
 
+/**
+ * Whether release downloads are shown: the `releases` switch is on and some release in any snapshot has an
+ * asset that counts as a download (not ignored). Without any, the release views would be all zeros.
+ */
+export function countsReleaseDownloads(config: StatsConfig, snapshots: readonly Snapshot[]): boolean {
+  return (
+    config.releases &&
+    snapshots.some((s) => s.releases.some((r) => r.assets.some((a) => classifyAsset(a.name, config) !== IGNORED)))
+  );
+}
+
 /** A counter from `from` on counts only releases at or after that version (and never a non-version tag). */
 export function isCounted(tag: string, from: string | undefined): boolean {
   if (from === undefined) return true;

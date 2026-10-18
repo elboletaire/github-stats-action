@@ -98,6 +98,7 @@ describe('Dataset maths against the reference dashboard', () => {
 });
 
 describe('Dataset maths on small inputs', () => {
+  const file = { name: 'manga-downloader-linux-amd64.tar.gz', downloads: 1 };
   const rel = (tag: string, publishedAt: string, assets: SnapshotRelease['assets'] = []): SnapshotRelease => ({
     tag,
     publishedAt,
@@ -154,15 +155,32 @@ describe('Dataset maths on small inputs', () => {
     expect(d.periods.at(-1)).toMatchObject({ version: 'v9.0.0', start: null, releases: 0, medianPerDayTotal: null });
   });
 
+  it('hides release downloads when no asset counts, or when the releases switch is off', () => {
+    const unCounted = build({
+      snapshots: [snap('2026-10-18', [rel('v1.0.0', '2026-01-01T00:00:00Z', [{ name: 'notes.md5', downloads: 9 }])], 7)],
+      now: new Date('2026-10-18T00:00:00Z'),
+    });
+    expect(unCounted).toMatchObject({ releaseDownloads: false, releases: [], periods: [], groups: [], totals: { downloads: 0 } });
+    expect(unCounted.totals.stars).toBe(7);
+
+    const switched = buildDataset({
+      repo: 'o/r',
+      config: { ...config, releases: false },
+      snapshots: [snap('2026-10-18', [rel('v1.0.0', '2026-01-01T00:00:00Z', [file])])],
+      now: new Date('2026-10-18T00:00:00Z'),
+    });
+    expect(switched).toMatchObject({ releaseDownloads: false, releases: [], groups: [] });
+  });
+
   it('assigns epochs by version, a non-version tag inheriting the release before it', () => {
     const d = build({
       snapshots: [
         snap('2026-10-18', [
-          rel('v1.10.0', '2026-01-01T00:00:00Z'),
-          rel('v1.11.0', '2026-02-01T00:00:00Z'),
-          rel('v1.18.0', '2026-03-01T00:00:00Z'),
-          rel('nightly', '2026-03-02T00:00:00Z'),
-          rel('v1.20.0', '2026-04-01T00:00:00Z'),
+          rel('v1.10.0', '2026-01-01T00:00:00Z', [file]),
+          rel('v1.11.0', '2026-02-01T00:00:00Z', [file]),
+          rel('v1.18.0', '2026-03-01T00:00:00Z', [file]),
+          rel('nightly', '2026-03-02T00:00:00Z', [file]),
+          rel('v1.20.0', '2026-04-01T00:00:00Z', [file]),
         ]),
       ],
       now: new Date('2026-10-18T00:00:00Z'),

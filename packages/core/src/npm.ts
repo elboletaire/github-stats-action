@@ -47,13 +47,14 @@ export interface NpmInput {
 
 /** The dataset's npm figures from the stored series, in config order; undefined when none has a day. */
 export function buildNpmData(inputs: readonly NpmInput[]): NpmData | undefined {
-  const stored = inputs.filter((input) => input.series.days.length > 0);
+  const stored = inputs.flatMap((input, color) => (input.series.days.length > 0 ? [{ ...input, color }] : []));
   if (stored.length === 0) return undefined;
   const latest = stored.map((i) => i.series.days.at(-1)!.date).sort().at(-1)!;
   const first = stored.map((i) => i.series.days[0]!.date).sort()[0]!;
-  const packages: NpmPackageStats[] = stored.map(({ label, series }) => ({
+  const packages: NpmPackageStats[] = stored.map(({ label, color, series }) => ({
     package: series.package,
     label,
+    color,
     slug: npmSlug(series.package),
     first: series.days[0]!.date,
     totals: npmTotals(series.days, latest),
