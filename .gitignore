@@ -3,3 +3,5 @@ node_modules/
 coverage/
 .vitest/
 dist/
+packages/dashboard/src/embedded.ts
+packages/dashboard/dist/

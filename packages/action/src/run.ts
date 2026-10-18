@@ -1,7 +1,6 @@
 // One run: collect, write the day's snapshot, rebuild the derived files and the outputs.
 // Everything is fetched before anything is written, so a failed run leaves the branch as it was.
 
-import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { renderBadges } from '@github-stats-action/badges';
 import {
@@ -75,10 +74,8 @@ export async function writeDerivedOutputs(dataDir: string, repo: string, config:
 
 /** Writes the Pages site: the dashboard and the dataset, without traffic unless `traffic` is set. */
 export async function writePagesSite(pages: { dir: string; traffic: boolean }, repo: string, dataset: Dataset): Promise<void> {
+  // the dashboard's pages build already includes data/<owner>/<repo>/dataset.json
   const pagesDataset = pages.traffic ? dataset : { ...dataset, traffic: undefined };
-  const datasetPath = join(pages.dir, 'data', repo, 'dataset.json');
-  await mkdir(join(datasetPath, '..'), { recursive: true });
-  await writeFile(datasetPath, `${JSON.stringify(pagesDataset, null, 1)}\n`);
   await writeOutputFiles(pages.dir, renderDashboard([pagesDataset], { mode: 'pages' }));
 }
 

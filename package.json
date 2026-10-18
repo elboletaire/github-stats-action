@@ -12,11 +12,12 @@
     "node": ">=24"
   },
   "scripts": {
-    "build": "tsdown",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit",
+    "build": "pnpm build:dashboard && tsdown",
+    "test": "pnpm build:dashboard && vitest run",
+    "typecheck": "pnpm build:dashboard && tsc --noEmit",
     "stats": "tsx packages/action/src/bin.ts",
-    "fixtures": "tsx scripts/build-fixture-dataset.ts"
+    "fixtures": "tsx scripts/build-fixture-dataset.ts",
+    "build:dashboard": "pnpm --filter @github-stats-action/dashboard build"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
