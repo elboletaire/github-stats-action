@@ -108,7 +108,7 @@ export function estimated(d: Dataset): Section {
       const s = series[j] ?? [];
       const color = colorVar(g);
       const pts = s.slice(a, b + 1).map((v, k) => `${x(a + k).toFixed(1)},${y(v).toFixed(1)}`).join('L');
-      svgEl('path', { d: `M${x(a)},${y(0)}L${pts}L${x(b)},${y(0)}Z`, fill: fadeFill(chart, `es${j}`, color) }, chart);
+      svgEl('path', { d: `M${x(a)},${y(0)}L${pts}L${x(b)},${y(0)}Z`, fill: fadeFill(chart, `estimated-fade-${j}`, color) }, chart);
       svgEl('path', { d: `M${pts}`, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, chart);
       svgEl('circle', { cx: x(b), cy: y(s[b] ?? 0), r: 4, fill: color, stroke: 'var(--surface)', 'stroke-width': 2 }, chart);
     });

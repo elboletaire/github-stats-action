@@ -2,13 +2,13 @@
 // estimated per-day series by group as stacked areas. The note says which one it is.
 
 import type { Dataset } from '@github-stats-action/core';
+import { MARK } from '@github-stats-action/core';
 import {
   areaGradient,
   barWidth,
   dayOf,
   edgeAnchor,
   emptyNote,
-  endDot,
   finite,
   heading,
   timeLabel,
@@ -91,21 +91,21 @@ function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: strin
   const yOf = (v: number): number => box.bottom - (finite(v) / top) * (box.bottom - box.top);
   const xOf = (i: number): number => (count > 1 ? box.left + (i / (count - 1)) * (box.right - box.left) : (box.left + box.right) / 2);
 
-  // Each group is a band stacked on the ones before it: its fade fills the band, its line runs along the top.
+  // Each group is a band stacked on the ones before it, its line along the top. A lone band fades to the
+  // baseline; stacked bands each take a flat wash, since fades on top of each other blur into one.
+  const stacked = dataset.groups.filter((g) => (estimatedDaily.groups[g.name] ?? []).some((v) => v > 0)).length > 1;
   let lower = new Array<number>(count).fill(0);
   const defs: string[] = [];
   const areas: string[] = [];
-  const dots: string[] = [];
   dataset.groups.forEach((g, k) => {
     const base = lower;
     const upper = base.map((v, i) => v + valueOf(g.name, i));
     lower = upper;
     if (!upper.some((v, i) => v > (base[i] ?? 0))) return;
     const color = seriesColor(theme, g.color);
-    defs.push(areaGradient(`g${k}`, color));
-    areas.push(areaShape(xOf, yOf, upper, base, color, `g${k}`));
-    const end = upper[count - 1] ?? 0;
-    dots.push(endDot(xOf(count - 1), yOf(end), color, theme, `${g.label}: ${Math.round(end * 10) / 10}/day`));
+    const id = `day-fade-${k}`;
+    if (!stacked) defs.push(areaGradient(id, color));
+    areas.push(areaShape(xOf, yOf, upper, base, color, stacked ? `${color}" fill-opacity="${MARK.areaStack}` : `url(#${id})`));
   });
 
   const marks = sample(count);
@@ -115,20 +115,20 @@ function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: strin
   const body =
     count === 0
       ? [emptyNote('No downloads yet', box, theme)]
-      : [`<defs>${defs.join('')}</defs>`, ...valueAxis(ticks, yOf, box, theme), ...xLabels(labels, box.bottom + 20, theme), ...areas, ...dots];
+      : [...(defs.length ? [`<defs>${defs.join('')}</defs>`] : []), ...valueAxis(ticks, yOf, box, theme), ...xLabels(labels, box.bottom + 20, theme), ...areas];
 
   return svgDocument(theme, title, `${title}: estimated per day by group.`, [...heading(title, note, theme, keys), ...body]);
 }
 
-// The band between `base` and `upper`: a fade, with a 2px line along `upper`.
-// A point on a straight run (equal to both neighbours on both edges) is dropped; the shape is unchanged.
-function areaShape(xOf: (i: number) => number, yOf: (v: number) => number, upper: number[], base: number[], color: string, gradient: string): string {
+// The band between `base` and `upper`, filled with `fill` (a colour or a gradient reference), with a 2px line
+// along `upper`. A point on a straight run (equal to both neighbours on both edges) is dropped; the shape is unchanged.
+function areaShape(xOf: (i: number) => number, yOf: (v: number) => number, upper: number[], base: number[], color: string, fill: string): string {
   const bends = (a: number[], i: number): boolean => a[i] !== a[i - 1] || a[i] !== a[i + 1];
   const kept = upper.map((_, i) => i).filter((i) => bends(upper, i) || bends(base, i));
   const top = kept.map((i, k) => `${k === 0 ? 'M' : 'L'}${px(xOf(i))} ${px(yOf(upper[i] ?? 0))}`).join('');
   const bottom = kept.map((i) => `L${px(xOf(i))} ${px(yOf(base[i] ?? 0))}`).reverse().join('');
   return [
-    `<path d="${top}${bottom}Z" fill="url(#${gradient})"/>`,
+    `<path d="${top}${bottom}Z" fill="${fill}"/>`,
     `<path d="${top}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`,
   ].join('');
 }

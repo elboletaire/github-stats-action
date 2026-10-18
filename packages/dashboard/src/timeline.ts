@@ -14,6 +14,8 @@ export interface TimelineSeries {
 }
 
 export interface TimelineOptions {
+  /** Prefix of the chart's gradient ids, unique on the page. */
+  id: string;
   /** Ascending day indices of the points, counted by `axis`. */
   xs: readonly number[];
   axis: DayAxis;
@@ -66,7 +68,7 @@ export function drawTimeline(svg: SVGSVGElement, o: TimelineOptions): void {
         const [x1] = pts[pts.length - 1]!.split(',');
         return `M${x0},${y(0).toFixed(1)}L${run}L${x1},${y(0).toFixed(1)}Z`;
       }).join('');
-      svgEl('path', { d: area, fill: fadeFill(svg, `tl${j}`, s.color) }, svg);
+      svgEl('path', { d: area, fill: fadeFill(svg, `${o.id}-fade-${j}`, s.color) }, svg);
     }
     svgEl('path', { d, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
     const lastK = s.values.length - 1;

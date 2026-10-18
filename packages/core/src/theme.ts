@@ -87,6 +87,8 @@ export const MARK = {
   /** An area fades from this opacity at its line to nothing at the baseline. */
   areaTop: 0.22,
   areaBottom: 0.02,
+  /** Stacked bands take a flat wash each instead of a fade. */
+  areaStack: 0.18,
   /** Card corner radius. */
   radius: 12,
 } as const;

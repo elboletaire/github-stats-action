@@ -94,7 +94,7 @@ describe('renderCharts', () => {
     const svg = chart(renderCharts(dataset), 'charts/downloads-per-day-light.svg');
     expect(svg).toContain('Estimated');
     expect(svg).toContain('measured needs 14 days, have 1');
-    expect(svg.match(/fill="url\(#g\d+\)"/g)).toHaveLength(2);
+    expect(svg.match(/fill-opacity="0.18"/g)).toHaveLength(2);
   });
 
   it('draws one bar per measured day and group once there are 14 measured days', async () => {
@@ -185,7 +185,7 @@ describe('renderCharts', () => {
       estimatedDaily: { start: '2020-01-01', groups: { app: Array(1000).fill(0), cli: Array(1000).fill(5) } },
     };
     const svg = chart(renderCharts(flat), 'charts/downloads-per-day-light.svg');
-    const areas = [...svg.matchAll(/<path d="([^"]*)" fill="url\(#g\d+\)"\/>/g)];
+    const areas = [...svg.matchAll(/<path d="([^"]*)" fill="url\(#day-fade-\d+\)"\/>/g)];
     expect(areas).toHaveLength(1);
     expect(areas[0]?.[1]?.match(/[ML]/g)).toHaveLength(4);
   });

@@ -10,8 +10,9 @@ import { stackSegments } from '../stack';
 import { showTip, tipOn } from '../tooltip';
 import { makeSection, legendHtml, type Section } from './common';
 
-const STEP = 17;
-const M = { l: 44, r: 12, t: 44, b: 58 };
+/** The narrowest slot a release gets: the chart fits a phone before it scrolls. */
+const MIN_SLOT = 6;
+const M = { l: 44, r: 12, t: 56, b: 58 };
 /** Epoch labels take the row nearest the plot that has room, else the one above it; past that the marker stands alone. */
 const TIERS = 2;
 const TIER_H = 14;
@@ -51,14 +52,16 @@ export function releases(d: Dataset): Section {
 function drawReleases(svg: SVGSVGElement, d: Dataset): void {
   const groups = countedGroups(d);
   const R = d.releases;
-  const W = widthOf(svg, M.l + M.r + STEP * R.length);
+  const W = widthOf(svg, M.l + M.r + MIN_SLOT * R.length);
   resetSvg(svg, W, H);
   const mx = niceMax(Math.max(0, ...R.map((r) => groupTotal(r, groups))));
   const y = (v: number): number => M.t + (H - M.t - M.b) * (1 - v / mx);
   const slot = (W - M.l - M.r) / R.length;
-  // a column never fills its slot: capped, the leftover is air; tags lie flat once the slots are wide enough
-  const bw = Math.min(32, slot - 4);
+  // a column never fills its slot: capped, the leftover is air; tags lie flat once the slots are wide
+  // enough, and only every nth tag is shown when a rotated label (about 14px) would overlap the next
+  const bw = Math.min(32, Math.max(2, slot - 2));
   const flat = slot >= 64;
+  const every = flat ? 1 : Math.max(1, Math.ceil(14 / slot));
 
   gridLines(svg, ticks(mx), y, M.l, W - M.r, f0);
 
@@ -71,10 +74,12 @@ function drawReleases(svg: SVGSVGElement, d: Dataset): void {
       if (seg.top) svgEl('path', { d: roundedTop(x, seg.y, bw, seg.height, 4), fill: colorVar(group) }, svg);
       else svgEl('rect', { x, y: seg.y, width: bw, height: seg.height, fill: colorVar(group) }, svg);
     }
-    const label = flat
-      ? svgEl('text', { x: M.l + slot * (i + 0.5), y: H - M.b + 18, 'text-anchor': 'middle' }, svg)
-      : svgEl('text', { transform: `translate(${M.l + slot * (i + 0.5) + 3},${H - M.b + 10}) rotate(-60)`, 'text-anchor': 'end' }, svg);
-    label.textContent = r.tag;
+    if (i % every === 0) {
+      const label = flat
+        ? svgEl('text', { x: M.l + slot * (i + 0.5), y: H - M.b + 18, 'text-anchor': 'middle' }, svg)
+        : svgEl('text', { transform: `translate(${M.l + slot * (i + 0.5) + 3},${H - M.b + 10}) rotate(-60)`, 'text-anchor': 'end' }, svg);
+      label.textContent = r.tag;
+    }
     const hit = hitRect(svg, M.l + slot * i, M.t, slot, H - M.t - M.b);
     tipOn(hit, (ev) => showTip(releaseTip(r, d), ev));
   });

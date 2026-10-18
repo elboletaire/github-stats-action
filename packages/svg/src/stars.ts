@@ -73,11 +73,11 @@ export function starsChart(dataset: Dataset, theme: Theme): string {
   const labelAnchor = labelX < lastX ? 'end' : 'start';
 
   return svgDocument(theme, title, `${title}: ${last.stars} stargazers on ${last.date}.`, [
-    `<defs>${areaGradient('a', color)}</defs>`,
+    `<defs>${areaGradient('stars-fade', color)}</defs>`,
     ...heading(title, note, theme),
     ...valueAxis(ticks, yOf, box, theme),
     ...xLabels(axisLabels, box.bottom + 20, theme),
-    `<path d="${line}L${px(lastX)} ${px(box.bottom)}L${px(xOf(first))} ${px(box.bottom)}Z" fill="url(#a)"/>`,
+    `<path d="${line}L${px(lastX)} ${px(box.bottom)}L${px(xOf(first))} ${px(box.bottom)}Z" fill="url(#stars-fade)"/>`,
     `<path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`,
     endDot(lastX, lastY, color, theme, `${last.date}: ${plural(last.stars, 'star')}`),
     svgText({ x: labelX, y: Math.max(box.top + 10, lastY - 10), value: count, fill: c.primary, anchor: labelAnchor, size: TYPE.md, weight: 600 }),
