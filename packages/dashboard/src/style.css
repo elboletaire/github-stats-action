@@ -257,6 +257,13 @@ section {
   mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
 }
 
+/* the npm table drops its day columns on a phone, where the counts would otherwise scroll sideways */
+@media (max-width: 480px) {
+  .npm-table .optional {
+    display: none;
+  }
+}
+
 .scroll[hidden] {
   display: none;
 }
