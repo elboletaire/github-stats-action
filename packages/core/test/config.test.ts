@@ -12,6 +12,13 @@ describe('parseConfig', () => {
     expect(parseConfig('# nothing here\n')).toEqual(DEFAULT_CONFIG);
   });
 
+  it('reads a file with only groups, leaving epochs and the rest empty', () => {
+    const config = parseConfig('groups:\n  - { name: cli, assets: "manga-downloader-*" }\n');
+    expect(config.groups).toEqual([{ name: 'cli', label: 'cli', assets: 'manga-downloader-*' }]);
+    expect(config.epochs).toEqual([]);
+    expect(config.counters).toEqual([]);
+  });
+
   it('defaults labels to the name and the optional lists to empty', () => {
     const config = parseConfig('groups:\n  - { name: app, assets: "gui-*" }\n');
     expect(config.groups).toEqual([{ name: 'app', label: 'app', assets: 'gui-*' }]);
@@ -29,6 +36,7 @@ describe('parseConfig', () => {
     expect(config.counters).toEqual([
       { name: 'updates', label: 'In-app updates', assets: 'manga-downloader-gui-*-SHA256SUMS.txt', from: 'v1.19.0' },
     ]);
+    expect(config.epochs.map((e) => e.version)).toEqual(['v1.0.0', 'v1.11.0', 'v1.18.0', 'v1.20.0']);
     expect(config.docker).toBe('elboletaire/manga-downloader');
   });
 

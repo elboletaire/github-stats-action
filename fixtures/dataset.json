@@ -16,6 +16,10 @@
  ],
  "epochs": [
   {
+   "version": "v1.0.0",
+   "label": "1.0 rewrite"
+  },
+  {
    "version": "v1.11.0",
    "label": "First desktop app"
   },
@@ -1618,7 +1622,7 @@
    "publishedAt": "2026-07-20T22:55:39Z",
    "end": "2026-07-20T23:48:39.000Z",
    "days": 0.03680555555555556,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -1722,7 +1726,7 @@
    "publishedAt": "2026-07-20T23:48:39Z",
    "end": "2026-07-21T16:50:07.000Z",
    "days": 0.7093518518518519,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -1826,7 +1830,7 @@
    "publishedAt": "2026-07-21T16:50:07Z",
    "end": "2026-07-21T20:51:24.000Z",
    "days": 0.16755787037037037,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -1930,7 +1934,7 @@
    "publishedAt": "2026-07-21T20:51:24Z",
    "end": "2026-07-21T22:20:57.000Z",
    "days": 0.0621875,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -2034,7 +2038,7 @@
    "publishedAt": "2026-07-21T22:20:57Z",
    "end": "2026-07-22T22:38:51.000Z",
    "days": 1.0124305555555555,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -2138,7 +2142,7 @@
    "publishedAt": "2026-07-22T22:38:51Z",
    "end": "2026-07-22T23:13:21.000Z",
    "days": 0.023958333333333335,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -2242,7 +2246,7 @@
    "publishedAt": "2026-07-22T23:13:21Z",
    "end": "2026-08-03T00:47:31.000Z",
    "days": 11.065393518518519,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -2346,7 +2350,7 @@
    "publishedAt": "2026-08-03T00:47:31Z",
    "end": "2026-08-10T15:45:18.000Z",
    "days": 7.623460648148148,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -2450,7 +2454,7 @@
    "publishedAt": "2026-08-10T15:45:18Z",
    "end": "2026-08-17T11:44:07.000Z",
    "days": 6.832511574074074,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -2554,7 +2558,7 @@
    "publishedAt": "2026-08-17T11:44:07Z",
    "end": "2026-08-18T08:10:39.000Z",
    "days": 0.8517592592592592,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -2658,7 +2662,7 @@
    "publishedAt": "2026-08-18T08:10:39Z",
    "end": "2026-08-24T13:39:27.000Z",
    "days": 6.2283333333333335,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -2762,7 +2766,7 @@
    "publishedAt": "2026-08-24T13:39:27Z",
    "end": "2026-09-02T08:26:22.000Z",
    "days": 8.782581018518519,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -2866,7 +2870,7 @@
    "publishedAt": "2026-09-02T08:26:22Z",
    "end": "2026-09-03T18:31:48.000Z",
    "days": 1.4204398148148147,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -2970,7 +2974,7 @@
    "publishedAt": "2026-09-03T18:31:48Z",
    "end": "2026-10-08T18:42:14.000Z",
    "days": 35.00724537037037,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -3074,7 +3078,7 @@
    "publishedAt": "2026-10-08T18:42:14Z",
    "end": "2026-10-10T23:19:36.000Z",
    "days": 2.1926157407407407,
-   "epoch": -1,
+   "epoch": 0,
    "prerelease": false,
    "groups": {
     "app": 0,
@@ -3178,7 +3182,7 @@
    "publishedAt": "2026-10-10T23:19:36Z",
    "end": "2026-10-10T23:46:00.000Z",
    "days": 0.018333333333333333,
-   "epoch": 0,
+   "epoch": 1,
    "prerelease": false,
    "groups": {
     "app": 5,
@@ -3318,7 +3322,7 @@
    "publishedAt": "2026-10-10T23:46:00Z",
    "end": "2026-10-11T15:09:27.000Z",
    "days": 0.6412847222222222,
-   "epoch": 0,
+   "epoch": 1,
    "prerelease": false,
    "groups": {
     "app": 31,
@@ -3464,7 +3468,7 @@
    "publishedAt": "2026-10-11T15:09:27Z",
    "end": "2026-10-11T16:54:41.000Z",
    "days": 0.0730787037037037,
-   "epoch": 0,
+   "epoch": 1,
    "prerelease": false,
    "groups": {
     "app": 9,
@@ -3610,7 +3614,7 @@
    "publishedAt": "2026-10-11T16:54:41Z",
    "end": "2026-10-11T20:39:58.000Z",
    "days": 0.15644675925925927,
-   "epoch": 0,
+   "epoch": 1,
    "prerelease": false,
    "groups": {
     "app": 18,
@@ -3756,7 +3760,7 @@
    "publishedAt": "2026-10-11T20:39:58Z",
    "end": "2026-10-12T23:05:01.000Z",
    "days": 1.1007291666666668,
-   "epoch": 0,
+   "epoch": 1,
    "prerelease": false,
    "groups": {
     "app": 38,
@@ -3902,7 +3906,7 @@
    "publishedAt": "2026-10-12T23:05:01Z",
    "end": "2026-10-13T16:56:53.000Z",
    "days": 0.7443518518518518,
-   "epoch": 0,
+   "epoch": 1,
    "prerelease": false,
    "groups": {
     "app": 29,
@@ -4048,7 +4052,7 @@
    "publishedAt": "2026-10-13T16:56:53Z",
    "end": "2026-10-14T23:27:31.000Z",
    "days": 1.271273148148148,
-   "epoch": 0,
+   "epoch": 1,
    "prerelease": false,
    "groups": {
     "app": 35,
@@ -4194,7 +4198,7 @@
    "publishedAt": "2026-10-14T23:27:31Z",
    "end": "2026-10-15T00:18:05.000Z",
    "days": 0.03511574074074074,
-   "epoch": 0,
+   "epoch": 1,
    "prerelease": false,
    "groups": {
     "app": 7,
@@ -4340,7 +4344,7 @@
    "publishedAt": "2026-10-15T00:18:05Z",
    "end": "2026-10-15T23:55:11.000Z",
    "days": 0.9840972222222222,
-   "epoch": 0,
+   "epoch": 1,
    "prerelease": false,
    "groups": {
     "app": 42,
@@ -4486,7 +4490,7 @@
    "publishedAt": "2026-10-15T23:55:11Z",
    "end": "2026-10-16T20:37:08.000Z",
    "days": 0.8624652777777778,
-   "epoch": 0,
+   "epoch": 1,
    "prerelease": false,
    "groups": {
     "app": 47,
@@ -4644,7 +4648,7 @@
    "publishedAt": "2026-10-16T20:37:08Z",
    "end": "2026-10-17T14:41:53.000Z",
    "days": 0.7532986111111111,
-   "epoch": 1,
+   "epoch": 2,
    "prerelease": false,
    "groups": {
     "app": 54,
@@ -4814,7 +4818,7 @@
    "publishedAt": "2026-10-17T14:41:53Z",
    "end": "2026-10-17T18:12:58.000Z",
    "days": 0.14658564814814815,
-   "epoch": 1,
+   "epoch": 2,
    "prerelease": false,
    "groups": {
     "app": 14,
@@ -4984,7 +4988,7 @@
    "publishedAt": "2026-10-17T18:12:58Z",
    "end": "2026-10-18T12:36:07.000Z",
    "days": 0.7660763888888888,
-   "epoch": 1,
+   "epoch": 2,
    "prerelease": false,
    "groups": {
     "app": 34,
@@ -5154,7 +5158,7 @@
    "publishedAt": "2026-10-18T12:36:07Z",
    "end": "2026-10-18T13:00:00.000Z",
    "days": 0.016585648148148148,
-   "epoch": 2,
+   "epoch": 3,
    "prerelease": false,
    "groups": {
     "app": 10,
@@ -5326,27 +5330,27 @@
    "version": null,
    "label": null,
    "start": "2022-12-31T01:33:47Z",
-   "end": "2026-10-10T23:19:36.000Z",
-   "days": 1379.9068171296296,
-   "releases": 30,
+   "end": "2026-07-20T22:55:39.000Z",
+   "days": 1297.8901851851851,
+   "releases": 15,
    "firstTag": "v0.0.1",
-   "lastTag": "v1.10.0",
+   "lastTag": "v0.0.15",
    "groups": {
     "app": 0,
-    "cli": 11491
+    "cli": 9939
    },
-   "downloads": 11491,
+   "downloads": 9939,
    "avgPerDay": {
     "app": 0,
-    "cli": 8.327373890291119
+    "cli": 7.657812743673601
    },
-   "avgPerDayTotal": 8.327373890291119,
+   "avgPerDayTotal": 7.657812743673601,
    "medianPerDay": {
     "app": 0,
     "cli": 7.230990946643026
    },
    "medianPerDayTotal": 7.230990946643026,
-   "fullDays": 1378,
+   "fullDays": 1296,
    "counters": {
     "updates": {
      "downloads": 0,
@@ -5356,6 +5360,39 @@
   },
   {
    "epoch": 0,
+   "version": "v1.0.0",
+   "label": "1.0 rewrite",
+   "start": "2026-07-20T22:55:39Z",
+   "end": "2026-10-10T23:19:36.000Z",
+   "days": 82.01663194444444,
+   "releases": 15,
+   "firstTag": "v1.0.0",
+   "lastTag": "v1.10.0",
+   "groups": {
+    "app": 0,
+    "cli": 1552
+   },
+   "downloads": 1552,
+   "avgPerDay": {
+    "app": 0,
+    "cli": 18.922991144665357
+   },
+   "avgPerDayTotal": 18.922991144665357,
+   "medianPerDay": {
+    "app": 0,
+    "cli": 18.396191793630024
+   },
+   "medianPerDayTotal": 18.396191793630024,
+   "fullDays": 81,
+   "counters": {
+    "updates": {
+     "downloads": 0,
+     "counted": false
+    }
+   }
+  },
+  {
+   "epoch": 1,
    "version": "v1.11.0",
    "label": "First desktop app",
    "start": "2026-10-10T23:19:36Z",
@@ -5388,7 +5425,7 @@
    }
   },
   {
-   "epoch": 1,
+   "epoch": 2,
    "version": "v1.18.0",
    "label": "Installer and updater",
    "start": "2026-10-16T20:37:08Z",
@@ -5421,7 +5458,7 @@
    }
   },
   {
-   "epoch": 2,
+   "epoch": 3,
    "version": "v1.20.0",
    "label": "Multilingual",
    "start": "2026-10-18T12:36:07Z",

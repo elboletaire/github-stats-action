@@ -59,8 +59,9 @@ describe('Dataset maths against the reference dashboard', () => {
 
   it('periods sum to the reference periods (v1.18.0 onwards is two periods here)', async () => {
     fixture ??= await buildFixtureDataset();
-    const [before, v111, v118, v120] = fixture.periods;
-    expect(before!.groups).toEqual({ app: 0, cli: 11491 }); // reference v0.0.x + v1.0.0 to v1.10.0
+    const [early, v100, v111, v118, v120] = fixture.periods;
+    expect(early!.groups).toEqual({ app: 0, cli: 9939 }); // reference v0.0.x
+    expect(v100!.groups).toEqual({ app: 0, cli: 1552 }); // reference v1.0.0 to v1.10.0
     expect(v111!.groups).toEqual({ app: 261, cli: 258 });
     expect({
       app: v118!.groups.app! + v120!.groups.app!,
@@ -71,7 +72,7 @@ describe('Dataset maths against the reference dashboard', () => {
 
   it('period medians and averages over whole days match the reference', async () => {
     fixture ??= await buildFixtureDataset();
-    const p = fixture.periods[1]!;
+    const p = fixture.periods[2]!;
     expect(p).toMatchObject({ version: 'v1.11.0', releases: 10, firstTag: 'v1.11.0', lastTag: 'v1.17.0', fullDays: 5 });
     expect(p.days).toBeCloseTo(5.887, 2);
     expect(p.medianPerDay.app ?? NaN).toBeCloseTo(35.6, 1);
@@ -191,6 +192,28 @@ describe('Dataset maths on small inputs', () => {
     });
     expect(d.totals.counters).toEqual({ updates: { downloads: 6, all: 15 }, all: { downloads: 15, all: 15 } });
     expect(d.releases.map((r) => r.counters.updates!.counted)).toEqual([false, false, true]);
+  });
+
+  it('with no epochs there is one period over every release, and no markers', () => {
+    const groupsOnly = parseConfig('groups:\n  - { name: cli, assets: "manga-downloader-*" }\n');
+    const d = buildDataset({
+      repo: 'o/r',
+      config: groupsOnly,
+      snapshots: [
+        snap('2026-01-02', [
+          rel('v0.9.0', '2026-01-01T00:00:00Z', [{ name: 'manga-downloader-v0.9.0.tar.gz', downloads: 2 }]),
+          rel('v2.0.0', '2026-01-02T00:00:00Z', [{ name: 'manga-downloader-v2.0.0.tar.gz', downloads: 3 }]),
+        ]),
+      ],
+      now: new Date('2026-01-03T00:00:00Z'),
+    });
+    expect(d.epochs).toEqual([]);
+    expect(d.releases.map((r) => r.epoch)).toEqual([-1, -1]);
+    expect(d.periods).toHaveLength(1);
+    expect(d.periods[0]).toMatchObject({ epoch: -1, version: null, label: null, releases: 2, firstTag: 'v0.9.0', lastTag: 'v2.0.0' });
+    expect(d.periods[0]!.groups).toEqual({ cli: 5 });
+    expect(d.estimatedDaily.groups.cli).toHaveLength(3);
+    expect(d.measuredDaily).toEqual([]);
   });
 
   it('refuses to build without snapshots', () => {
