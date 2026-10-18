@@ -48,6 +48,7 @@ Use `@v1` (the latest 1.x release, moved by the release workflow) or pin a full 
 | `pages-dir` | `_site` | Where the Pages site goes. |
 | `pages-traffic` | `false` | Include traffic in the Pages site. |
 | `dry-run` | `false` | Collect and build, but don't commit or push. |
+| `import-old` | empty | Path of an old-format `snapshots/` in the data branch (`.` for the root), converted into this repo's folder before the run. See [Data branch](#data-branch). |
 
 Outputs: `pages-dir` (absolute, empty when `pages` is off), `dataset` (absolute path of the repo's `dataset.json`) and `summary` (one line of totals).
 
@@ -137,6 +138,10 @@ dashboard/index.html              self-contained dashboard, all repos on the bra
 ```
 
 Everything except `snapshots/`, `stargazers.json` and `traffic/` is rebuilt on every run, so the snapshots are the only source of truth.
+
+### Migrating an old data branch
+
+To move manga-downloader's old `snapshots/` (at the branch root) into `<owner>/<repo>/snapshots/`, set `import-old: .` for one run. The days are converted and committed; days already in the new folder are kept, and the old root files are left alone. Check the branch, then remove the root `snapshots/` by hand if you want it gone, and unset `import-old`.
 
 ## Reading the dashboard
 

@@ -14,6 +14,7 @@ import {
   fetchTraffic,
   githubClient,
   mergeTrafficDays,
+  importOldSnapshots,
   readDatasets,
   readStargazers,
   readTrafficSeries,
@@ -43,6 +44,8 @@ export interface RunOptions {
   traffic: boolean;
   /** The Pages site, when `pages` is on. */
   pages?: { dir: string; traffic: boolean };
+  /** An old-format `snapshots/` under the data root (`.` for the root), imported before the day is written. */
+  importOld?: string;
   now: Date;
   log: Logger;
   fetch?: FetchFn;
@@ -105,6 +108,10 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
     ...(config.docker && dockerPulls !== undefined ? { docker: { image: config.docker, pulls: dockerPulls } } : {}),
     releases,
   };
+  if (options.importOld) {
+    const imported = await importOldSnapshots(join(options.dataDir, options.importOld), dir, config.docker);
+    log.info(`import: ${imported.imported.length} days imported, ${imported.kept.length} kept`);
+  }
   await writeSnapshot(dir, snapshot);
   await writeStargazers(dir, stargazers);
   if (traffic) {
