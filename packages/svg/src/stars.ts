@@ -43,6 +43,8 @@ export function starsChart(dataset: Dataset, theme: Theme): string {
   const titled = showTitle(dataset, 'stars');
   const box = boxOf(titled);
   const note = even ? 'Cumulative stargazers, samples evenly spaced by star count' : 'Cumulative stargazers, one point per day';
+  // the spacing is the only thing the subtitle says that the title doesn't, so it stays when the title is hidden
+  const hint = even ? 'Evenly spaced by star count' : '';
   const [head] = dataset.stars;
   const last = dataset.stars.at(-1);
 
@@ -55,7 +57,7 @@ export function starsChart(dataset: Dataset, theme: Theme): string {
   const top = ticks.at(-1) ?? 1;
   const yOf = (v: number): number => box.bottom - (finite(v) / top) * (box.bottom - box.top);
   const color = seriesColor(theme, 0);
-  const shared = { title, note, theme, titled, box, yOf, color, ticks, last };
+  const shared = { title, note, hint, theme, titled, box, yOf, color, ticks, last };
 
   if (even) return evenChart(dataset, shared);
 
@@ -92,6 +94,7 @@ export function starsChart(dataset: Dataset, theme: Theme): string {
 interface Shared {
   title: string;
   note: string;
+  hint: string;
   theme: Theme;
   titled: boolean;
   box: Box;
@@ -131,7 +134,7 @@ function evenChart(dataset: Dataset, s: Shared): string {
 
   return svgDocument(theme, title, `${title}: ${s.last.stars} stargazers on ${s.last.date}.`, [
     `<defs>${areaGradient('stars-fade', color)}</defs>`,
-    ...heading(title, s.note, theme, [], s.titled),
+    ...heading(title, s.note, theme, [], s.titled, s.hint),
     ...valueAxis(s.ticks, s.yOf, box, theme),
     ...xLabels(axisLabels, box.bottom + 20, theme),
     `<path d="${line}L${px(lastX)} ${px(box.bottom)}L${px(xs[0]!)} ${px(box.bottom)}Z" fill="url(#stars-fade)"/>`,

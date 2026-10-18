@@ -76,7 +76,7 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, tit
 
   const note = `Measured, change between daily snapshots (${plural(days.length, 'day')})`;
   return svgDocument(theme, title, `${title}: measured from daily snapshots.`, [
-    ...heading(title, note, theme, keys, titled),
+    ...heading(title, note, theme, keys, titled, note),
     ...valueAxis(ticks, yOf, box, theme),
     ...xLabels(labels, box.bottom + 20, theme),
     ...bars,
@@ -121,7 +121,7 @@ function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: strin
       ? [emptyNote('No downloads yet', box, theme)]
       : [...(defs.length ? [`<defs>${defs.join('')}</defs>`] : []), ...valueAxis(ticks, yOf, box, theme), ...xLabels(labels, box.bottom + 20, theme), ...areas];
 
-  return svgDocument(theme, title, `${title}: estimated per day by group.`, [...heading(title, note, theme, keys, titled), ...body]);
+  return svgDocument(theme, title, `${title}: estimated per day by group.`, [...heading(title, note, theme, keys, titled, note), ...body]);
 }
 
 // The band between `base` and `upper`, filled with `fill` (a colour or a gradient reference), with a 2px line

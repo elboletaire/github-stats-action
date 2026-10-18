@@ -43,7 +43,7 @@ export interface StarsChartConfig extends ChartConfig {
 }
 
 export interface ChartsConfig {
-  /** Shows the visible title and note of the README charts; the dashboard keeps its headings. */
+  /** Shows the visible title of the README charts; the dashboard keeps its headings. */
   titles: boolean;
   stars: StarsChartConfig;
   'downloads-per-day': ChartConfig;

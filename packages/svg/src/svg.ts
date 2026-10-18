@@ -150,9 +150,14 @@ function legend(keys: Key[], theme: Theme, right: number, y: number): string[] {
   });
 }
 
-/** Title, note line and legend (when there is more than one series). Without a title, only the legend stays, inline on the top line. */
-export function heading(title: string, note: string, theme: Theme, keys: Key[] = [], titled = true): string[] {
-  if (!titled) return keys.length > 1 ? legend(keys, theme, WIDTH - PAD, 20) : [];
+/** Title, note line and legend (when there is more than one series). Without a title, the hint (a small note that says what the data is) and the legend stay on the top line. */
+export function heading(title: string, note: string, theme: Theme, keys: Key[] = [], titled = true, hint = ''): string[] {
+  if (!titled) {
+    return [
+      ...(hint ? [svgText({ x: PAD, y: 20, value: hint, fill: INK[theme].muted, size: TYPE.xs })] : []),
+      ...(keys.length > 1 ? legend(keys, theme, WIDTH - PAD, 20) : []),
+    ];
+  }
   return [
     `<text x="${PAD}" y="32" fill="${INK[theme].primary}" font-size="${TYPE.lg}" font-weight="600" letter-spacing="-0.2">${esc(title)}</text>`,
     svgText({ x: PAD, y: 50, value: note, fill: INK[theme].muted, size: TYPE.sm }),

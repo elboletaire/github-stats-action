@@ -225,9 +225,28 @@ describe('chart options', () => {
       expect(content).toContain('<title id="title">');
       expect(content).toContain('<desc id="desc">');
       expect(content).toContain('aria-labelledby="title desc"');
-      expect(drawn(content), path).not.toMatch(/>(Stars over time|Downloads per day|Downloads per release|Cumulative stargazers|Estimated|One column)/);
+      expect(drawn(content), path).not.toMatch(/>(Stars over time|Downloads per day|Downloads per release|Cumulative stargazers|One column)/);
       expect(drawn(content), path).not.toMatch(/font-size="15"/);
     }
+  });
+
+  it('keeps the estimated note and the stars spacing when titles are hidden', async () => {
+    const files = renderCharts(await withCharts({ titles: false }));
+    expect(drawn(chart(files, 'charts/downloads-per-day-light.svg'))).toContain('>Estimated, spread over each release');
+    expect(drawn(chart(files, 'charts/stars-light.svg'))).toContain('>Evenly spaced by star count<');
+    expect(drawn(chart(files, 'charts/stars-light.svg'))).not.toContain('Cumulative stargazers');
+  });
+
+  it('keeps the measured note when titles are hidden', async () => {
+    const dataset = await withCharts({ titles: false });
+    const days = Array.from({ length: 20 }, (_, i) => ({ date: new Date(Date.UTC(2026, 8, 1) + i * 86_400_000).toISOString().slice(0, 10), days: 1, groups: { app: 1, cli: 2 }, stars: 1, docker: null, counters: {} }));
+    const svg = chart(renderCharts({ ...dataset, measuredDaily: days }), 'charts/downloads-per-day-light.svg');
+    expect(drawn(svg)).toContain('>Measured, change between daily snapshots (20 days)<');
+  });
+
+  it('shows no stars hint in time spacing, which has no hint', async () => {
+    const svg = chart(renderCharts(await withCharts({ titles: false, stars: { spacing: 'time' } })), 'charts/stars-light.svg');
+    expect(drawn(svg)).not.toContain('Evenly spaced');
   });
 
   it('lets a chart title override the global switch', async () => {
