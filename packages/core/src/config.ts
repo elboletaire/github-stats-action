@@ -56,10 +56,10 @@ export interface ChartsConfig {
   stars: ChartConfig;
   'downloads-per-day': ChartConfig;
   'downloads-per-release': ChartConfig;
-  npmDownloads: ChartConfig;
+  'npm-downloads': ChartConfig;
 }
 
-/** The charts the README SVGs are made of, by config key (the file name differs for `npmDownloads`). */
+/** The charts the README SVGs are made of, by config key (the file name is the key). */
 export type ChartName = Exclude<keyof ChartsConfig, 'titles'>;
 
 export interface StatsConfig {
@@ -91,7 +91,7 @@ export const DEFAULT_CONFIG: StatsConfig = {
   counters: [],
   epochs: [],
   platforms: [],
-  charts: { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, npmDownloads: {} },
+  charts: { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {} },
 };
 
 /** One colour per package in the npm chart and the dashboard, so the list is capped at the palette's slots. */
@@ -258,23 +258,18 @@ function parseChart(sub: Obj, chart: ChartName, path: string): ChartConfig {
 
 function parseCharts(value: unknown): ChartsConfig {
   const obj = expectObject(value, 'charts');
-  checkKeys(obj, ['titles', 'stars', 'downloads-per-day', 'downloadsPerDay', 'downloads-per-release', 'downloadsPerRelease', 'npmDownloads'], 'charts');
-  // a chart may be named in camelCase or in the kebab-case of its file name, but not both
-  const section = (chart: ChartName, alias?: string): ChartConfig => {
-    if (alias !== undefined && obj[chart] !== undefined && obj[alias] !== undefined) {
-      throw new ConfigError(`charts.${chart} and charts.${alias} are the same chart; use one`);
-    }
-    const name = alias !== undefined && obj[alias] !== undefined ? alias : chart;
-    const sub = obj[name] === undefined ? {} : expectObject(obj[name], `charts.${name}`);
-    checkKeys(sub, ['title', 'from', 'range', 'last'], `charts.${name}`);
-    return parseChart(sub, chart, `charts.${name}`);
+  checkKeys(obj, ['titles', 'stars', 'downloads-per-day', 'downloads-per-release', 'npm-downloads'], 'charts');
+  const section = (chart: ChartName): ChartConfig => {
+    const sub = obj[chart] === undefined ? {} : expectObject(obj[chart], `charts.${chart}`);
+    checkKeys(sub, ['title', 'from', 'range', 'last'], `charts.${chart}`);
+    return parseChart(sub, chart, `charts.${chart}`);
   };
   return {
     titles: optionalBoolean(obj, 'titles', 'charts') ?? true,
     stars: section('stars'),
-    'downloads-per-day': section('downloads-per-day', 'downloadsPerDay'),
-    'downloads-per-release': section('downloads-per-release', 'downloadsPerRelease'),
-    npmDownloads: section('npmDownloads'),
+    'downloads-per-day': section('downloads-per-day'),
+    'downloads-per-release': section('downloads-per-release'),
+    'npm-downloads': section('npm-downloads'),
   };
 }
 

@@ -46,8 +46,8 @@ describe('npm downloads chart', () => {
     }
   });
 
-  it('hides the title when charts.npmDownloads says so, keeping the packages legend', async () => {
-    const config = parseConfig('charts:\n  npmDownloads: { title: false }\n');
+  it('hides the title when charts.npm-downloads says so, keeping the packages legend', async () => {
+    const config = parseConfig('charts:\n  npm-downloads: { title: false }\n');
     const dataset = { ...(await fixture()), npm: npmData(), charts: config.charts };
     const svg = renderCharts(dataset).find((f) => f.path === 'charts/npm-downloads-light.svg')!.content;
     expect(svg).not.toContain('>npm downloads per week</text>');

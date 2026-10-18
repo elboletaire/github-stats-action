@@ -30,6 +30,7 @@ import {
   type Key,
   type Theme,
 } from './svg';
+import { windowed } from './window';
 
 /** The plot starts lower when there are epoch labels to make room for above it. */
 const plotBox = (labelled: boolean, titled: boolean): Box => ({ left: PLOT_LEFT, right: WIDTH - PAD, top: plotTop(titled, labelled), bottom: 252 });
@@ -45,7 +46,8 @@ interface Span {
   tier: number;
 }
 
-export function downloadsPerReleaseChart(dataset: Dataset, theme: Theme): string {
+export function downloadsPerReleaseChart(all: Dataset, theme: Theme): string {
+  const dataset = windowed(all, 'downloads-per-release');
   const keys: Key[] = dataset.groups.map((g) => ({ label: g.label, color: seriesColor(theme, g.color) }));
   const note = 'One column per release, stacked by group';
   const { releases } = dataset;
@@ -56,7 +58,8 @@ export function downloadsPerReleaseChart(dataset: Dataset, theme: Theme): string
     titled,
   );
   if (releases.length === 0) {
-    return svgDocument(theme, title, `${title}: no releases yet.`, [...heading(title, note, theme, keys, titled), emptyNote('No releases yet', box, theme)]);
+    const message = all.releases.length === 0 ? 'No releases yet' : 'No releases in this window';
+    return svgDocument(theme, title, `${title}: ${message.toLowerCase()}.`, [...heading(title, note, theme, keys, titled), emptyNote(message, box, theme)]);
   }
 
   const totals = releases.map((r) => dataset.groups.reduce((sum, g) => sum + finite(r.groups[g.name] ?? 0), 0));

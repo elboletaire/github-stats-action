@@ -31,6 +31,7 @@ import {
   type Segment,
   type Theme,
 } from './svg';
+import { windowed, windowSet } from './window';
 
 /** Measured bars need at least this many snapshot days; before that the estimate is shown. */
 export const MIN_MEASURED_DAYS = 14;
@@ -42,14 +43,28 @@ const MEASURED_HINT = 'Measured per day';
 const boxOf = (titled: boolean): Box => ({ left: PLOT_LEFT, right: WIDTH - PAD, top: plotTop(titled), bottom: 252 });
 const title = 'Downloads per day';
 
-export function downloadsPerDayChart(dataset: Dataset, theme: Theme): string {
+export function downloadsPerDayChart(all: Dataset, theme: Theme): string {
+  // bars or areas are chosen on the whole history; the window only narrows the days drawn
+  const measuredAll = all.measuredDaily.length;
+  const dataset = windowed(all, 'downloads-per-day');
   const keys: Key[] = dataset.groups.map((g) => ({ label: g.label, color: seriesColor(theme, g.color) }));
-  const measured = dataset.measuredDaily.length;
   const titled = showTitle(dataset, 'downloads-per-day');
   const box = boxOf(titled);
-  if (measured >= MIN_MEASURED_DAYS) return measuredBars(dataset, theme, keys, box, titled);
-  const note = `Estimated, spread over each release's live window (measured needs ${MIN_MEASURED_DAYS} days, have ${plural(measured, 'day')})`;
-  return estimatedAreas(dataset, theme, keys, note, box, titled);
+  const empty = windowSet(all, 'downloads-per-day') ? 'No downloads in this window' : 'No downloads yet';
+  if (measuredAll >= MIN_MEASURED_DAYS) {
+    if (dataset.measuredDaily.length === 0) {
+      const note = 'Measured, change between daily snapshots (0 days)';
+      return emptyChart(theme, keys, note, MEASURED_HINT, box, titled, empty);
+    }
+    return measuredBars(dataset, theme, keys, box, titled);
+  }
+  const note = `Estimated, spread over each release's live window (measured needs ${MIN_MEASURED_DAYS} days, have ${plural(measuredAll, 'day')})`;
+  return estimatedAreas(dataset, theme, keys, note, box, titled, empty);
+}
+
+/** A chart with nothing to draw: its note, and the message in the middle of the plot. */
+function emptyChart(theme: Theme, keys: Key[], note: string, hint: string, box: Box, titled: boolean, message: string): string {
+  return svgDocument(theme, title, `${title}: ${message.toLowerCase()}.`, [...heading(title, note, theme, keys, titled, hint), emptyNote(message, box, theme)]);
 }
 
 function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, titled: boolean): string {
@@ -89,7 +104,7 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, tit
   ]);
 }
 
-function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: string, box: Box, titled: boolean): string {
+function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: string, box: Box, titled: boolean, empty: string): string {
   const { estimatedDaily } = dataset;
   const count = Math.max(0, ...dataset.groups.map((g) => estimatedDaily.groups[g.name]?.length ?? 0));
   const start = dayOf(estimatedDaily.start);
@@ -124,7 +139,7 @@ function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: strin
 
   const body =
     count === 0
-      ? [emptyNote('No downloads yet', box, theme)]
+      ? [emptyNote(empty, box, theme)]
       : [...(defs.length ? [`<defs>${defs.join('')}</defs>`] : []), ...valueAxis(ticks, yOf, box, theme), ...xLabels(labels, box.bottom + 20, theme), ...areas];
 
   return svgDocument(theme, title, `${title}: estimated per day by group.`, [...heading(title, note, theme, keys, titled, ESTIMATED_HINT), ...body]);

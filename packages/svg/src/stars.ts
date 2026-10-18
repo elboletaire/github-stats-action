@@ -32,6 +32,7 @@ import {
   type Box,
   type Theme,
 } from './svg';
+import { windowed, windowSet } from './window';
 
 const boxOf = (titled: boolean): Box => ({ left: PLOT_LEFT, right: WIDTH - PAD, top: plotTop(titled), bottom: 252 });
 
@@ -48,7 +49,8 @@ interface AxisLabel {
   anchor: 'start' | 'middle' | 'end';
 }
 
-export function starsChart(dataset: Dataset, theme: Theme): string {
+export function starsChart(all: Dataset, theme: Theme): string {
+  const dataset = windowed(all, 'stars');
   const title = 'Stars over time';
   const note = 'Cumulative stargazers';
   const titled = showTitle(dataset, 'stars');
@@ -57,7 +59,7 @@ export function starsChart(dataset: Dataset, theme: Theme): string {
   const last = dataset.stars.at(-1);
 
   if (!head || !last) {
-    const message = dataset.totals.stars === 0 ? 'No stars yet' : 'No stargazer history';
+    const message = all.totals.stars === 0 ? 'No stars yet' : windowSet(all, 'stars') ? 'No stars in this window' : 'No stargazer history';
     return svgDocument(theme, title, `${title}: ${message}.`, [...heading(title, note, theme, [], titled), emptyNote(message, box, theme)]);
   }
 

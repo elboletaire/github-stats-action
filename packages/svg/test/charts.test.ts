@@ -205,7 +205,7 @@ describe('niceTicks', () => {
 });
 
 describe('chart options', () => {
-  const CHARTS = { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, npmDownloads: {} };
+  const CHARTS = { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {} };
   const withCharts = async (charts: Partial<NonNullable<Dataset['charts']>>): Promise<Dataset> => ({ ...(await fixture()), charts: { ...CHARTS, ...charts } });
   /** The file without its accessible title and description, so only what is drawn is left. */
   const drawn = (svg: string): string => svg.replace(/<(title|desc) id="[^"]*">[^<]*<\/\1>/g, '');

@@ -29,6 +29,7 @@ import {
   type Key,
   type Theme,
 } from './svg';
+import { windowed } from './window';
 import { INK, TYPE } from '@github-stats-action/core/theme';
 
 const WEEK = 7;
@@ -67,10 +68,11 @@ export function weeklySums(npm: NpmData): { ends: number[]; sums: number[][] } {
   return { ends, sums };
 }
 
-export function npmDownloadsChart(dataset: Dataset, theme: Theme): string {
+export function npmDownloadsChart(all: Dataset, theme: Theme): string {
+  const dataset = windowed(all, 'npm-downloads');
   const npm = dataset.npm;
   if (!npm) throw new Error('npmDownloadsChart needs dataset.npm');
-  const titled = showTitle(dataset, 'npmDownloads');
+  const titled = showTitle(dataset, 'npm-downloads');
   const keys: Key[] = npm.packages.map((pkg) => ({ label: pkg.label, color: seriesColor(theme, pkg.color) }));
   // the legend wraps under the note; the plot starts below its last row
   const rows = keys.length > 1 ? legendRows(keys, WIDTH - 2 * PAD) : [];

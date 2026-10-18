@@ -122,7 +122,7 @@ describe('charts', () => {
       stars: {},
       'downloads-per-day': {},
       'downloads-per-release': {},
-      npmDownloads: {},
+      'npm-downloads': {},
     });
   });
 
@@ -138,7 +138,7 @@ charts:
       stars: { title: true },
       'downloads-per-day': { title: false },
       'downloads-per-release': {},
-      npmDownloads: {},
+      'npm-downloads': {},
     });
   });
 
@@ -182,8 +182,8 @@ npm:
     expect(parseConfig('npm: []\n').npm).toEqual([]);
   });
 
-  it('reads the npmDownloads chart title', () => {
-    expect(parseConfig('charts:\n  npmDownloads: { title: false }\n').charts.npmDownloads).toEqual({ title: false });
+  it('reads the npm-downloads chart title', () => {
+    expect(parseConfig('charts:\n  npm-downloads: { title: false }\n').charts['npm-downloads']).toEqual({ title: false });
   });
 
   it.each([
@@ -219,17 +219,16 @@ describe('chart windows', () => {
 
   it('reads a range as a count of days, months or years', () => {
     expect(parseConfig('charts: { downloads-per-day: { range: 90d } }').charts['downloads-per-day']).toEqual({ range: '90d' });
-    expect(parseConfig('charts: { npmDownloads: { range: 1y } }').charts.npmDownloads).toEqual({ range: '1y' });
+    expect(parseConfig("charts: { npm-downloads: { range: 1y } }").charts['npm-downloads']).toEqual({ range: '1y' });
   });
 
   it('reads last for downloads per release only', () => {
     expect(parseConfig('charts: { downloads-per-release: { last: 20 } }').charts['downloads-per-release']).toEqual({ last: 20 });
   });
 
-  it('reads the camelCase names of the download charts as those charts', () => {
-    const config = parseConfig('charts:\n  downloadsPerDay: { from: 2026-01-01 }\n  downloadsPerRelease: { last: 20 }\n');
-    expect(config.charts['downloads-per-day']).toEqual({ from: '2026-01-01' });
-    expect(config.charts['downloads-per-release']).toEqual({ last: 20 });
+  it('reads from as unquoted or quoted text', () => {
+    expect(parseConfig('charts:\n  downloads-per-day: { from: 2024 }\n').charts['downloads-per-day']).toEqual({ from: '2024-01-01' });
+    expect(parseConfig('charts:\n  downloads-per-day: { from: "2024" }\n').charts['downloads-per-day']).toEqual({ from: '2024-01-01' });
   });
 
   it('keeps the window out of the config when none is set', () => {
@@ -248,7 +247,8 @@ describe('chart windows', () => {
     ['last with from', 'charts: { downloads-per-release: { last: 5, from: 2024 } }', "charts.downloads-per-release: last can't be combined with from or range"],
     ['last of zero', 'charts: { downloads-per-release: { last: 0 } }', 'charts.downloads-per-release.last must be a whole number above zero'],
     ['last that is not whole', 'charts: { downloads-per-release: { last: 2.5 } }', 'charts.downloads-per-release.last must be a whole number above zero'],
-    ['the same chart named twice', 'charts:\n  downloads-per-day: { from: 2024 }\n  downloadsPerDay: { from: 2025 }\n', 'charts.downloads-per-day and charts.downloadsPerDay are the same chart; use one'],
+    ['a camelCase chart key', 'charts:\n  downloadsPerDay: { from: 2026 }\n', 'charts.downloadsPerDay is not a known key'],
+    ['the old npmDownloads key', 'charts: { npmDownloads: {} }\n', 'charts.npmDownloads is not a known key'],
     ['an unknown key next to the window', 'charts: { stars: { from: 2024, every: 2 } }', 'charts.stars.every is not a known key'],
   ])('rejects %s', (_, text, message) => {
     expect(() => parseConfig(text)).toThrow(message);

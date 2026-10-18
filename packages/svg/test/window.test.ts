@@ -12,7 +12,7 @@ const shift = (day: string, days: number): string => iso(Date.parse(`${day}T00:0
 const fixture = async (): Promise<Dataset> =>
   JSON.parse(await readFile(resolve(import.meta.dirname, '../../../fixtures/dataset.json'), 'utf8')) as Dataset;
 
-const CHARTS: ChartsConfig = { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, npmDownloads: {} };
+const CHARTS: ChartsConfig = { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {} };
 
 const withCharts = async (charts: Partial<ChartsConfig>): Promise<Dataset> => ({ ...(await fixture()), charts: { ...CHARTS, ...charts } });
 
@@ -135,7 +135,7 @@ describe('npm window', () => {
 
   it('draws the weeks of the window from its first day, ending on the latest day', async () => {
     const base = await fixture();
-    const dataset = { ...base, npm: npmData().npm, charts: { ...CHARTS, npmDownloads: { range: '1y' as const } } };
+    const dataset = { ...base, npm: npmData().npm, charts: { ...CHARTS, 'npm-downloads': { range: '1y' as const } } };
     const svg = chart(renderCharts(dataset), 'charts/npm-downloads-light.svg');
     const bars = svg.match(/<path d="(M[^"]*)" fill="[^"]*"\/>/)?.[1] ?? '';
     // 2025-10-18 to 2026-10-17 is 365 days: 52 whole weeks and a first one of a single day
@@ -195,5 +195,38 @@ describe('label collisions', () => {
         }
       }
     }
+  });
+});
+
+describe('mode and empty windows', () => {
+  it('keeps the bars for a short window when the whole history has enough measured days', async () => {
+    const data = await withCharts({ 'downloads-per-day': { range: '7d' } });
+    const svg = chart(renderCharts({ ...data, measuredDaily: measured({ app: 2, cli: 3 }, 30, '2026-10-18') }), 'charts/downloads-per-day-light.svg');
+    expect(svg).toContain('Measured, change between daily snapshots (7 days)');
+    expect(svg).not.toContain('measured needs');
+    expect(segments(svg)).toBe(14);
+  });
+
+  it('says the window holds no releases, not that there are none', async () => {
+    const svg = chart(renderCharts(await withCharts({ 'downloads-per-release': { from: '2030-01-01' } })), 'charts/downloads-per-release-light.svg');
+    expect(svg).toContain('No releases in this window');
+    expect(svg).not.toContain('No releases yet');
+  });
+
+  it('says the window holds no downloads, for the estimate and for the bars', async () => {
+    const estimate = chart(renderCharts(await withCharts({ 'downloads-per-day': { from: '2030-01-01' } })), 'charts/downloads-per-day-light.svg');
+    expect(estimate).toContain('No downloads in this window');
+    expect(estimate).not.toContain('No downloads yet');
+    const data = await withCharts({ 'downloads-per-day': { from: '2030-01-01' } });
+    const bars = chart(renderCharts({ ...data, measuredDaily: measured({ app: 2, cli: 3 }, 30, '2026-10-18') }), 'charts/downloads-per-day-light.svg');
+    expect(bars).toContain('No downloads in this window');
+    expect(bars).toContain('Measured, change between daily snapshots (0 days)');
+  });
+
+  it('says the window holds no stars, and keeps "no stars yet" for a repo without any', async () => {
+    const svg = chart(renderCharts(await withCharts({ stars: { from: '2030-01-01' } })), 'charts/stars-light.svg');
+    expect(svg).toContain('No stars in this window');
+    const none = { ...(await withCharts({ stars: { from: '2030-01-01' } })), stars: [], totals: { ...(await fixture()).totals, stars: 0 } };
+    expect(chart(renderCharts(none), 'charts/stars-light.svg')).toContain('No stars yet');
   });
 });

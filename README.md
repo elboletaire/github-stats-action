@@ -195,10 +195,10 @@ platforms:                  # label rules for asset names
   - { match: "acme-desktop-*-windows-x64-setup.exe", label: Windows installer }
 charts:                     # README SVG charts
   titles: true              # false hides every chart's title
-  stars: { from: 2024-01-01 }             # the window: a date, a year or a month
-  downloadsPerDay: { range: 90d }         # or a length counted back from the latest day
-  downloadsPerRelease: { last: 20 }       # the last N releases instead
-  npmDownloads: { range: 1y }
+  stars: { from: 2024-01-01 }                # the window: a date, a year or a month
+  downloads-per-day: { range: 90d }          # or a length counted back from the latest day
+  downloads-per-release: { last: 20 }        # the last N releases instead
+  npm-downloads: { range: 1y }
 docker: acme/acme           # optional Docker Hub image
 npm:                        # optional npm packages, counted daily
   - password-strength-meter
@@ -212,11 +212,11 @@ npm:                        # optional npm packages, counted daily
 - `platforms`: `match` and `label`. Without a matching rule, the asset name minus the tag, repo name and archive suffixes is used.
 - `releases`: `true` by default. Release downloads show only when some release has an asset that counts (not ignored), so a repo without release assets gets no download views. `false` hides them even when assets count. The snapshots keep the counts either way, so turning it back on restores the history.
 - `npm`: npm package names, or `{ package, label }` (the label defaults to the name). Scoped names work. Up to 8: each package takes one of the eight palette colours, and a ninth would repeat one in the stacked charts, where two touching segments of one colour can't be told apart. Absent means no npm requests at all.
-- `charts`: `titles` (default `true`) shows or hides the title of the README SVGs (a note that says what the data is stays: estimated or measured); a chart's own `title` (`stars`, `downloads-per-day`, `downloads-per-release`, `npmDownloads`) overrides it. The dashboard keeps its headings.
-  - Each chart can cover a window, set per chart (there is no global default). `from` is the first day: `2024-06-01`, `2024-06` or `2024`. `range` is a length counted back from the latest day, inclusive: `30d`, `6m`, `1y`. `from` and `range` are exclusive. A window longer than the history shows all of it; absent means all history.
-  - `stars` samples the window (the count on its first day is where the curve starts, and the y axis keeps the real total). `downloadsPerDay` and `npmDownloads` start their x axis at the window start. `downloadsPerRelease` takes the releases published in the window, or with `last: N` the last N releases; epoch markers outside it are hidden.
+- `charts`: `titles` (default `true`) shows or hides the title of the README SVGs (a note that says what the data is stays: estimated or measured); a chart's own `title` (`stars`, `downloads-per-day`, `downloads-per-release`, `npm-downloads`) overrides it. The dashboard keeps its headings.
+  - Each chart can cover a window, set per chart (there is no global default). `from` is the first day: `2024-06-01`, `2024-06` or `2024`, quoted or not (`from: 2024` and `from: "2024"` both work). `range` is a length counted back from the latest day, inclusive: `30d`, `6m`, `1y`. `from` and `range` are exclusive. A window longer than the history shows all of it; absent means all history.
+  - `stars` samples the window (the count on its first day is where the curve starts, and the y axis keeps the real total). `downloads-per-day` and `npm-downloads` start their x axis at the window start, and the bars or areas of `downloads-per-day` are chosen on the whole history, so a short window still shows bars. `downloads-per-release` takes the releases published in the window, or with `last: N` the last N releases; epoch markers outside it are hidden.
   - The window ends on the data's latest day, never the clock, so re-rendering gives the same file. npm's window ends on npm's last stored day.
-  - The keys `downloads-per-day` and `downloads-per-release` work too. `last` is for `downloadsPerRelease` only.
+  - `last` is for `downloads-per-release` only.
   - The dashboard isn't windowed: it has its own zoom.
 - `docker`: `namespace/name`.
 

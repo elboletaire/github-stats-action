@@ -18,12 +18,18 @@ export interface ChartWindow {
   end: string;
 }
 
+/** Whether the config sets a window for `chart`, so an empty chart can say the window matched nothing. */
+export function windowSet(dataset: Dataset, chart: ChartName): boolean {
+  const options = dataset.charts?.[chart];
+  return options?.from !== undefined || options?.range !== undefined || options?.last !== undefined;
+}
+
 /** The days a chart covers: its `from`, or its `range` counted back from the end. Undefined shows all history. */
 export function windowOf(dataset: Dataset, chart: ChartName): ChartWindow | undefined {
   const options = dataset.charts?.[chart];
   if (!options || (options.from === undefined && options.range === undefined)) return undefined;
   // the end is the data's latest day: the snapshot's, or npm's last stored day, which is where the npm chart ends
-  const end = chart === 'npmDownloads' && dataset.npm ? dataset.npm.latest : utcDate(Date.parse(dataset.snapshotAt));
+  const end = chart === 'npm-downloads' && dataset.npm ? dataset.npm.latest : utcDate(Date.parse(dataset.snapshotAt));
   return { start: options.from ?? rangeStart(options.range!, end), end };
 }
 
@@ -91,6 +97,6 @@ export function windowed(dataset: Dataset, chart: ChartName): Dataset {
   if (chart === 'downloads-per-release' && (w || last !== undefined)) {
     return clipReleases(dataset, w, last);
   }
-  if (chart === 'npmDownloads' && w && dataset.npm) return { ...dataset, npm: clipNpm(dataset.npm, w) };
+  if (chart === 'npm-downloads' && w && dataset.npm) return { ...dataset, npm: clipNpm(dataset.npm, w) };
   return dataset;
 }
