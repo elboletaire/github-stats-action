@@ -1,7 +1,7 @@
 // Periods: one row per epoch span, with totals, averages and medians per day, and a chart of the averages.
 
 import type { Dataset } from '@github-stats-action/core';
-import { esc, f0, f1 } from '../format';
+import { esc, f0, f1, plural } from '../format';
 import { niceMax, ticks } from '../scale';
 import { countedGroups, periodName, periodShort } from '../model';
 import { colorVar } from '../palette';
@@ -82,11 +82,11 @@ function drawPeriods(svg: SVGSVGElement, d: Dataset): void {
       const bar = svgEl('path', { d: roundedTop(x, y(v), bw - 2, h, 4), fill: colorVar(g) }, svg);
       svgEl('text', { x: x + (bw - 2) / 2, y: y(v) - 4, 'text-anchor': 'middle', class: 'ink' }, svg).textContent = f1(v);
       tipOn(bar, (ev) => showTip(
-        `<b>${esc(periodName(p, d.epochs))}</b><br>${esc(g.label)}: ${f1(v)}/day avg (est.)<br>${f0(p.groups[g.name] ?? 0)} downloads over ${p.days.toFixed(1)} days`,
+        `<b>${esc(periodName(p, d.epochs))}</b><br>${esc(g.label)}: ${f1(v)}/day avg (est.)<br>${f0(p.groups[g.name] ?? 0)} downloads over ${p.days.toFixed(1)} ${p.days === 1 ? 'day' : 'days'}`,
         ev,
       ));
     });
     svgEl('text', { x: cx, y: H - m.b + 16, 'text-anchor': 'middle', class: 'ink' }, svg).textContent = periodShort(p, d.epochs);
-    svgEl('text', { x: cx, y: H - m.b + 30, 'text-anchor': 'middle' }, svg).textContent = `${p.releases} releases`;
+    svgEl('text', { x: cx, y: H - m.b + 30, 'text-anchor': 'middle' }, svg).textContent = plural(p.releases, 'release');
   });
 }

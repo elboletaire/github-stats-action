@@ -30,6 +30,6 @@ export function stars(d: Dataset): Section {
   const svg = el.querySelector('svg') as SVGSVGElement;
   return {
     el,
-    redraw: () => drawTimeline(svg, { xs, axis, series: [{ label: 'Stars', color: colorVar({ color: 0 }), values }], unit: 'stars' }),
+    redraw: () => drawTimeline(svg, { xs, axis, series: [{ label: 'Stars', color: colorVar({ color: 0 }), values }], unit: { one: 'star', other: 'stars' } }),
   };
 }

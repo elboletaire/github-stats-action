@@ -18,8 +18,8 @@ export interface TimelineOptions {
   xs: readonly number[];
   axis: DayAxis;
   series: readonly TimelineSeries[];
-  /** Hover label of a value, e.g. "stars". */
-  unit: string;
+  /** Hover label of a value, by its count: "1 star", "2 stars". */
+  unit: { one: string; other: string };
 }
 
 const HEIGHT = 240;
@@ -84,7 +84,11 @@ export function drawTimeline(svg: SVGSVGElement, o: TimelineOptions): void {
       dot.setAttribute('cy', String(y(v ?? 0)));
       dot.setAttribute('visibility', v == null ? 'hidden' : 'visible');
     });
-    const rows = o.series.map((s) => `${esc(s.label)}: ${s.values[k] == null ? '—' : f0(s.values[k] as number)} ${esc(o.unit)}`);
+    const rows = o.series.map((s) => {
+      const value = s.values[k];
+      const unit = value === 1 ? o.unit.one : o.unit.other;
+      return `${esc(s.label)}: ${value == null ? '—' : f0(value)} ${esc(unit)}`;
+    });
     showTip(`<b>${esc(o.axis.long(day))}</b><br>${rows.join('<br>')}`, ev);
   });
   hit.addEventListener('pointerleave', (ev) => {

@@ -51,7 +51,7 @@ export function traffic(d: Dataset): Section | null {
       drawTimeline(svg, {
         xs,
         axis,
-        unit: 'per day',
+        unit: { one: 'per day', other: 'per day' },
         series: [
           { label: 'Views', color: VIEWS, values: dates.map((date) => views.get(date)?.count ?? null) },
           { label: 'Clones', color: CLONES, values: dates.map((date) => clones.get(date)?.count ?? null) },

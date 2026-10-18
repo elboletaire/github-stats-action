@@ -106,5 +106,5 @@ function releaseTip(r: ReleaseRow, d: Dataset): string {
   const groups = countedGroups(d);
   const rows = groups.map((g) => `${esc(g.label)}: ${f0(r.groups[g.name] ?? 0)}`);
   const counted = d.counters.filter((c) => r.counters[c.name]?.counted).map((c) => `${esc(c.label)}: ${f0(r.counters[c.name]!.downloads)}`);
-  return `<b>${esc(r.tag)}</b> ${isoDay(r.publishedAt)}<br>${[...rows, `Total: ${f0(groupTotal(r, groups))}`, ...counted, `Live ${r.days.toFixed(1)} days`].join('<br>')}`;
+  return `<b>${esc(r.tag)}</b> ${isoDay(r.publishedAt)}<br>${[...rows, `Total: ${f0(groupTotal(r, groups))}`, ...counted, `Live ${r.days.toFixed(1)} ${r.days === 1 ? 'day' : 'days'}`].join('<br>')}`;
 }
