@@ -1,22 +1,12 @@
-// The stars chart's shared maths: the even samples, their axis labels and a monotone curve through
-// them. Browser code imports this file alone (`@github-stats-action/core/stars`), so it stays free of Node imports.
+// The stars chart's shared maths: the sampled points and a monotone curve through them. Browser code
+// imports this file alone (`@github-stats-action/core/stars`), so it stays free of Node imports.
 
-import type { ChartsConfig } from './config';
 import type { StarPoint } from './types';
 
 export type { StarPoint };
 
-export type StarsSpacing = 'even' | 'time';
-
-export const DEFAULT_STARS_SPACING: StarsSpacing = 'even';
-
-/** The number of points the even chart samples the series into (fewer when there are fewer stars). */
+/** The number of points the stars chart samples the series into (fewer when there are fewer stars). */
 export const STAR_SAMPLES = 30;
-
-/** The spacing the stars chart uses, the default when the config has none. */
-export function starsSpacing(charts: ChartsConfig | undefined): StarsSpacing {
-  return charts?.stars.spacing ?? DEFAULT_STARS_SPACING;
-}
 
 /** Up to `count` points evenly spaced by star count: the first star, the days the count reached the levels between, and the latest total. */
 export function sampleStars(points: readonly StarPoint[], count = STAR_SAMPLES): StarPoint[] {
@@ -33,41 +23,6 @@ export function sampleStars(points: readonly StarPoint[], count = STAR_SAMPLES):
   }
   indices.push(last);
   return indices.filter((index, i) => i === 0 || index !== indices[i - 1]).map((index) => points[index]!);
-}
-
-export interface SampleTick {
-  /** Index into the samples. */
-  index: number;
-  label: string;
-}
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-/** Axis labels: the year at each year's first sample, or the month under a year's span. A newer label drops the one before it when they are within `minGap` samples; the first label stays. */
-export function sampleTicks(samples: readonly StarPoint[], minGap: number): SampleTick[] {
-  const first = samples[0];
-  const last = samples.at(-1);
-  if (!first || !last) return [];
-  const monthly = Date.parse(last.date) - Date.parse(first.date) < 365 * 86_400_000;
-  const candidates: SampleTick[] = [];
-  let period: string | undefined;
-  samples.forEach((p, index) => {
-    const key = monthly ? p.date.slice(0, 7) : p.date.slice(0, 4);
-    if (key === period) return;
-    period = key;
-    const year = p.date.slice(0, 4);
-    const month = MONTHS[Number(p.date.slice(5, 7)) - 1] ?? '';
-    const label = !monthly ? year : index === 0 || month === 'Jan' ? `${month} ${year}` : month;
-    candidates.push({ index, label });
-  });
-  const ticks: SampleTick[] = [];
-  for (const tick of candidates) {
-    // the first label keeps its place, so a newer label that clashes with it is the one left out
-    while (ticks.length > 1 && tick.index - ticks.at(-1)!.index < minGap) ticks.pop();
-    const previous = ticks.at(-1);
-    if (!previous || tick.index - previous.index >= minGap) ticks.push(tick);
-  }
-  return ticks;
 }
 
 /** A point in plot coordinates. */

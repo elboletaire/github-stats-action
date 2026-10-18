@@ -116,27 +116,27 @@ describe('the example config', () => {
 });
 
 describe('charts', () => {
-  it('defaults to even star spacing with every title shown', () => {
-    expect(parseConfig('').charts).toEqual({ titles: true, stars: { spacing: 'even' }, 'downloads-per-day': {}, 'downloads-per-release': {} });
+  it('defaults to every title shown', () => {
+    expect(parseConfig('').charts).toEqual({ titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {} });
   });
 
-  it('reads the spacing, the global titles switch and a title per chart', () => {
+  it('reads the global titles switch and a title per chart', () => {
     const config = parseConfig(`
 charts:
   titles: false
-  stars: { spacing: time, title: true }
+  stars: { title: true }
   downloads-per-day: { title: false }
 `);
     expect(config.charts).toEqual({
       titles: false,
-      stars: { spacing: 'time', title: true },
+      stars: { title: true },
       'downloads-per-day': { title: false },
       'downloads-per-release': {},
     });
   });
 
-  it('rejects a spacing other than even or time', () => {
-    expect(() => parseConfig('charts: { stars: { spacing: linear } }')).toThrow("charts.stars.spacing must be 'even' or 'time'");
+  it('rejects the spacing option, which the stars chart no longer has', () => {
+    expect(() => parseConfig('charts: { stars: { spacing: even } }')).toThrow('charts.stars.spacing is not a known key');
   });
 
   it('rejects a title that is not true or false', () => {
@@ -144,8 +144,7 @@ charts:
     expect(() => parseConfig('charts: { downloads-per-release: { title: 0 } }')).toThrow('charts.downloads-per-release.title must be true or false');
   });
 
-  it('rejects a null spacing and a null title alike', () => {
-    expect(() => parseConfig('charts: { stars: { spacing: null } }')).toThrow("charts.stars.spacing must be 'even' or 'time'");
+  it('rejects a null title', () => {
     expect(() => parseConfig('charts: { stars: { title: null } }')).toThrow('charts.stars.title must be true or false');
   });
 

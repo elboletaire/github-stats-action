@@ -4,7 +4,6 @@
 import { readFile } from 'node:fs/promises';
 import { parse } from 'yaml';
 import { compareVersions, parseVersion } from './semver';
-import { DEFAULT_STARS_SPACING, type StarsSpacing } from './stars';
 
 export interface GroupRule {
   name: string;
@@ -37,15 +36,10 @@ export interface ChartConfig {
   title?: boolean;
 }
 
-export interface StarsChartConfig extends ChartConfig {
-  /** `even` spaces the points by star count, `time` by day. */
-  spacing: StarsSpacing;
-}
-
 export interface ChartsConfig {
   /** Shows the visible title of the README charts; the dashboard keeps its headings. */
   titles: boolean;
-  stars: StarsChartConfig;
+  stars: ChartConfig;
   'downloads-per-day': ChartConfig;
   'downloads-per-release': ChartConfig;
 }
@@ -77,7 +71,7 @@ export const DEFAULT_CONFIG: StatsConfig = {
   counters: [],
   epochs: [],
   platforms: [],
-  charts: { titles: true, stars: { spacing: DEFAULT_STARS_SPACING }, 'downloads-per-day': {}, 'downloads-per-release': {} },
+  charts: { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {} },
 };
 
 /** Names the dataset uses for its own buckets, so a group can't take them. */
@@ -206,14 +200,12 @@ function parseCharts(value: unknown): ChartsConfig {
     checkKeys(sub, keys, `charts.${name}`);
     return sub;
   };
-  const stars = section('stars', ['title', 'spacing']);
-  const spacing = stars.spacing === undefined ? DEFAULT_STARS_SPACING : stars.spacing;
-  if (spacing !== 'even' && spacing !== 'time') throw new ConfigError(`charts.stars.spacing must be 'even' or 'time'`);
+  const stars = section('stars', ['title']);
   const perDay = section('downloads-per-day', ['title']);
   const perRelease = section('downloads-per-release', ['title']);
   return {
     titles: optionalBoolean(obj, 'titles', 'charts') ?? true,
-    stars: { spacing, ...chartOptions(optionalBoolean(stars, 'title', 'charts.stars')) },
+    stars: chartOptions(optionalBoolean(stars, 'title', 'charts.stars')),
     'downloads-per-day': chartOptions(optionalBoolean(perDay, 'title', 'charts.downloads-per-day')),
     'downloads-per-release': chartOptions(optionalBoolean(perRelease, 'title', 'charts.downloads-per-release')),
   };

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { StarPoint } from '../src/types';
-import { monotoneCurve, monotonePath, sampleStars, sampleTicks, starsSpacing, STAR_SAMPLES } from '../src/stars';
+import { monotoneCurve, monotonePath, sampleStars, STAR_SAMPLES } from '../src/stars';
 
 const DAY = 86_400_000;
 const dateOf = (i: number, from = '2024-01-01'): string => new Date(Date.parse(from) + i * DAY).toISOString().slice(0, 10);
@@ -96,75 +96,6 @@ describe('sampleStars', () => {
   });
 });
 
-describe('sampleTicks', () => {
-  it('labels the first sample of each year', () => {
-    const samples = [
-      { date: '2023-11-20', stars: 1 },
-      { date: '2024-01-03', stars: 2 },
-      { date: '2024-06-01', stars: 3 },
-      { date: '2025-01-09', stars: 4 },
-    ];
-    expect(sampleTicks(samples, 1)).toEqual([
-      { index: 0, label: '2023' },
-      { index: 1, label: '2024' },
-      { index: 3, label: '2025' },
-    ]);
-  });
-
-  it('uses month labels under a year, with the year on January', () => {
-    const samples = [
-      { date: '2025-11-02', stars: 1 },
-      { date: '2025-12-20', stars: 2 },
-      { date: '2026-01-05', stars: 3 },
-      { date: '2026-02-11', stars: 4 },
-    ];
-    expect(sampleTicks(samples, 1)).toEqual([
-      { index: 0, label: 'Nov 2025' },
-      { index: 1, label: 'Dec' },
-      { index: 2, label: 'Jan 2026' },
-      { index: 3, label: 'Feb' },
-    ]);
-  });
-
-  it('leaves out a label within the gap of the previous one', () => {
-    const samples = [
-      { date: '2024-12-30', stars: 1 },
-      { date: '2025-01-02', stars: 2 },
-      { date: '2025-02-01', stars: 3 },
-    ];
-    // under a year, so months: January is one sample after the first label, too close to keep
-    expect(sampleTicks(samples, 2)).toEqual([
-      { index: 0, label: 'Dec 2024' },
-      { index: 2, label: 'Feb' },
-    ]);
-  });
-
-  it('keeps the last label over a tight one before it, so the end label never runs into it', () => {
-    // samples 0, 3 and 4 are 2019, 2020 and 2021: 2021 is one sample after 2020, too close, so 2020 goes
-    const samples = [
-      { date: '2019-06-01', stars: 1 },
-      { date: '2019-07-01', stars: 2 },
-      { date: '2019-08-01', stars: 3 },
-      { date: '2020-06-01', stars: 4 },
-      { date: '2021-06-01', stars: 5 },
-    ];
-    expect(sampleTicks(samples, 2)).toEqual([
-      { index: 0, label: '2019' },
-      { index: 4, label: '2021' },
-    ]);
-  });
-
-  it('keeps every year when each one has room', () => {
-    // five years, three samples each: every first sample is three samples after the last
-    const samples = Array.from({ length: 15 }, (_, i) => ({ date: `${2019 + Math.floor(i / 3)}-03-01`, stars: i + 1 }));
-    expect(sampleTicks(samples, 3).map((t) => t.label)).toEqual(['2019', '2020', '2021', '2022', '2023']);
-  });
-
-  it('gives nothing without samples', () => {
-    expect(sampleTicks([], 1)).toEqual([]);
-  });
-});
-
 describe('monotoneCurve', () => {
   it('never leaves the range of its end points, so a cumulative count never overshoots', () => {
     // a jump, a flat run and a steep rise: the classic overshoot shape for an unconstrained spline
@@ -220,12 +151,5 @@ describe('monotoneCurve', () => {
 
   it('writes the path as a move and one cubic per segment, one decimal', () => {
     expect(monotonePath([[0, 0], [30, 10]])).toBe('M0.0 0.0C10.0 3.3 20.0 6.7 30.0 10.0');
-  });
-});
-
-describe('starsSpacing', () => {
-  it('is even unless the config says time', () => {
-    expect(starsSpacing(undefined)).toBe('even');
-    expect(starsSpacing({ titles: true, stars: { spacing: 'time' }, 'downloads-per-day': {}, 'downloads-per-release': {} })).toBe('time');
   });
 });

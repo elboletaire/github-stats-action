@@ -9679,9 +9679,7 @@
  ],
  "charts": {
   "titles": true,
-  "stars": {
-   "spacing": "even"
-  },
+  "stars": {},
   "downloads-per-day": {},
   "downloads-per-release": {}
  },

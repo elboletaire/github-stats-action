@@ -113,7 +113,7 @@ describe('renderCharts', () => {
     expect(segments(svg)).toBe(0);
   });
 
-  it('keeps the stars file small by dropping the days inside a flat run', async () => {
+  it('keeps the stars file small over a long series', async () => {
     const dataset = await fixture();
     const stars = Array.from({ length: 1500 }, (_, i) => ({ date: day(i, {}).date, stars: Math.floor(i / 5) }));
     const svg = chart(renderCharts({ ...dataset, stars }), 'charts/stars-light.svg');
@@ -205,7 +205,7 @@ describe('niceTicks', () => {
 });
 
 describe('chart options', () => {
-  const CHARTS = { titles: true, stars: { spacing: 'even' as const }, 'downloads-per-day': {}, 'downloads-per-release': {} };
+  const CHARTS = { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {} };
   const withCharts = async (charts: Partial<NonNullable<Dataset['charts']>>): Promise<Dataset> => ({ ...(await fixture()), charts: { ...CHARTS, ...charts } });
   /** The file without its accessible title and description, so only what is drawn is left. */
   const drawn = (svg: string): string => svg.replace(/<(title|desc) id="[^"]*">[^<]*<\/\1>/g, '');
@@ -216,7 +216,7 @@ describe('chart options', () => {
   it('shows each title and note by default', async () => {
     const files = renderCharts(await fixture());
     expect(chart(files, 'charts/stars-light.svg')).toContain('>Stars over time<');
-    expect(chart(files, 'charts/stars-light.svg')).toContain('evenly spaced by stars, not time');
+    expect(chart(files, 'charts/stars-light.svg')).toContain('>Cumulative stargazers<');
     expect(chart(files, 'charts/downloads-per-release-light.svg')).toContain('>Downloads per release<');
   });
 
@@ -233,8 +233,6 @@ describe('chart options', () => {
   it('keeps the estimated note and the stars spacing when titles are hidden', async () => {
     const files = renderCharts(await withCharts({ titles: false }));
     expect(drawn(chart(files, 'charts/downloads-per-day-light.svg'))).toContain('>Estimated per day<');
-    expect(drawn(chart(files, 'charts/stars-light.svg'))).toContain('>Evenly spaced by stars, not time<');
-    expect(drawn(chart(files, 'charts/stars-light.svg'))).not.toContain('Cumulative stargazers');
   });
 
   it('keeps the measured note when titles are hidden', async () => {
@@ -257,13 +255,13 @@ describe('chart options', () => {
     expect(short).toMatch(/y="20\.0"[^>]*>Estimated per day</);
   });
 
-  it('shows no stars hint in time spacing, which has no hint', async () => {
-    const svg = chart(renderCharts(await withCharts({ titles: false, stars: { spacing: 'time' } })), 'charts/stars-light.svg');
-    expect(drawn(svg)).not.toContain('Evenly spaced');
+  it('leaves the stars chart without a note when titles are hidden', async () => {
+    const svg = chart(renderCharts(await withCharts({ titles: false })), 'charts/stars-light.svg');
+    expect(drawn(svg)).not.toContain('Cumulative stargazers');
   });
 
   it('lets a chart title override the global switch', async () => {
-    const files = renderCharts(await withCharts({ titles: false, stars: { spacing: 'even', title: true }, 'downloads-per-day': { title: true } }));
+    const files = renderCharts(await withCharts({ titles: false, stars: { title: true }, 'downloads-per-day': { title: true } }));
     expect(drawn(chart(files, 'charts/stars-light.svg'))).toContain('>Stars over time<');
     expect(drawn(chart(files, 'charts/downloads-per-day-light.svg'))).toContain('>Estimated');
     expect(drawn(chart(files, 'charts/downloads-per-release-light.svg'))).not.toContain('>Downloads per release<');
@@ -289,7 +287,7 @@ describe('chart options', () => {
     expect(hidden).toMatch(/<text x="[\d.]+" y="20\.0" fill="[^"]*" font-size="12">/);
   });
 
-  it('draws the stars at evenly spaced samples: a dot each, titled, and the end dot', async () => {
+  it('draws the stars as about 30 samples: a dot each, titled, and the end dot', async () => {
     const dataset = await fixture();
     const svg = chart(renderCharts(dataset), 'charts/stars-light.svg');
     const samples = (dataset.stars.at(-1)?.stars ?? 0) === 18 ? 18 : 30;
@@ -297,9 +295,37 @@ describe('chart options', () => {
     expect(svg.match(/<circle [^>]*r="4"[^>]*><title>/g)).toHaveLength(1);
   });
 
-  it('keeps one point per day in time spacing', async () => {
-    const svg = chart(renderCharts(await withCharts({ stars: { spacing: 'time' } })), 'charts/stars-light.svg');
-    expect(svg).toContain('one point per day');
-    expect(svg).not.toMatch(/r="3"/);
+  it('places each sample at its date on a linear time axis that starts at the first star', async () => {
+    const dataset = { ...(await fixture()), stars: [
+      { date: '2024-01-01', stars: 1 },
+      { date: '2024-01-02', stars: 2 },
+      { date: '2024-04-10', stars: 3 },
+    ] };
+    const svg = chart(renderCharts(dataset), 'charts/stars-light.svg');
+    // 100 days from the first star to the last, over the 716px plot: the second star is 1% of the way along
+    const dotX = [...svg.matchAll(/<circle cx="([\d.]+)" cy="[\d.]+" r="3"/g)].map((m) => Number(m[1]));
+    expect(dotX).toEqual([60, 67.2]);
+    expect(svg).toMatch(/<circle cx="776\.0" cy="[\d.]+" r="4"/);
   });
+
+  it('keeps the x positions of the samples in order, the first and the last at the plot edges', async () => {
+    const svg = chart(renderCharts(await fixture()), 'charts/stars-light.svg');
+    const xs = [...svg.matchAll(/<circle cx="([\d.]+)" cy="[\d.]+" r="[34]"/g)].map((m) => Number(m[1]));
+    expect(xs[0]).toBe(60);
+    expect(xs.at(-1)).toBe(776);
+    for (let i = 1; i < xs.length; i++) expect(xs[i]!).toBeGreaterThan(xs[i - 1]!);
+  });
+
+  it('draws a single star and a single day, all at the centre of the plot, without a NaN', async () => {
+    for (const stars of [
+      [{ date: '2024-01-01', stars: 1 }],
+      [{ date: '2024-01-01', stars: 2 }],
+    ]) {
+      const dataset = { ...(await fixture()), stars };
+      const svg = chart(renderCharts(dataset), 'charts/stars-light.svg');
+      expect(svg).toMatch(/<circle cx="418\.0" cy="[\d.]+" r="4"/);
+      expect(svg).not.toContain('NaN');
+    }
+  });
+
 });
