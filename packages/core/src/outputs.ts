@@ -1,5 +1,5 @@
 // Output renderers. Each returns the files to write; the action and the CLI do the writing.
-// Stubs until the dashboard, svg and badges packages fill them in.
+// Stubs until the dashboard and svg packages fill them in.
 
 import type { Dataset } from './types';
 
@@ -22,12 +22,6 @@ export function renderDashboard(datasets: readonly Dataset[], options: { mode: '
 
 /** SVG charts for one repo; paths are relative to `<owner>/<repo>/` (`charts/*.svg`). */
 export function renderCharts(dataset: Dataset): OutputFile[] {
-  void dataset;
-  return [];
-}
-
-/** Badges for one repo; paths are relative to `<owner>/<repo>/` (`badges/*`). */
-export function renderBadges(dataset: Dataset): OutputFile[] {
   void dataset;
   return [];
 }
