@@ -1,4 +1,4 @@
-# github-stats-action
+# Repo Stats
 
 A GitHub Action that keeps the history GitHub throws away. GitHub shows only the current download count of each release asset and 14 days of traffic, so nothing else survives unless it's copied. Every run stores a snapshot of release downloads, stars, Docker Hub pulls and (opt-in) traffic on an orphan `stats-data` branch, then rebuilds from all of them a dashboard, SVG charts and badges.
 
@@ -7,7 +7,7 @@ A GitHub Action that keeps the history GitHub throws away. GitHub shows only the
 1. Add `.github/workflows/stats.yml` (see [examples/workflow.yml](examples/workflow.yml)):
 
    ```yaml
-   name: GitHub stats
+   name: Repo Stats
 
    on:
      schedule:
@@ -79,7 +79,7 @@ A repo has one Pages site. If the repo already serves a website from Pages, keep
 Set the repo's Pages source to "GitHub Actions" first. The action only writes the site to `pages-dir`; the Pages actions deploy it:
 
 ```yaml
-name: GitHub stats
+name: Repo Stats
 
 on:
   schedule:

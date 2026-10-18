@@ -1,5 +1,5 @@
-name: GitHub stats
-description: Keeps release downloads, stars, traffic and Docker Hub pulls on a data branch, and builds a dashboard, charts and badges from them.
+name: Repo Stats
+description: Keeps a repository's release downloads, stars, traffic and Docker pulls on a data branch, with dashboard, charts and badges.
 branding:
   icon: bar-chart-2
   color: blue
