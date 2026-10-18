@@ -187,6 +187,9 @@ epochs:                     # dashboard periods and chart markers
   - { version: v2.0.0, label: Desktop app }
 platforms:                  # label rules for asset names
   - { match: "acme-desktop-*-windows-x64-setup.exe", label: Windows installer }
+charts:                     # README SVG charts
+  titles: true              # false hides every chart's title
+  stars: { spacing: even }  # even (default) or time (one point per day)
 docker: acme/acme           # optional Docker Hub image
 ```
 
@@ -195,6 +198,7 @@ docker: acme/acme           # optional Docker Hub image
 - `counters`: `name`, `label`, `assets`, and `from`, an optional quoted semver; releases before it aren't counted. A counter's assets still count as downloads unless `ignore` also names them.
 - `epochs`: `version` as a quoted semver (`"v1.11.0"`, so YAML doesn't read `1.11` as a number), `label` defaults to the version. Optional.
 - `platforms`: `match` and `label`. Without a matching rule, the asset name minus the tag, repo name and archive suffixes is used.
+- `charts`: `titles` (default `true`) shows or hides the title of the README SVGs; a chart's own `title` (`stars`, `downloads-per-day`, `downloads-per-release`) overrides it. A note that says what the data is stays when titles are hidden. `stars.spacing` is `even` (default: the points are evenly spaced by star count, so a slow start doesn't flatten the line) or `time` (evenly spaced by day). The dashboard keeps its headings.
 - `docker`: `namespace/name`.
 
 Globs: `*` matches any run of characters, everything else is literal.

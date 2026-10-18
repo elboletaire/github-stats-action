@@ -14,9 +14,11 @@ import {
   niceTicks,
   PAD,
   PLOT_LEFT,
+  plotTop,
   plural,
   px,
   seriesColor,
+  showTitle,
   stack,
   svgDocument,
   svgText,
@@ -30,7 +32,7 @@ import {
 } from './svg';
 
 /** The plot starts lower when there are epoch labels to make room for above it. */
-const plotBox = (labelled: boolean): Box => ({ left: PLOT_LEFT, right: WIDTH - PAD, top: labelled ? 112 : 80, bottom: 252 });
+const plotBox = (labelled: boolean, titled: boolean): Box => ({ left: PLOT_LEFT, right: WIDTH - PAD, top: plotTop(titled, labelled), bottom: 252 });
 const title = 'Downloads per release';
 
 /** Label rows above the plot, nearest first. Past the last one a label is left out, its marker stays. */
@@ -48,9 +50,13 @@ export function downloadsPerReleaseChart(dataset: Dataset, theme: Theme): string
   const note = 'One column per release, stacked by group';
   const { releases } = dataset;
   const c = ink(theme);
-  const box = plotBox(dataset.epochs.some((_, e) => releases.some((r) => r.epoch === e)));
+  const titled = showTitle(dataset, 'downloads-per-release');
+  const box = plotBox(
+    dataset.epochs.some((_, e) => releases.some((r) => r.epoch === e)),
+    titled,
+  );
   if (releases.length === 0) {
-    return svgDocument(theme, title, `${title}: no releases yet.`, [...heading(title, note, theme, keys), emptyNote('No releases yet', box, theme)]);
+    return svgDocument(theme, title, `${title}: no releases yet.`, [...heading(title, note, theme, keys, titled), emptyNote('No releases yet', box, theme)]);
   }
 
   const totals = releases.map((r) => dataset.groups.reduce((sum, g) => sum + finite(r.groups[g.name] ?? 0), 0));
@@ -100,7 +106,7 @@ export function downloadsPerReleaseChart(dataset: Dataset, theme: Theme): string
   const tagLabels = releases.flatMap((r, i) => (i % step === 0 ? [{ x: box.left + i * slot + slot / 2, value: r.tag }] : []));
 
   return svgDocument(theme, title, `${title}: ${plural(releases.length, 'release')}, stacked by group.`, [
-    ...heading(title, note, theme, keys),
+    ...heading(title, note, theme, keys, titled),
     ...valueAxis(ticks, yOf, box, theme),
     ...markers,
     ...columns,

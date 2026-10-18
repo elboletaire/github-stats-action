@@ -2,7 +2,7 @@
 // no DOM, so each chart is a standalone file for READMEs. Colours and sizes come from the
 // theme the dashboard shares.
 
-import { FONT, INK, MARK, TYPE, seriesColor as slotColor, type Ink, type Theme } from '@github-stats-action/core';
+import { FONT, INK, MARK, TYPE, seriesColor as slotColor, type ChartName, type Dataset, type Ink, type Theme } from '@github-stats-action/core';
 
 export type { Theme };
 
@@ -13,6 +13,12 @@ export const DAY_MS = 86_400_000;
 /** The side margin of every chart, and where the plot starts after the value axis. */
 export const PAD = 24;
 export const PLOT_LEFT = 60;
+
+/** Whether a chart shows its title and note: its own `title` option, else `charts.titles`, else yes. */
+export const showTitle = (dataset: Dataset, chart: ChartName): boolean => dataset.charts?.[chart].title ?? dataset.charts?.titles ?? true;
+
+/** The top of the plot: lower without a title, and lower again to make room for `labelled` rows above it. */
+export const plotTop = (titled: boolean, labelled = false): number => (titled ? 80 : 40) + (labelled ? 32 : 0);
 
 export const ink = (theme: Theme): Ink => INK[theme];
 
@@ -144,8 +150,9 @@ function legend(keys: Key[], theme: Theme, right: number, y: number): string[] {
   });
 }
 
-/** Title, note line and legend (when there is more than one series). */
-export function heading(title: string, note: string, theme: Theme, keys: Key[] = []): string[] {
+/** Title, note line and legend (when there is more than one series). Without a title, only the legend stays, inline on the top line. */
+export function heading(title: string, note: string, theme: Theme, keys: Key[] = [], titled = true): string[] {
+  if (!titled) return keys.length > 1 ? legend(keys, theme, WIDTH - PAD, 20) : [];
   return [
     `<text x="${PAD}" y="32" fill="${INK[theme].primary}" font-size="${TYPE.lg}" font-weight="600" letter-spacing="-0.2">${esc(title)}</text>`,
     svgText({ x: PAD, y: 50, value: note, fill: INK[theme].muted, size: TYPE.sm }),

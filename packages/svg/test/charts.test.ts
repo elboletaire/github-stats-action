@@ -203,3 +203,71 @@ describe('niceTicks', () => {
     expect(niceTicks(5000)).toEqual([0, 2000, 4000, 6000]);
   });
 });
+
+describe('chart options', () => {
+  const CHARTS = { titles: true, stars: { spacing: 'even' as const }, 'downloads-per-day': {}, 'downloads-per-release': {} };
+  const withCharts = async (charts: Partial<NonNullable<Dataset['charts']>>): Promise<Dataset> => ({ ...(await fixture()), charts: { ...CHARTS, ...charts } });
+  /** The file without its accessible title and description, so only what is drawn is left. */
+  const drawn = (svg: string): string => svg.replace(/<(title|desc) id="[^"]*">[^<]*<\/\1>/g, '');
+  /** The topmost gridline, the top of the plot. */
+  const plotTop = (svg: string): number =>
+    Math.min(...[...svg.matchAll(/<line x1="[^"]*" x2="[^"]*" y1="([\d.]+)" y2="\1" stroke="[^"]*"\/>/g)].map((m) => Number(m[1])));
+
+  it('shows each title and note by default', async () => {
+    const files = renderCharts(await fixture());
+    expect(chart(files, 'charts/stars-light.svg')).toContain('>Stars over time<');
+    expect(chart(files, 'charts/stars-light.svg')).toContain('samples evenly spaced by star count');
+    expect(chart(files, 'charts/downloads-per-release-light.svg')).toContain('>Downloads per release<');
+  });
+
+  it('hides every visible title and note when titles is false, keeping the accessible title', async () => {
+    for (const { content, path } of renderCharts(await withCharts({ titles: false }))) {
+      expect(content).toContain('<title id="title">');
+      expect(content).toContain('<desc id="desc">');
+      expect(content).toContain('aria-labelledby="title desc"');
+      expect(drawn(content), path).not.toMatch(/>(Stars over time|Downloads per day|Downloads per release|Cumulative stargazers|Estimated|One column)/);
+      expect(drawn(content), path).not.toMatch(/font-size="15"/);
+    }
+  });
+
+  it('lets a chart title override the global switch', async () => {
+    const files = renderCharts(await withCharts({ titles: false, stars: { spacing: 'even', title: true }, 'downloads-per-day': { title: true } }));
+    expect(drawn(chart(files, 'charts/stars-light.svg'))).toContain('>Stars over time<');
+    expect(drawn(chart(files, 'charts/downloads-per-day-light.svg'))).toContain('>Estimated');
+    expect(drawn(chart(files, 'charts/downloads-per-release-light.svg'))).not.toContain('>Downloads per release<');
+  });
+
+  it('moves the plot up when the title is hidden, leaving no empty band at the top', async () => {
+    const shown = chart(renderCharts(await fixture()), 'charts/stars-light.svg');
+    const hidden = chart(renderCharts(await withCharts({ titles: false })), 'charts/stars-light.svg');
+    expect(plotTop(shown)).toBeGreaterThanOrEqual(79);
+    expect(plotTop(hidden)).toBeLessThanOrEqual(44);
+  });
+
+  it('moves the labelled plot of the releases chart up too', async () => {
+    const shown = chart(renderCharts(await fixture()), 'charts/downloads-per-release-light.svg');
+    const hidden = chart(renderCharts(await withCharts({ titles: false })), 'charts/downloads-per-release-light.svg');
+    expect(plotTop(shown)).toBeGreaterThanOrEqual(111);
+    expect(plotTop(hidden)).toBeLessThanOrEqual(76);
+    expect(hidden).toContain('>v1.11.0 First desktop app<');
+  });
+
+  it('keeps the legend on the top line without a title', async () => {
+    const hidden = chart(renderCharts(await withCharts({ titles: false })), 'charts/downloads-per-release-light.svg');
+    expect(hidden).toMatch(/<text x="[\d.]+" y="20\.0" fill="[^"]*" font-size="12">/);
+  });
+
+  it('draws the stars at evenly spaced samples: a dot each, titled, and the end dot', async () => {
+    const dataset = await fixture();
+    const svg = chart(renderCharts(dataset), 'charts/stars-light.svg');
+    const samples = (dataset.stars.at(-1)?.stars ?? 0) === 18 ? 18 : 30;
+    expect(svg.match(/<circle [^>]*r="3"[^>]*><title>/g)).toHaveLength(samples - 1);
+    expect(svg.match(/<circle [^>]*r="4"[^>]*><title>/g)).toHaveLength(1);
+  });
+
+  it('keeps one point per day in time spacing', async () => {
+    const svg = chart(renderCharts(await withCharts({ stars: { spacing: 'time' } })), 'charts/stars-light.svg');
+    expect(svg).toContain('one point per day');
+    expect(svg).not.toMatch(/r="3"/);
+  });
+});

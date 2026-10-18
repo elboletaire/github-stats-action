@@ -15,10 +15,12 @@ import {
   niceTicks,
   PAD,
   PLOT_LEFT,
+  plotTop,
   plural,
   px,
   sample,
   seriesColor,
+  showTitle,
   stack,
   svgDocument,
   valueAxis,
@@ -33,18 +35,20 @@ import {
 /** Measured bars need at least this many snapshot days; before that the estimate is shown. */
 export const MIN_MEASURED_DAYS = 14;
 
-const box: Box = { left: PLOT_LEFT, right: WIDTH - PAD, top: 80, bottom: 252 };
+const boxOf = (titled: boolean): Box => ({ left: PLOT_LEFT, right: WIDTH - PAD, top: plotTop(titled), bottom: 252 });
 const title = 'Downloads per day';
 
 export function downloadsPerDayChart(dataset: Dataset, theme: Theme): string {
   const keys: Key[] = dataset.groups.map((g) => ({ label: g.label, color: seriesColor(theme, g.color) }));
   const measured = dataset.measuredDaily.length;
-  if (measured >= MIN_MEASURED_DAYS) return measuredBars(dataset, theme, keys);
+  const titled = showTitle(dataset, 'downloads-per-day');
+  const box = boxOf(titled);
+  if (measured >= MIN_MEASURED_DAYS) return measuredBars(dataset, theme, keys, box, titled);
   const note = `Estimated, spread over each release's live window (measured needs ${MIN_MEASURED_DAYS} days, have ${plural(measured, 'day')})`;
-  return estimatedAreas(dataset, theme, keys, note);
+  return estimatedAreas(dataset, theme, keys, note, box, titled);
 }
 
-function measuredBars(dataset: Dataset, theme: Theme, keys: Key[]): string {
+function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, titled: boolean): string {
   const days = dataset.measuredDaily;
   const totals = days.map((d) => dataset.groups.reduce((sum, g) => sum + finite(d.groups[g.name] ?? 0), 0));
   const ticks = niceTicks(Math.max(0, ...totals));
@@ -72,14 +76,14 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[]): string {
 
   const note = `Measured, change between daily snapshots (${plural(days.length, 'day')})`;
   return svgDocument(theme, title, `${title}: measured from daily snapshots.`, [
-    ...heading(title, note, theme, keys),
+    ...heading(title, note, theme, keys, titled),
     ...valueAxis(ticks, yOf, box, theme),
     ...xLabels(labels, box.bottom + 20, theme),
     ...bars,
   ]);
 }
 
-function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: string): string {
+function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: string, box: Box, titled: boolean): string {
   const { estimatedDaily } = dataset;
   const count = Math.max(0, ...dataset.groups.map((g) => estimatedDaily.groups[g.name]?.length ?? 0));
   const start = dayOf(estimatedDaily.start);
@@ -117,7 +121,7 @@ function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: strin
       ? [emptyNote('No downloads yet', box, theme)]
       : [...(defs.length ? [`<defs>${defs.join('')}</defs>`] : []), ...valueAxis(ticks, yOf, box, theme), ...xLabels(labels, box.bottom + 20, theme), ...areas];
 
-  return svgDocument(theme, title, `${title}: estimated per day by group.`, [...heading(title, note, theme, keys), ...body]);
+  return svgDocument(theme, title, `${title}: estimated per day by group.`, [...heading(title, note, theme, keys, titled), ...body]);
 }
 
 // The band between `base` and `upper`, filled with `fill` (a colour or a gradient reference), with a 2px line
