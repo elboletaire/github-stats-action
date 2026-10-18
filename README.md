@@ -141,7 +141,7 @@ dashboard/index.html              self-contained dashboard, all repos on the bra
   badges/*.json, badges/*.svg     derived: shields.io endpoint JSON and flat SVG badges
 ```
 
-Everything except `snapshots/`, `stargazers.json`, `npm/` and `traffic/` is rebuilt on every run, so the snapshots and the stored counts are the only source of truth.
+Everything except `snapshots/`, `stargazers.json`, `npm/` and `traffic/` is rebuilt on every run, so the snapshots and the stored counts are the only source of truth. Generated charts and badges that a run no longer produces are deleted; folders and files the action doesn't generate (a hand-made `charts/logo.svg`) are left alone.
 
 ## Reading the dashboard
 

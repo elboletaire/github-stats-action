@@ -2,6 +2,7 @@
 // empty; writes create their folders.
 
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import type { Dirent } from 'node:fs';
 import { join } from 'node:path';
 import type { OutputFile } from './outputs';
 import { npmSlug } from './npm';
@@ -148,23 +149,32 @@ export async function writeDerived(dir: string, dataset: Dataset, csv: string): 
   await writeFile(join(dir, 'daily.csv'), csv);
 }
 
-/** Folders whose files are all rebuilt on every run, so a file no run produces any more is stale. */
-const REBUILT_DIRS = ['charts', 'badges'];
+/**
+ * The files a run generates under `charts/` and `badges/`. Anything else in those folders is the user's
+ * (a logo, a hand-made chart) and is never removed.
+ */
+const GENERATED =
+  /^(charts\/(stars|downloads-per-day|downloads-per-release|npm-downloads)-(light|dark)\.svg|badges\/(downloads|release-latest|stars|docker-pulls|npm-downloads|downloads-[A-Za-z0-9_-]+|npm-[A-Za-z0-9._~-]+|counter-[A-Za-z0-9_-]+)\.(json|svg))$/;
 
-/** Removes the files of `charts/` and `badges/` that `files` no longer produces, e.g. the download charts once release downloads are off. */
+/**
+ * Removes the generated files of `charts/` and `badges/` that `files` no longer produces, e.g. the download
+ * charts once release downloads are off. Folders and files the run doesn't generate are left alone.
+ */
 export async function pruneDerived(dir: string, files: readonly OutputFile[]): Promise<void> {
   const keep = new Set(files.map((file) => file.path));
-  for (const sub of REBUILT_DIRS) {
-    let names: string[];
+  for (const sub of ['charts', 'badges']) {
+    let entries: Dirent[];
     try {
-      names = await readdir(join(dir, sub));
+      entries = await readdir(join(dir, sub), { withFileTypes: true });
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue;
       throw error;
     }
-    for (const name of names) {
-      const path = `${sub}/${name}`;
-      if (!keep.has(path)) await rm(join(dir, path), { force: true });
+    for (const entry of entries) {
+      const path = `${sub}/${entry.name}`;
+      if (entry.isDirectory() || keep.has(path) || !GENERATED.test(path)) continue;
+      // rm unlinks a symlink rather than following it
+      await rm(join(dir, path), { force: true });
     }
   }
 }

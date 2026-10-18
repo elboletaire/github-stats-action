@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, readdir } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -95,6 +95,23 @@ describe('pruneDerived', () => {
     expect(await readdir(join(dir, 'badges'))).toEqual([]);
     expect(await readdir(join(dir, 'snapshots'))).toEqual(['2026-01-01.json']);
     expect(await readdir(join(dir, 'npm'))).toEqual(['passcore--core.json']);
+  });
+
+  it('keeps folders and files it does not generate, and removes only stale generated ones', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'stats-prune-'));
+    await writeOutputFiles(dir, [
+      { path: 'charts/stars-light.svg', content: '<svg/>' },
+      { path: 'charts/downloads-per-day-light.svg', content: '<svg/>' },
+      { path: 'charts/logo.svg', content: '<svg/>' },
+      { path: 'badges/npm-passcore--core.json', content: '{}' },
+      { path: 'badges/logo.svg', content: '<svg/>' },
+    ]);
+    await mkdir(join(dir, 'charts', 'hand-made'));
+    await writeFile(join(dir, 'charts', 'hand-made', 'x.svg'), '<svg/>');
+    await pruneDerived(dir, [{ path: 'charts/stars-light.svg', content: '' }]);
+    expect((await readdir(join(dir, 'charts'))).sort()).toEqual(['hand-made', 'logo.svg', 'stars-light.svg']);
+    expect(await readdir(join(dir, 'charts', 'hand-made'))).toEqual(['x.svg']);
+    expect(await readdir(join(dir, 'badges')).then((names) => names.sort())).toEqual(['logo.svg']);
   });
 
   it('does nothing when the derived folders do not exist yet', async () => {
