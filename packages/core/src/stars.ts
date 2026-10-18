@@ -12,7 +12,8 @@ export const STAR_SAMPLES = 30;
 export function sampleStars(points: readonly StarPoint[], count = STAR_SAMPLES): StarPoint[] {
   const last = points.length - 1;
   if (last < 0) return [];
-  const total = points[last]!.stars;
+  // the peak, not the last count: a dip (stars removed) still sets the levels the samples reach
+  const total = Math.max(...points.map((p) => p.stars));
   const n = Math.max(1, Math.min(count, total));
   const indices = [0];
   let k = 0;

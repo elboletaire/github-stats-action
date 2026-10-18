@@ -295,6 +295,22 @@ describe('chart options', () => {
     expect(svg.match(/<circle [^>]*r="4"[^>]*><title>/g)).toHaveLength(1);
   });
 
+  it('keeps the whole curve on the plot when the count dips', async () => {
+    const dataset = { ...(await fixture()), stars: [
+      { date: '2024-01-01', stars: 1 },
+      { date: '2024-01-02', stars: 50 },
+      { date: '2024-01-03', stars: 60 },
+      { date: '2024-01-04', stars: 10 },
+    ] };
+    const svg = chart(renderCharts(dataset), 'charts/stars-light.svg');
+    const cys = [...svg.matchAll(/ cy="([\d.-]+)"/g)].map((m) => Number(m[1]));
+    expect(cys.length).toBeGreaterThan(0);
+    for (const cy of cys) {
+      expect(cy).toBeGreaterThanOrEqual(80);
+      expect(cy).toBeLessThanOrEqual(252);
+    }
+  });
+
   it('places each sample at its date on a linear time axis that starts at the first star', async () => {
     const dataset = { ...(await fixture()), stars: [
       { date: '2024-01-01', stars: 1 },

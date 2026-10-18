@@ -61,7 +61,9 @@ export function starsChart(dataset: Dataset, theme: Theme): string {
     return svgDocument(theme, title, `${title}: ${message}.`, [...heading(title, note, theme, [], titled), emptyNote(message, box, theme)]);
   }
 
-  const ticks = niceTicks(last.stars);
+  // the peak, not the last count: a dip (stars removed) must stay on the plot
+  const peak = Math.max(...dataset.stars.map((p) => p.stars));
+  const ticks = niceTicks(peak);
   const top = ticks.at(-1) ?? 1;
   const yOf = (v: number): number => box.bottom - (finite(v) / top) * (box.bottom - box.top);
   const color = seriesColor(theme, 0);

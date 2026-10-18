@@ -40,6 +40,18 @@ describe('sampleStars', () => {
     expect(sampleStars([{ date: '2024-01-01', stars: 9 }])).toEqual([{ date: '2024-01-01', stars: 9 }]);
   });
 
+  it('sets the levels by the peak, so a dip keeps the samples on the way up', () => {
+    const points = [
+      { date: '2024-01-01', stars: 1 },
+      { date: '2024-01-02', stars: 50 },
+      { date: '2024-01-03', stars: 60 },
+      { date: '2024-01-04', stars: 10 },
+    ];
+    const samples = sampleStars(points);
+    expect(samples.at(-1)).toEqual(points[3]);
+    expect(samples.map((p) => p.stars)).toContain(60);
+  });
+
   it('takes at most 30 points, always the first star and the latest total', () => {
     const points = oneADay(100);
     const samples = sampleStars(points);
