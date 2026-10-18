@@ -34,7 +34,7 @@ export const INK: Record<Theme, Ink> = {
     grid: '#e8eaeb',
     axis: '#dcdedf',
     border: '#dcdedf',
-    good: '#1a7f3c',
+    good: '#1f7a4d',
     warn: '#9a6700',
   },
   dark: {
@@ -46,8 +46,8 @@ export const INK: Record<Theme, Ink> = {
     grid: '#2a2b2e',
     axis: '#33343a',
     border: '#33343a',
-    good: '#5ec487',
-    warn: '#dcae4a',
+    good: '#5fc08a',
+    warn: '#d9a441',
   },
 };
 
