@@ -1,6 +1,7 @@
 // One run: collect, write the day's snapshot, rebuild the derived files and the outputs.
 // Everything is fetched before anything is written, so a failed run leaves the branch as it was.
 
+import { stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { renderBadges } from '@github-stats-action/badges';
 import { dashboardFiles } from '@github-stats-action/dashboard';
@@ -75,6 +76,14 @@ export async function writeDerivedOutputs(dataDir: string, repo: string, config:
   return dataset;
 }
 
+async function isDirectory(path: string): Promise<boolean> {
+  try {
+    return (await stat(path)).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 /** Writes the Pages site: the dashboard and the dataset, without traffic unless `traffic` is set. */
 export async function writePagesSite(pages: { dir: string; traffic: boolean }, repo: string, dataset: Dataset): Promise<void> {
   // the pages build already includes data/<owner>/<repo>/dataset.json
@@ -109,7 +118,11 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
     releases,
   };
   if (options.importOld) {
-    const imported = await importOldSnapshots(join(options.dataDir, options.importOld), dir, config.docker);
+    const oldDir = join(options.dataDir, options.importOld);
+    if (!(await isDirectory(join(oldDir, 'snapshots')))) {
+      throw new Error(`import-old: no snapshots/ folder at ${options.importOld} on the data branch`);
+    }
+    const imported = await importOldSnapshots(oldDir, dir, config.docker);
     log.info(`import: ${imported.imported.length} days imported, ${imported.kept.length} kept`);
   }
   await writeSnapshot(dir, snapshot);

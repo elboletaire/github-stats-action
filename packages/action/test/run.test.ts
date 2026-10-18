@@ -176,4 +176,12 @@ describe('import-old', () => {
     expect(onBranch(REPO + '/snapshots').sort()).toEqual([...oldNames, '2026-01-03.json'].sort());
     expect(git(remote, 'show', `stats-data:${REPO}/snapshots/${oldNames[0]}`)).toContain('"takenAt": "2026-10-01T00:00:00Z"');
   });
+
+  it('fails clearly when the path holds no snapshots/ folder', async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
+    await expect(
+      runStats({ repo: REPO, config, dataDir, traffic: false, importOld: 'old', now, log, fetch: network() }),
+    ).rejects.toThrow('import-old: no snapshots/ folder at old on the data branch');
+    expect(await readdir(dataDir)).toEqual([]);
+  });
 });
