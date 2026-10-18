@@ -1,0 +1,97 @@
+name: Release
+
+# JS actions run dist/index.js straight from the ref and the runner builds nothing,
+# so each release tag points at a commit that carries the built dist/.
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release (vX.Y.Z), tagged on the selected branch's head
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve the version
+        id: version
+        env:
+          INPUT: ${{ inputs.version }}
+          REF: ${{ github.ref_name }}
+        run: |
+          v="${INPUT:-$REF}"
+          if [[ ! "$v" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "::error::not a vX.Y.Z version: $v"
+            exit 1
+          fi
+          {
+            echo "version=$v"
+            echo "major=v${BASH_REMATCH[1]}"
+            echo "minor=v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Find the source commit
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          src=$(git rev-parse -q --verify "refs/tags/$VERSION^{commit}" || git rev-parse HEAD)
+          # a rerun finds the tag already on the release commit; build from its parent
+          if [ "$(git log -1 --format=%s "$src")" = "chore(release): $VERSION" ]; then
+            src=$(git rev-parse "$src^")
+          fi
+          git checkout --detach "$src"
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm build
+
+      - name: Commit dist and move the tags
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          MAJOR: ${{ steps.version.outputs.major }}
+          MINOR: ${{ steps.version.outputs.minor }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f dist
+          git commit -q -m "chore(release): $VERSION"
+          git tag -f "$VERSION"
+          git push --force origin "refs/tags/$VERSION"
+          # vX and vX.Y follow only the newest stable release of their series
+          newest() { git tag -l "$1.*" | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1; }
+          for alias in "$MAJOR" "$MINOR"; do
+            if [ "$(newest "$alias")" = "$VERSION" ]; then
+              git tag -f "$alias"
+              git push --force origin "refs/tags/$alias"
+            fi
+          done
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if ! gh release view "$VERSION" > /dev/null 2>&1; then
+            # a backport shouldn't become the repo's latest release
+            newest=$(git tag -l 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+            latest=$([ "$newest" = "$VERSION" ] && echo true || echo false)
+            gh release create "$VERSION" --verify-tag --generate-notes --title "$VERSION" --latest="$latest"
+          fi
