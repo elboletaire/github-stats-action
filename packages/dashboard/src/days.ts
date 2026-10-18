@@ -12,6 +12,8 @@ export interface DayAxis {
   short(index: number): string;
   /** `Oct 18, 2026` */
   long(index: number): string;
+  /** `Oct 2026` */
+  monthYear(index: number): string;
   year(index: number): number;
   /** Year times 12 plus the month (0-11), so consecutive months differ by one. */
   month(index: number): number;
@@ -33,6 +35,7 @@ export function dayAxis(startIso: string): DayAxis {
     iso: (index) => date(index).toISOString().slice(0, 10),
     short,
     long: (index) => `${short(index)}, ${date(index).getUTCFullYear()}`,
+    monthYear: (index) => `${MONTHS[date(index).getUTCMonth()]} ${date(index).getUTCFullYear()}`,
     year: (index) => date(index).getUTCFullYear(),
     month: (index) => date(index).getUTCFullYear() * 12 + date(index).getUTCMonth(),
   };

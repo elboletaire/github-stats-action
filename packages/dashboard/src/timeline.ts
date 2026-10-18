@@ -22,9 +22,13 @@ export interface TimelineOptions {
   series: readonly TimelineSeries[];
   /** Hover label of a value, by its count: "1 star", "2 stars". */
   unit: { one: string; other: string };
+  /** Labels the first day's month and year, and leaves out a tick that would run into it. */
+  startLabel?: boolean;
 }
 
 const HEIGHT = 240;
+/** The least gap between the start label and the next tick, in px. */
+const START_LABEL_GAP = 60;
 
 /** Draws the chart into `svg` for the container's current width. */
 export function drawTimeline(svg: SVGSVGElement, o: TimelineOptions): void {
@@ -40,7 +44,9 @@ export function drawTimeline(svg: SVGSVGElement, o: TimelineOptions): void {
   const y = (v: number): number => m.t + (H - m.t - m.b) * (1 - v / mx);
 
   gridLines(svg, ticks(mx), y, m.l, W - m.r, f0);
+  if (o.startLabel) svgEl('text', { x: x(first), y: H - 8, 'text-anchor': 'start' }, svg).textContent = o.axis.monthYear(first);
   for (const [i, text] of xTicks(o.axis, first, last, Math.max(2, Math.floor(pw / 72)))) {
+    if (o.startLabel && x(i) - x(first) < START_LABEL_GAP) continue;
     svgEl('text', { x: x(i), y: H - 8, 'text-anchor': 'middle' }, svg).textContent = text;
   }
 

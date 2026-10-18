@@ -40,7 +40,10 @@ export function stars(d: Dataset): Section {
   if (points.length === 0) {
     return { el: makeSection('<div><h2>Stars over time</h2><p class="note">No stargazers collected yet.</p></div>') };
   }
-  const note = 'Cumulative stars at the end of each UTC day, from the stargazers\' timestamps. Hover or tap a point for its date.';
+  const notes: Record<View, string> = {
+    daily: 'Cumulative stars at the end of each UTC day, from the stargazers\' timestamps. Hover or tap for a day.',
+    sampled: 'Cumulative stars at about 30 points along the history, from the stargazers\' timestamps. Hover or tap a point for its date.',
+  };
   const axis = dayAxis(points[0]!.date);
   const xs = points.map((p) => axis.indexOf(Date.parse(`${p.date}T00:00:00Z`)));
   const values = points.map((p) => p.stars);
@@ -55,20 +58,22 @@ export function stars(d: Dataset): Section {
     [...months.values()].map((p) => `<tr><td>${esc(p.date.slice(0, 7))}</td><td>${f0(p.stars)}</td></tr>`).join('') + '</tbody>';
 
   const el = makeSection(
-    `<div><h2>Stars over time</h2><p class="note">${esc(note)}</p></div>` +
+    `<div><h2>Stars over time</h2><p class="note" data-note></p></div>` +
     `<div class="presets"><span class="group" role="group" aria-label="Chart view" data-views></span></div>` +
     `<div class="scroll"><svg role="img" aria-label="Cumulative stars over time"></svg></div>` +
     `<details><summary>Table view</summary><div class="scroll"><table>${table}</table></div></details>`,
   );
   const svg = el.querySelector('svg') as SVGSVGElement;
   const viewBox = el.querySelector('[data-views]') as HTMLElement;
+  const noteEl = el.querySelector('[data-note]') as HTMLElement;
 
   let view = savedView();
   const draw = (): void => {
+    noteEl.textContent = notes[view];
     if (view === 'sampled') {
       drawSampled(svg, { id: 'stars', axis, samples, xs: sampledXs, color });
     } else {
-      drawTimeline(svg, { id: 'stars', xs, axis, series: [{ label: 'Stars', color, values }], unit: { one: 'star', other: 'stars' } });
+      drawTimeline(svg, { id: 'stars', xs, axis, series: [{ label: 'Stars', color, values }], unit: { one: 'star', other: 'stars' }, startLabel: true });
     }
   };
   const buttons = VIEWS.map(([key, label]) => {

@@ -10,6 +10,8 @@ import { quarterMax, ticks } from './scale';
 import { showTip, tipOn } from './tooltip';
 
 const HEIGHT = 240;
+/** The least gap between the start label and the next tick, in px. */
+const START_LABEL_GAP = 60;
 
 export interface SampledOptions {
   /** Prefix of the chart's gradient id, unique on the page. */
@@ -40,7 +42,9 @@ export function drawSampled(svg: SVGSVGElement, o: SampledOptions): void {
   const base = y(0);
 
   gridLines(svg, ticks(mx), y, m.l, W - m.r, f0);
+  svgEl('text', { x: x(first), y: H - 8, 'text-anchor': 'start' }, svg).textContent = axis.monthYear(first);
   for (const [day, text] of xTicks(axis, first, last, Math.max(2, Math.floor(pw / 72)))) {
+    if (x(day) - x(first) < START_LABEL_GAP) continue;
     svgEl('text', { x: x(day), y: H - 8, 'text-anchor': 'middle' }, svg).textContent = text;
   }
 
