@@ -1,4 +1,4 @@
-name: Repo Stats
+name: Repo Stats Action
 description: Keeps a repository's release downloads, stars, traffic and Docker pulls on a data branch, with dashboard, charts and badges.
 branding:
   icon: bar-chart-2
