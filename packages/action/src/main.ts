@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import * as core from '@actions/core';
 import { loadConfig } from '@github-stats-action/core';
 import { checkoutDataBranch } from './git';
-import { runStats } from './run';
+import { runStats, writeDerivedOutputs } from './run';
 
 async function main(): Promise<void> {
   const token = core.getInput('token') || process.env.GITHUB_TOKEN || '';
@@ -15,6 +15,7 @@ async function main(): Promise<void> {
   const pages = core.getBooleanInput('pages');
   const dryRun = core.getBooleanInput('dry-run');
   const workspace = process.env.GITHUB_WORKSPACE ?? process.cwd();
+  const now = new Date();
   const repo = process.env.GITHUB_REPOSITORY;
   if (!repo) throw new Error('GITHUB_REPOSITORY is not set');
 
@@ -28,14 +29,16 @@ async function main(): Promise<void> {
     dataDir: data.dir,
     traffic: core.getBooleanInput('traffic'),
     pages: pages ? { dir: pagesDir, traffic: core.getBooleanInput('pages-traffic') } : undefined,
-    now: new Date(),
+    now,
     log: core,
   });
 
   if (dryRun) {
     core.info('dry-run: nothing committed or pushed');
   } else {
-    const pushed = await data.publish(`stats: ${result.dataset.snapshotAt.slice(0, 10)}`);
+    const pushed = await data.publish(`stats: ${result.dataset.snapshotAt.slice(0, 10)}`, () =>
+      writeDerivedOutputs(data.dir, repo, config, now),
+    );
     core.info(pushed ? `pushed ${branch}` : `${branch} unchanged`);
   }
   core.setOutput('pages-dir', pages ? pagesDir : '');

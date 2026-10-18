@@ -63,6 +63,16 @@ export function summaryLine(dataset: Dataset): string {
   return `${dataset.repo}: ${dataset.totals.downloads} downloads (${groups}), ${dataset.totals.stars} stars${docker}`;
 }
 
+/** Rebuilds the derived files, charts, badges and dashboard from the stored snapshots of `repo`. */
+export async function writeDerivedOutputs(dataDir: string, repo: string, config: StatsConfig, now: Date): Promise<Dataset> {
+  const dir = repoDir(dataDir, repo);
+  const { dataset, csv } = await deriveRepo(dir, repo, config, now);
+  await writeDerived(dir, dataset, csv);
+  await writeOutputFiles(dir, [...renderCharts(dataset), ...renderBadges(dataset)]);
+  await writeOutputFiles(dataDir, renderDashboard(await readDatasets(dataDir), { mode: 'standalone' }));
+  return dataset;
+}
+
 export async function runStats(options: RunOptions): Promise<RunResult> {
   const { repo, config, now, log } = options;
   const fetchFn = options.fetch ?? fetch;
@@ -97,10 +107,7 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
     await writeTrafficAggregates(dir, date, traffic);
   }
 
-  const { dataset, csv } = await deriveRepo(dir, repo, config, now);
-  await writeDerived(dir, dataset, csv);
-  await writeOutputFiles(dir, [...renderCharts(dataset), ...renderBadges(dataset)]);
-  await writeOutputFiles(options.dataDir, renderDashboard(await readDatasets(options.dataDir), { mode: 'standalone' }));
+  const dataset = await writeDerivedOutputs(options.dataDir, repo, config, now);
 
   if (options.pages) {
     const pagesDataset = options.pages.traffic ? dataset : { ...dataset, traffic: undefined };

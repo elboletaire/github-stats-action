@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -81,5 +81,33 @@ describe('checkoutDataBranch', () => {
     expect(git(remote, 'show', 'stats-data:theirs.json')).toBe('2');
     expect(git(remote, 'show', 'stats-data:mine.json')).toBe('3');
     expect(await readFile(join(mine.dir, 'theirs.json'), 'utf8')).toBe('2\n');
+  });
+
+  it('rebuilds the derived files over the rebased tree, so they include the day pushed meanwhile', async () => {
+    const { root, remote, work } = await setup();
+    const seed = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    await mkdir(join(seed.dir, 'snapshots'), { recursive: true });
+    await writeFile(join(seed.dir, 'snapshots', '2026-01-01.json'), '{}\n');
+    await seed.publish('day 1');
+
+    const mine = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    await writeFile(join(mine.dir, 'snapshots', '2026-01-03.json'), '{}\n');
+    const other = join(root, 'other');
+    git(root, 'clone', '-q', '-b', 'stats-data', remote, other);
+    git(other, 'config', 'user.email', 'x@example.com');
+    git(other, 'config', 'user.name', 'other');
+    await mkdir(join(other, 'snapshots'), { recursive: true });
+    await writeFile(join(other, 'snapshots', '2026-01-02.json'), '{}\n');
+    git(other, 'add', '-A');
+    git(other, 'commit', '-q', '-m', 'day 2');
+    git(other, 'push', '-q', 'origin', 'stats-data');
+
+    const derive = async () => {
+      const days = (await readdir(join(mine.dir, 'snapshots'))).sort();
+      await writeFile(join(mine.dir, 'daily.csv'), `${days.join('\n')}\n`);
+    };
+    expect(await mine.publish('day 3', derive)).toBe(true);
+    expect(git(remote, 'show', 'stats-data:daily.csv')).toBe('2026-01-01.json\n2026-01-02.json\n2026-01-03.json');
+    expect(git(remote, 'rev-list', '--count', 'stats-data')).toBe('3');
   });
 });

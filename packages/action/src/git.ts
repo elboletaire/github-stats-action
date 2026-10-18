@@ -16,8 +16,11 @@ const BOT = {
 export interface DataBranch {
   /** The worktree holding the branch; the run writes here. */
   dir: string;
-  /** Commits and pushes what changed. Returns false when nothing did. */
-  publish(message: string): Promise<boolean>;
+  /**
+   * Commits and pushes what changed. Returns false when nothing did. After a rebase onto a
+   * moved branch, `rederive` rebuilds the derived files over the rebased tree first.
+   */
+  publish(message: string, rederive?: () => Promise<unknown>): Promise<boolean>;
 }
 
 async function git(args: string[], cwd: string): Promise<string> {
@@ -65,7 +68,7 @@ export async function checkoutDataBranch(options: { cwd: string; branch: string;
 
   return {
     dir,
-    async publish(message: string): Promise<boolean> {
+    async publish(message: string, rederive?: () => Promise<unknown>): Promise<boolean> {
       await git(['add', '-A'], dir);
       if (!(await hasStagedChanges(dir))) return false;
       await git(['-c', `user.name=${BOT.name}`, '-c', `user.email=${BOT.email}`, 'commit', '--quiet', '-m', message], dir);
@@ -74,6 +77,13 @@ export async function checkoutDataBranch(options: { cwd: string; branch: string;
       } catch {
         await git(['fetch', '--quiet', '--no-tags', 'origin', `+refs/heads/${branch}:${remoteRef}`], dir);
         await git(['-c', `user.name=${BOT.name}`, '-c', `user.email=${BOT.email}`, 'rebase', '--quiet', '-X', 'theirs', remoteRef], dir);
+        if (rederive) {
+          await rederive();
+          await git(['add', '-A'], dir);
+          if (await hasStagedChanges(dir)) {
+            await git(['-c', `user.name=${BOT.name}`, '-c', `user.email=${BOT.email}`, 'commit', '--quiet', '--amend', '--no-edit'], dir);
+          }
+        }
         await git(['push', '--quiet', 'origin', `HEAD:refs/heads/${branch}`], dir);
       }
       return true;
