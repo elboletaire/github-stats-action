@@ -1,10 +1,10 @@
 // A line chart over day indices, with a crosshair and a tooltip per nearest day. Used by stars and traffic.
 
 import { esc, f0 } from './format';
-import { niceMax, ticks } from './scale';
+import { quarterMax, ticks } from './scale';
 import { type DayAxis, xTicks } from './days';
 import { showTip, tipOn } from './tooltip';
-import { resetSvg, svgEl, widthOf } from './svg';
+import { fadeFill, gridLines, resetSvg, svgEl, widthOf } from './svg';
 
 export interface TimelineSeries {
   label: string;
@@ -28,24 +28,23 @@ const HEIGHT = 240;
 export function drawTimeline(svg: SVGSVGElement, o: TimelineOptions): void {
   const W = widthOf(svg);
   const H = HEIGHT;
-  const m = { l: 44, r: 12, t: 14, b: 28 };
+  const m = { l: 44, r: 16, t: 16, b: 28 };
   resetSvg(svg, W, H);
   const first = o.xs[0] ?? 0;
   const last = Math.max(first + 1, o.xs[o.xs.length - 1] ?? first + 1);
   const pw = W - m.l - m.r;
   const x = (i: number): number => m.l + (pw * (i - first)) / (last - first);
-  const mx = niceMax(Math.max(0, ...o.series.flatMap((s) => s.values.map((v) => v ?? 0))));
+  const mx = quarterMax(Math.max(0, ...o.series.flatMap((s) => s.values.map((v) => v ?? 0))));
   const y = (v: number): number => m.t + (H - m.t - m.b) * (1 - v / mx);
 
-  for (const t of ticks(mx)) {
-    svgEl('line', { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), class: 'axis' }, svg);
-    svgEl('text', { x: m.l - 6, y: y(t) + 4, 'text-anchor': 'end' }, svg).textContent = f0(t);
-  }
+  gridLines(svg, ticks(mx), y, m.l, W - m.r, f0);
   for (const [i, text] of xTicks(o.axis, first, last, Math.max(2, Math.floor(pw / 72)))) {
     svgEl('text', { x: x(i), y: H - 8, 'text-anchor': 'middle' }, svg).textContent = text;
   }
 
-  for (const s of o.series) {
+  // one series gets a fade under its line and its last value at the end; several share the legend and the tooltip
+  const single = o.series.length === 1;
+  o.series.forEach((s, j) => {
     let d = '';
     let open = false;
     o.xs.forEach((day, k) => {
@@ -58,10 +57,29 @@ export function drawTimeline(svg: SVGSVGElement, o: TimelineOptions): void {
       d += `${open ? 'L' : 'M'}${x(day).toFixed(1)},${y(v).toFixed(1)}`;
       open = true;
     });
-    if (d) svgEl('path', { d, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round' }, svg);
-  }
+    if (!d) return;
+    if (single) {
+      const runs = d.split('M').filter(Boolean);
+      const area = runs.map((run) => {
+        const pts = run.split('L');
+        const [x0] = pts[0]!.split(',');
+        const [x1] = pts[pts.length - 1]!.split(',');
+        return `M${x0},${y(0).toFixed(1)}L${run}L${x1},${y(0).toFixed(1)}Z`;
+      }).join('');
+      svgEl('path', { d: area, fill: fadeFill(svg, `tl${j}`, s.color) }, svg);
+    }
+    svgEl('path', { d, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+    const lastK = s.values.length - 1;
+    const lastV = s.values[lastK];
+    if (single && lastV != null) {
+      const ex = x(o.xs[lastK] ?? last);
+      const ey = y(lastV);
+      svgEl('circle', { cx: ex, cy: ey, r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2 }, svg);
+      svgEl('text', { x: ex - 8, y: Math.max(m.t + 10, ey - 10), 'text-anchor': 'end', class: 'strong' }, svg).textContent = f0(lastV);
+    }
+  });
 
-  const cross = svgEl('line', { y1: m.t, y2: y(0), stroke: 'var(--muted)', 'stroke-width': 1, visibility: 'hidden' }, svg);
+  const cross = svgEl('line', { y1: m.t, y2: y(0), class: 'base', visibility: 'hidden' }, svg);
   const dots = o.series.map((s) => svgEl('circle', { r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, visibility: 'hidden' }, svg));
   const hit = svgEl('rect', { x: m.l, y: m.t, width: pw, height: H - m.t - m.b, fill: 'transparent' }, svg);
   // tipOn handles the tooltip for mouse and tap; the crosshair follows the same pointer

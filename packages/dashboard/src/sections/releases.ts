@@ -5,13 +5,16 @@ import { esc, f0, f1, isoDay } from '../format';
 import { niceMax, ticks } from '../scale';
 import { countedGroups } from '../model';
 import { colorVar } from '../palette';
-import { resetSvg, roundedTop, svgEl, widthOf, hitRect } from '../svg';
+import { gridLines, resetSvg, roundedTop, svgEl, widthOf, hitRect } from '../svg';
 import { stackSegments } from '../stack';
 import { showTip, tipOn } from '../tooltip';
 import { makeSection, legendHtml, type Section } from './common';
 
 const STEP = 17;
-const M = { l: 44, r: 12, t: 30, b: 58 };
+const M = { l: 44, r: 12, t: 44, b: 58 };
+/** Epoch labels take the row nearest the plot that has room, else the one above it; past that the marker stands alone. */
+const TIERS = 2;
+const TIER_H = 14;
 const H = 300;
 
 export function releases(d: Dataset): Section {
@@ -53,15 +56,14 @@ function drawReleases(svg: SVGSVGElement, d: Dataset): void {
   const mx = niceMax(Math.max(0, ...R.map((r) => groupTotal(r, groups))));
   const y = (v: number): number => M.t + (H - M.t - M.b) * (1 - v / mx);
   const slot = (W - M.l - M.r) / R.length;
-  const bw = slot - 4;
+  // a column never fills its slot: capped, the leftover is air; tags lie flat once the slots are wide enough
+  const bw = Math.min(32, slot - 4);
+  const flat = slot >= 64;
 
-  for (const t of ticks(mx)) {
-    svgEl('line', { x1: M.l, x2: W - M.r, y1: y(t), y2: y(t), class: 'axis' }, svg);
-    svgEl('text', { x: M.l - 6, y: y(t) + 4, 'text-anchor': 'end' }, svg).textContent = f0(t);
-  }
+  gridLines(svg, ticks(mx), y, M.l, W - M.r, f0);
 
   R.forEach((r, i) => {
-    const x = M.l + slot * i + 2;
+    const x = M.l + slot * i + (slot - bw) / 2;
     const segments = stackSegments(groups.map((g) => r.groups[g.name] ?? 0), y);
     for (const seg of segments) {
       const group = groups[seg.index];
@@ -69,7 +71,9 @@ function drawReleases(svg: SVGSVGElement, d: Dataset): void {
       if (seg.top) svgEl('path', { d: roundedTop(x, seg.y, bw, seg.height, 4), fill: colorVar(group) }, svg);
       else svgEl('rect', { x, y: seg.y, width: bw, height: seg.height, fill: colorVar(group) }, svg);
     }
-    const label = svgEl('text', { transform: `translate(${M.l + slot * (i + 0.5) + 3},${H - M.b + 10}) rotate(-60)`, 'text-anchor': 'end' }, svg);
+    const label = flat
+      ? svgEl('text', { x: M.l + slot * (i + 0.5), y: H - M.b + 18, 'text-anchor': 'middle' }, svg)
+      : svgEl('text', { transform: `translate(${M.l + slot * (i + 0.5) + 3},${H - M.b + 10}) rotate(-60)`, 'text-anchor': 'end' }, svg);
     label.textContent = r.tag;
     const hit = hitRect(svg, M.l + slot * i, M.t, slot, H - M.t - M.b);
     tipOn(hit, (ev) => showTip(releaseTip(r, d), ev));
@@ -77,18 +81,27 @@ function drawReleases(svg: SVGSVGElement, d: Dataset): void {
 
   // epoch markers where an epoch starts; none when the config names no epochs
   let prev = -1;
+  const placed: Array<{ from: number; to: number; tier: number }> = [];
   R.forEach((r, i) => {
     if (r.epoch < 0 || r.epoch === prev) return;
-    const x = M.l + slot * i;
-    if (i > 0) svgEl('line', { x1: x, x2: x, y1: M.t - 14, y2: y(0), class: 'sep' }, svg);
-    const label = d.epochs[r.epoch]?.version ?? '';
-    const text = svgEl('text', { x: x + 4, y: M.t - 4, class: 'ink' }, svg);
-    text.textContent = label;
-    if (x > W - 70) {
-      text.setAttribute('text-anchor', 'end');
-      text.setAttribute('x', String(W - M.r));
-    }
     prev = r.epoch;
+    const x = M.l + slot * i;
+    const label = d.epochs[r.epoch]?.version ?? '';
+    const width = label.length * 6.5;
+    // right of the marker, else left of it, nearest tier first
+    const spot = Array.from({ length: TIERS }, (_, tier) => tier).flatMap((tier) =>
+      [{ x: x + 7, anchor: 'start', from: x + 7, to: x + 7 + width }, { x: x - 7, anchor: 'end', from: x - 7 - width, to: x - 7 }]
+        .filter((o) => o.from >= 2 && o.to <= W - 2 && !placed.some((p) => p.tier === tier && o.from < p.to + 8 && p.from < o.to + 8))
+        .map((o) => ({ ...o, tier })),
+    )[0];
+    const capY = M.t - 12 - (spot?.tier ?? 0) * TIER_H;
+    if (i > 0) {
+      svgEl('line', { x1: x, x2: x, y1: capY, y2: y(0), class: 'sep' }, svg);
+      svgEl('circle', { cx: x, cy: capY, r: 2.5, class: 'cap' }, svg);
+    }
+    if (!spot) return;
+    placed.push({ from: spot.from, to: spot.to, tier: spot.tier });
+    svgEl('text', { x: spot.x, y: capY + 4, class: 'ink', 'text-anchor': spot.anchor }, svg).textContent = label;
   });
 }
 

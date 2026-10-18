@@ -3,10 +3,10 @@
 import type { Dataset } from '@github-stats-action/core';
 import { dayAxis, presetStart, clampView, zoomView, xTicks } from '../days';
 import { esc, f0, f1 } from '../format';
-import { niceMax, ticks } from '../scale';
+import { niceMax, quarterMax, ticks } from '../scale';
 import { countedGroups } from '../model';
 import { colorVar } from '../palette';
-import { hitRect, resetSvg, svgEl, widthOf } from '../svg';
+import { fadeFill, gridLines, hitRect, resetSvg, svgEl, widthOf } from '../svg';
 import { hideTip, showTip, tipOn } from '../tooltip';
 import { makeSection, legendHtml, type Section } from './common';
 
@@ -33,7 +33,7 @@ export function estimated(d: Dataset): Section {
   const el = makeSection(
     `<div><h2>Downloads per day over time<span class="est">estimated</span></h2>` +
     `<p class="note">Uniform-spread estimate: a release's downloads are assumed to arrive at a constant rate while it was the latest release, so the lines step at each release and cannot show spikes inside a window. Hover for a day. Drag the strip below to choose the range; wheel or pinch over the chart to zoom, double-click to reset.</p></div>` +
-    `<div class="presets" data-presets></div>` +
+    `<div class="presets"><span class="group" data-presets></span></div>` +
     legendHtml(groups.map((g) => ({ label: g.label, color: colorVar(g) }))) +
     `<div class="scroll"><svg data-chart role="img" aria-label="Estimated downloads per day over time, by group"></svg></div>` +
     `<div class="scroll"><svg data-strip role="img" aria-label="Overview of the whole series with the range shown above"></svg></div>` +
@@ -65,9 +65,15 @@ export function estimated(d: Dataset): Section {
   });
   const readout = document.createElement('span');
   readout.className = 'note';
-  presetBox.appendChild(readout);
+  presetBox.parentElement!.appendChild(readout);
+  // a short series makes several presets cover the same window: only the widest reads as chosen
   const syncPresets = (): void => {
-    PRESETS.forEach(([, days], j) => buttons[j]!.setAttribute('aria-pressed', String(view.a === presetStart(days, n) && view.b === n - 1)));
+    let chosen = false;
+    PRESETS.forEach(([, days], j) => {
+      const on = !chosen && view.a === presetStart(days, n) && view.b === n - 1;
+      chosen ||= on;
+      buttons[j]!.setAttribute('aria-pressed', String(on));
+    });
     readout.textContent = `${axis.long(view.a)} to ${axis.long(view.b)}`;
   };
   syncPresets();
@@ -76,20 +82,19 @@ export function estimated(d: Dataset): Section {
   const drawChart = (): void => {
     const W = widthOf(chart);
     const H = 280;
-    const m = { l: 44, r: 44, t: 14, b: 28 };
+    // the right margin makes room for the end labels, up to a share of the width on a phone
+    const longest = Math.max(0, ...groups.map((g) => g.label.length * 6.5));
+    const m = { l: 44, r: Math.min(Math.round(longest) + 20, Math.round(W * 0.3)), t: 16, b: 28 };
     const { a, b } = view;
     const L = Math.max(1, b - a);
     const pw = W - m.l - m.r;
     resetSvg(chart, W, H);
     chartGeo = { W, left: m.l, right: m.r };
-    const mx = niceMax(Math.max(1, ...series.flatMap((s) => s.slice(a, b + 1))));
+    const mx = quarterMax(Math.max(1, ...series.flatMap((s) => s.slice(a, b + 1))));
     const x = (i: number): number => m.l + (pw * (i - a)) / L;
     const y = (v: number): number => m.t + (H - m.t - m.b) * (1 - v / mx);
 
-    for (const t of ticks(mx)) {
-      svgEl('line', { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), class: 'axis' }, chart);
-      svgEl('text', { x: m.l - 6, y: y(t) + 4, 'text-anchor': 'end' }, chart).textContent = f0(t);
-    }
+    gridLines(chart, ticks(mx), y, m.l, W - m.r, f0);
     // a year-long-or-more view keeps its start year at the left edge, so the first year tick beside it is dropped
     if (L > 400) svgEl('text', { x: m.l, y: H - 8 }, chart).textContent = String(axis.year(a));
     for (const [i, text] of xTicks(axis, a, b, Math.max(2, Math.floor(pw / 72)))) {
@@ -103,19 +108,24 @@ export function estimated(d: Dataset): Section {
       const s = series[j] ?? [];
       const color = colorVar(g);
       const pts = s.slice(a, b + 1).map((v, k) => `${x(a + k).toFixed(1)},${y(v).toFixed(1)}`).join('L');
-      svgEl('path', { d: `M${x(a)},${y(0)}L${pts}L${x(b)},${y(0)}Z`, fill: color, 'fill-opacity': 0.14 }, chart);
-      svgEl('path', { d: `M${pts}`, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round' }, chart);
+      svgEl('path', { d: `M${x(a)},${y(0)}L${pts}L${x(b)},${y(0)}Z`, fill: fadeFill(chart, `es${j}`, color) }, chart);
+      svgEl('path', { d: `M${pts}`, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, chart);
       svgEl('circle', { cx: x(b), cy: y(s[b] ?? 0), r: 4, fill: color, stroke: 'var(--surface)', 'stroke-width': 2 }, chart);
     });
-    groups.forEach((g, j) => {
-      const s = series[j] ?? [];
-      const endX = x(b);
-      // the end label goes left of the line when it would run past the plot's right edge
-      const left = endX + 8 + g.label.length * 6.5 > W - 4;
-      svgEl('text', { x: left ? endX - 8 : endX + 8, y: y(s[b] ?? 0) + 4, class: 'ink', 'text-anchor': left ? 'end' : 'start' }, chart).textContent = g.label;
+    // end labels beside the dots, nudged apart when two lines end close together
+    const ends = groups.map((g, j) => ({ g, y: y(series[j]?.[b] ?? 0) })).sort((p, q) => p.y - q.y);
+    ends.forEach((e, k) => {
+      const above = ends[k - 1];
+      if (above && e.y - above.y < 13) e.y = above.y + 13;
     });
+    for (const e of ends) {
+      const endX = x(b);
+      // the label goes left of the line when it would still run past the right edge
+      const left = endX + 10 + e.g.label.length * 6.5 > W - 2;
+      svgEl('text', { x: left ? endX - 10 : endX + 10, y: Math.min(H - m.b - 4, e.y + 4), class: 'ink', 'text-anchor': left ? 'end' : 'start' }, chart).textContent = e.g.label;
+    }
 
-    const cross = svgEl('line', { y1: m.t, y2: y(0), stroke: 'var(--muted)', 'stroke-width': 1, visibility: 'hidden' }, chart);
+    const cross = svgEl('line', { y1: m.t, y2: y(0), class: 'base', visibility: 'hidden' }, chart);
     const dots = groups.map((g) => svgEl('circle', { r: 4, fill: colorVar(g), stroke: 'var(--surface)', 'stroke-width': 2, visibility: 'hidden' }, chart));
     const hit = hitRect(chart, m.l, m.t, pw, H - m.t - m.b);
     tipOn(hit, (ev) => {
@@ -153,15 +163,17 @@ export function estimated(d: Dataset): Section {
     groups.forEach((g, j) => {
       const s = series[j] ?? [];
       const pts = s.map((v, i) => `${stripX(i).toFixed(1)},${y(v).toFixed(1)}`).join('L');
-      svgEl('path', { d: `M${stripX(0)},${y(0)}L${pts}L${stripX(n - 1)},${y(0)}Z`, fill: colorVar(g), 'fill-opacity': 0.2 }, strip);
-      svgEl('path', { d: `M${pts}`, fill: 'none', stroke: colorVar(g), 'stroke-opacity': 0.6, 'stroke-width': 1, 'stroke-linejoin': 'round' }, strip);
+      svgEl('path', { d: `M${stripX(0)},${y(0)}L${pts}L${stripX(n - 1)},${y(0)}Z`, fill: colorVar(g), 'fill-opacity': 0.16 }, strip);
+      svgEl('path', { d: `M${pts}`, fill: 'none', stroke: colorVar(g), 'stroke-opacity': 0.7, 'stroke-width': 1, 'stroke-linejoin': 'round' }, strip);
     });
+    svgEl('line', { x1: m.l, x2: W - m.r, y1: y(0) + 0.5, y2: y(0) + 0.5, class: 'base' }, strip);
+    // the days outside the window are veiled; the window has a hairline frame and two pill handles
     const x0 = stripX(view.a);
     const x1 = stripX(view.b);
-    svgEl('rect', { x: m.l, y: 0, width: x0 - m.l, height: H, fill: 'var(--surface)', 'fill-opacity': 0.7 }, strip);
-    svgEl('rect', { x: x1, y: 0, width: W - m.r - x1, height: H, fill: 'var(--surface)', 'fill-opacity': 0.7 }, strip);
-    svgEl('rect', { x: x0 + 0.5, y: 0.5, width: Math.max(0, x1 - x0 - 1), height: H - 1, fill: 'none', stroke: 'var(--muted)', 'stroke-width': 1, rx: 2 }, strip);
-    for (const hx of [x0, x1]) svgEl('rect', { x: hx - 3, y: H / 2 - 10, width: 6, height: 20, rx: 2, fill: 'var(--muted)' }, strip);
+    svgEl('rect', { x: m.l, y: 0, width: x0 - m.l, height: H, fill: 'var(--surface)', 'fill-opacity': 0.72 }, strip);
+    svgEl('rect', { x: x1, y: 0, width: W - m.r - x1, height: H, fill: 'var(--surface)', 'fill-opacity': 0.72 }, strip);
+    svgEl('rect', { x: x0 + 0.5, y: 0.5, width: Math.max(0, x1 - x0 - 1), height: H - 1, fill: 'none', stroke: 'var(--ink2)', 'stroke-opacity': 0.6, 'stroke-width': 1, rx: 3 }, strip);
+    for (const hx of [x0, x1]) svgEl('rect', { x: hx - 3.5, y: H / 2 - 10, width: 7, height: 20, rx: 3.5, fill: 'var(--ink2)', stroke: 'var(--surface)', 'stroke-width': 1.5 }, strip);
   };
 
   const zoneOf = (px: number): Zone => {

@@ -8,7 +8,7 @@ import { colorVar } from '../palette';
 import { quarterMax, ticks } from '../scale';
 import { measuredSeries, slotLabel, slotLabelDays, type MeasuredSeries } from '../slots';
 import { stackSegments } from '../stack';
-import { hitRect, resetSvg, roundedTop, svgEl, widthOf } from '../svg';
+import { gridLines, hitRect, resetSvg, roundedTop, svgEl, widthOf } from '../svg';
 import { showTip, tipOn } from '../tooltip';
 import { legendHtml, makeSection, type Section } from './common';
 
@@ -72,13 +72,10 @@ function drawMeasured(svg: SVGSVGElement, d: Dataset, series: MeasuredSeries, ha
   const y = (v: number): number => M.t + (H - M.t - M.b) * (1 - v / mx);
   const yd = (v: number): number => M.t + (H - M.t - M.b) * (1 - v / dx);
 
-  for (const t of ticks(mx)) {
-    svgEl('line', { x1: M.l, x2: W - M.r, y1: y(t), y2: y(t), class: 'axis' }, svg);
-    svgEl('text', { x: M.l - 6, y: y(t) + 4, 'text-anchor': 'end' }, svg).textContent = f0(t);
-  }
+  gridLines(svg, ticks(mx), y, M.l, W - M.r, f0);
   svgEl('text', { x: 2, y: M.t - 10, class: 'ink' }, svg).textContent = 'downloads';
   if (hasDocker) {
-    for (const t of ticks(dx)) svgEl('text', { x: W - M.r + 6, y: yd(t) + 4 }, svg).textContent = f0(t);
+    for (const t of ticks(dx)) svgEl('text', { x: W - M.r + 8, y: yd(t) + 4 }, svg).textContent = f0(t);
     svgEl('text', { x: W - 2, y: M.t - 10, 'text-anchor': 'end' }, svg).textContent = 'Docker';
   }
 

@@ -17,7 +17,7 @@ export function makeSection(inner: string): HTMLElement {
 
 export interface LegendItem {
   label: string;
-  /** A CSS colour; dashed items draw a line sample instead of a swatch. */
+  /** A CSS colour; dashed items draw a line sample instead of a dot. */
   color: string;
   dashed?: boolean;
 }
