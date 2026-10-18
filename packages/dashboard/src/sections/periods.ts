@@ -73,7 +73,7 @@ function drawPeriods(svg: SVGSVGElement, d: Dataset): void {
   const P = d.periods;
   const W = widthOf(svg);
   const H = 230;
-  const m = { l: 44, r: 10, t: 14, b: 44 };
+  const m = { l: 44, r: 10, t: 14, b: 58 };
   resetSvg(svg, W, H);
   const mx = niceMax(Math.max(0, ...P.flatMap((p) => groups.map((g) => p.avgPerDay[g.name] ?? 0))));
   const y = (v: number): number => m.t + (H - m.t - m.b) * (1 - v / mx);
@@ -100,6 +100,13 @@ function drawPeriods(svg: SVGSVGElement, d: Dataset): void {
       ));
     });
     svgEl('text', { x: cx, y: H - m.b + 16, 'text-anchor': 'middle', class: 'ink' }, svg).textContent = periodShort(p, d.epochs);
-    svgEl('text', { x: cx, y: H - m.b + 30, 'text-anchor': 'middle' }, svg).textContent = plural(p.releases, 'release');
+    // the count goes on one line when a slot is wide enough for it, otherwise it splits over two
+    const note = plural(p.releases, 'release');
+    if (note.length * 6.5 <= slot) {
+      svgEl('text', { x: cx, y: H - m.b + 30, 'text-anchor': 'middle' }, svg).textContent = note;
+    } else {
+      svgEl('text', { x: cx, y: H - m.b + 30, 'text-anchor': 'middle' }, svg).textContent = f0(p.releases);
+      svgEl('text', { x: cx, y: H - m.b + 44, 'text-anchor': 'middle' }, svg).textContent = p.releases === 1 ? 'release' : 'releases';
+    }
   });
 }
