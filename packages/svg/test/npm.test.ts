@@ -3,7 +3,8 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { buildNpmData, parseConfig, type Dataset, type NpmDay } from '@github-stats-action/core';
 import { renderCharts } from '../src/index';
-import { weeklySums } from '../src/npm';
+import { legendRows, weeklySums } from '../src/npm';
+import { textWidth } from '../src/svg';
 
 const fixture = async (): Promise<Dataset> =>
   JSON.parse(await readFile(resolve(import.meta.dirname, '../../../fixtures/dataset.json'), 'utf8')) as Dataset;
@@ -61,5 +62,16 @@ describe('npm downloads chart', () => {
     expect(stars).toContain('charts/stars-light.svg');
     expect(stars.some((p) => p.includes('downloads-per'))).toBe(false);
     expect(stars).toContain('charts/npm-downloads-light.svg');
+  });
+
+  it('wraps a long legend into rows that fit the width', () => {
+    const keys = Array.from({ length: 7 }, (_, i) => ({ label: `@passcore/package-${i}`, color: '#000' }));
+    const rows = legendRows(keys, 752);
+    expect(rows.length).toBeGreaterThan(1);
+    expect(rows.flat()).toEqual(keys);
+    for (const row of rows) {
+      const width = row.reduce((sum, k) => sum + 14 + textWidth(k.label, 12), 0) + 18 * (row.length - 1);
+      expect(width).toBeLessThanOrEqual(752);
+    }
   });
 });
