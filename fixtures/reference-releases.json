@@ -1,0 +1,266 @@
+[
+ {
+  "tag": "v0.0.1",
+  "app": 0,
+  "cli": 33,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.2",
+  "app": 0,
+  "cli": 35,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.3",
+  "app": 0,
+  "cli": 42,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.4",
+  "app": 0,
+  "cli": 40,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.5",
+  "app": 0,
+  "cli": 42,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.6",
+  "app": 0,
+  "cli": 46,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.7",
+  "app": 0,
+  "cli": 53,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.8",
+  "app": 0,
+  "cli": 75,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.9",
+  "app": 0,
+  "cli": 65,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.10",
+  "app": 0,
+  "cli": 323,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.11",
+  "app": 0,
+  "cli": 81,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.12",
+  "app": 0,
+  "cli": 653,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.13",
+  "app": 0,
+  "cli": 5060,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.14",
+  "app": 0,
+  "cli": 683,
+  "updates": 0
+ },
+ {
+  "tag": "v0.0.15",
+  "app": 0,
+  "cli": 2708,
+  "updates": 0
+ },
+ {
+  "tag": "v1.0.0",
+  "app": 0,
+  "cli": 22,
+  "updates": 0
+ },
+ {
+  "tag": "v1.1.0",
+  "app": 0,
+  "cli": 20,
+  "updates": 0
+ },
+ {
+  "tag": "v1.1.1",
+  "app": 0,
+  "cli": 16,
+  "updates": 0
+ },
+ {
+  "tag": "v1.2.0",
+  "app": 0,
+  "cli": 26,
+  "updates": 0
+ },
+ {
+  "tag": "v1.3.0",
+  "app": 0,
+  "cli": 29,
+  "updates": 0
+ },
+ {
+  "tag": "v1.4.0",
+  "app": 0,
+  "cli": 22,
+  "updates": 0
+ },
+ {
+  "tag": "v1.4.1",
+  "app": 0,
+  "cli": 136,
+  "updates": 0
+ },
+ {
+  "tag": "v1.5.0",
+  "app": 0,
+  "cli": 100,
+  "updates": 0
+ },
+ {
+  "tag": "v1.6.0",
+  "app": 0,
+  "cli": 94,
+  "updates": 0
+ },
+ {
+  "tag": "v1.6.1",
+  "app": 0,
+  "cli": 37,
+  "updates": 0
+ },
+ {
+  "tag": "v1.7.0",
+  "app": 0,
+  "cli": 127,
+  "updates": 0
+ },
+ {
+  "tag": "v1.7.1",
+  "app": 0,
+  "cli": 169,
+  "updates": 0
+ },
+ {
+  "tag": "v1.8.0",
+  "app": 0,
+  "cli": 37,
+  "updates": 0
+ },
+ {
+  "tag": "v1.9.0",
+  "app": 0,
+  "cli": 644,
+  "updates": 0
+ },
+ {
+  "tag": "v1.10.0",
+  "app": 0,
+  "cli": 73,
+  "updates": 0
+ },
+ {
+  "tag": "v1.11.0",
+  "app": 5,
+  "cli": 8,
+  "updates": 0
+ },
+ {
+  "tag": "v1.11.1",
+  "app": 31,
+  "cli": 46,
+  "updates": 0
+ },
+ {
+  "tag": "v1.12.0",
+  "app": 9,
+  "cli": 10,
+  "updates": 0
+ },
+ {
+  "tag": "v1.13.0",
+  "app": 18,
+  "cli": 17,
+  "updates": 0
+ },
+ {
+  "tag": "v1.14.0",
+  "app": 38,
+  "cli": 40,
+  "updates": 0
+ },
+ {
+  "tag": "v1.15.0",
+  "app": 29,
+  "cli": 21,
+  "updates": 0
+ },
+ {
+  "tag": "v1.15.1",
+  "app": 35,
+  "cli": 27,
+  "updates": 0
+ },
+ {
+  "tag": "v1.16.0",
+  "app": 7,
+  "cli": 14,
+  "updates": 0
+ },
+ {
+  "tag": "v1.16.1",
+  "app": 42,
+  "cli": 38,
+  "updates": 0
+ },
+ {
+  "tag": "v1.17.0",
+  "app": 47,
+  "cli": 37,
+  "updates": 1
+ },
+ {
+  "tag": "v1.18.0",
+  "app": 54,
+  "cli": 34,
+  "updates": 3
+ },
+ {
+  "tag": "v1.19.0",
+  "app": 14,
+  "cli": 14,
+  "updates": 2
+ },
+ {
+  "tag": "v1.19.1",
+  "app": 34,
+  "cli": 18,
+  "updates": 1
+ },
+ {
+  "tag": "v1.20.0",
+  "app": 10,
+  "cli": 13,
+  "updates": 1
+ }
+]

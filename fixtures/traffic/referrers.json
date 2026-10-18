@@ -1,0 +1,22 @@
+[
+ {
+  "referrer": "github.com",
+  "count": 61,
+  "uniques": 22
+ },
+ {
+  "referrer": "google",
+  "count": 33,
+  "uniques": 19
+ },
+ {
+  "referrer": "reddit.com",
+  "count": 12,
+  "uniques": 9
+ },
+ {
+  "referrer": "t.co",
+  "count": 5,
+  "uniques": 4
+ }
+]
