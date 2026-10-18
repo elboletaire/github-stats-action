@@ -2,7 +2,7 @@
 // Everything is fetched before anything is written, so a failed run leaves the branch as it was.
 
 import { stat } from 'node:fs/promises';
-import { join } from 'node:path';
+import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { renderBadges } from '@github-stats-action/badges';
 import { dashboardFiles } from '@github-stats-action/dashboard';
 import {
@@ -118,7 +118,11 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
     releases,
   };
   if (options.importOld) {
-    const oldDir = join(options.dataDir, options.importOld);
+    const oldDir = resolve(options.dataDir, options.importOld);
+    const inside = relative(options.dataDir, oldDir);
+    if (isAbsolute(inside) || inside === '..' || inside.startsWith(`..${sep}`)) {
+      throw new Error(`import-old: ${options.importOld} is outside the data branch`);
+    }
     if (!(await isDirectory(join(oldDir, 'snapshots')))) {
       throw new Error(`import-old: no snapshots/ folder at ${options.importOld} on the data branch`);
     }

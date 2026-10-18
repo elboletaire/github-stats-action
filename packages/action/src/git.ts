@@ -74,9 +74,19 @@ export async function checkoutDataBranch(options: { cwd: string; branch: string;
   return {
     dir,
     async dispose(): Promise<void> {
-      await git(['worktree', 'remove', '--force', dir], cwd);
-      if (throwaway) await git(['branch', '-D', throwaway], cwd);
-      await rm(root, { recursive: true, force: true });
+      // each step runs even when an earlier one failed, and the failures are reported together
+      const failures: string[] = [];
+      const step = async (action: () => Promise<unknown>): Promise<void> => {
+        try {
+          await action();
+        } catch (error) {
+          failures.push(error instanceof Error ? error.message : String(error));
+        }
+      };
+      await step(() => git(['worktree', 'remove', '--force', dir], cwd));
+      if (throwaway) await step(() => git(['branch', '-D', throwaway], cwd));
+      await step(() => rm(root, { recursive: true, force: true }));
+      if (failures.length > 0) throw new Error(failures.join('; '));
     },
     async publish(message: string, rederive?: () => Promise<unknown>): Promise<boolean> {
       await git(['add', '-A'], dir);

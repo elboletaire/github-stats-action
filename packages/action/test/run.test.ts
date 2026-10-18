@@ -177,6 +177,17 @@ describe('import-old', () => {
     expect(git(remote, 'show', `stats-data:${REPO}/snapshots/${oldNames[0]}`)).toContain('"takenAt": "2026-10-01T00:00:00Z"');
   });
 
+  it('refuses an import path that leaves the data branch, relative or absolute', async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
+    const outside = await mkdtemp(join(tmpdir(), 'stats-outside-'));
+    await mkdir(join(outside, 'snapshots'));
+    const run = (importOld: string) =>
+      runStats({ repo: REPO, config, dataDir, traffic: false, importOld, now, log, fetch: network() });
+    await expect(run('../' + outside.split('/').at(-1))).rejects.toThrow('is outside the data branch');
+    await expect(run(outside)).rejects.toThrow(`${outside} is outside the data branch`);
+    expect(await readdir(dataDir)).toEqual([]);
+  });
+
   it('fails clearly when the path holds no snapshots/ folder', async () => {
     const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
     await expect(

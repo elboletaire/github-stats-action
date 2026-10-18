@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { mkdir, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -164,6 +164,15 @@ describe('checkoutDataBranch', () => {
     await second.dispose();
     expect(git(work, 'worktree', 'list', '--porcelain').split('\n').filter((l) => l.startsWith('worktree '))).toHaveLength(1);
     expect(existsSync(second.dir)).toBe(false);
+  });
+
+  it('still deletes the throwaway branch and the folder when the worktree is already gone', async () => {
+    const { root, work } = await setup();
+    const data = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    await rm(data.dir, { recursive: true, force: true });
+    await expect(data.dispose()).rejects.toThrow();
+    expect(git(work, 'branch', '--list', 'orphan-*')).toBe('');
+    expect(existsSync(join(data.dir, '..'))).toBe(false);
   });
 
   it('starts the orphan branch even when the workspace already has a local branch of that name', async () => {
