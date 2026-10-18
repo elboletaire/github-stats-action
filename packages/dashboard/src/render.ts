@@ -1,13 +1,8 @@
-// Node side of the dashboard: the files `renderDashboard` writes, from the pages build and the
+// Node side of the dashboard: the files `dashboardFiles` returns, from the pages build and the
 // standalone page embedded at build time (see vite.config.ts). Nothing here reads the disk.
 
-import type { Dataset } from '@github-stats-action/core';
+import type { Dataset, OutputFile } from '@github-stats-action/core';
 import { PAGES_FILES, STANDALONE_HTML } from './embedded';
-
-export interface DashboardFile {
-  path: string;
-  content: string;
-}
 
 /** The placeholder element the build leaves for the datasets or the repo list. */
 const CONFIG_PLACEHOLDER = '<script id="gsa-config" type="application/json">__GSA_CONFIG__</script>';
@@ -20,7 +15,7 @@ const embedJson = (value: unknown): string =>
  * `standalone`: one self-contained page with every dataset inlined, at `dashboard/index.html`.
  * `pages`: the static site with each dataset at `data/<owner>/<repo>/dataset.json`, fetched by the page.
  */
-export function dashboardFiles(datasets: readonly Dataset[], options: { mode: 'pages' | 'standalone' }): DashboardFile[] {
+export function dashboardFiles(datasets: readonly Dataset[], options: { mode: 'pages' | 'standalone' }): OutputFile[] {
   if (options.mode === 'standalone') {
     const html = STANDALONE_HTML.replace(CONFIG_PLACEHOLDER, () => embedJson({ datasets }));
     return [{ path: 'dashboard/index.html', content: html }];

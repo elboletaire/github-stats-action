@@ -3,6 +3,7 @@
 
 import { join } from 'node:path';
 import { renderBadges } from '@github-stats-action/badges';
+import { dashboardFiles } from '@github-stats-action/dashboard';
 import {
   createClient,
   deriveRepo,
@@ -16,7 +17,6 @@ import {
   readDatasets,
   readStargazers,
   readTrafficSeries,
-  renderDashboard,
   repoDir,
   utcDate,
   writeDerived,
@@ -68,15 +68,15 @@ export async function writeDerivedOutputs(dataDir: string, repo: string, config:
   const { dataset, csv } = await deriveRepo(dir, repo, config, now);
   await writeDerived(dir, dataset, csv);
   await writeOutputFiles(dir, [...renderCharts(dataset), ...renderBadges(dataset)]);
-  await writeOutputFiles(dataDir, renderDashboard(await readDatasets(dataDir), { mode: 'standalone' }));
+  await writeOutputFiles(dataDir, dashboardFiles(await readDatasets(dataDir), { mode: 'standalone' }));
   return dataset;
 }
 
 /** Writes the Pages site: the dashboard and the dataset, without traffic unless `traffic` is set. */
 export async function writePagesSite(pages: { dir: string; traffic: boolean }, repo: string, dataset: Dataset): Promise<void> {
-  // the dashboard's pages build already includes data/<owner>/<repo>/dataset.json
+  // the pages build already includes data/<owner>/<repo>/dataset.json
   const pagesDataset = pages.traffic ? dataset : { ...dataset, traffic: undefined };
-  await writeOutputFiles(pages.dir, renderDashboard([pagesDataset], { mode: 'pages' }));
+  await writeOutputFiles(pages.dir, dashboardFiles([pagesDataset], { mode: 'pages' }));
 }
 
 export async function runStats(options: RunOptions): Promise<RunResult> {

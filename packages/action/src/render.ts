@@ -3,11 +3,11 @@
 import { join } from 'node:path';
 import { mkdir } from 'node:fs/promises';
 import { renderBadges } from '@github-stats-action/badges';
+import { dashboardFiles } from '@github-stats-action/dashboard';
 import {
   deriveRepo,
   listRepos,
   readSnapshots,
-  renderDashboard,
   repoDir,
   writeDerived,
   writeOutputFiles,
@@ -51,7 +51,7 @@ export async function renderData(options: RenderOptions): Promise<RenderResult> 
   await mkdir(dir, { recursive: true });
   await writeDerived(dir, dataset, csv);
   await writeOutputFiles(dir, [...renderCharts(dataset), ...renderBadges(dataset)]);
-  await writeOutputFiles(options.outDir, renderDashboard([dataset], { mode: 'standalone' }));
+  await writeOutputFiles(options.outDir, dashboardFiles([dataset], { mode: 'standalone' }));
   options.log.info(`rendered ${repo} into ${options.outDir}`);
   return { datasets: [dataset], datasetPaths: [join(dir, 'dataset.json')] };
 }
