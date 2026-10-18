@@ -73,7 +73,43 @@ Traffic is collected only with `traffic: true`. The daily views and clones are m
 
 ## npm downloads
 
-npm publishes its download counts openly, so no token is needed. Each run fetches the days it lacks, and the week before the last stored day to pick up corrections. The first run backfills npm's 18-month window. npm keeps no daily counts older than that, so the days this action stores stay after they leave npm's window. A package npm doesn't know, or a failed request, is a warning; what was stored stays. The latest day can be provisional: a run early in the UTC day may read a day npm hasn't finished counting, and the next run's overlap corrects it. The dashboard gets an npm section, and the npm badges are written (see [Badges](#badges)), with `charts/npm-downloads-*.svg`.
+npm keeps daily download counts for 18 months only. This action stores them on the data branch every day, so the history outlives npm's window. npm's counts are public, so no token is needed.
+
+List the packages in `.github/stats.yml`, scoped ones too (up to 8):
+
+```yaml
+npm:
+  - acme
+  - "@acme/core"
+  - { package: "@acme/react", label: React }
+```
+
+- **First run:** backfills the last 18 months of every package.
+- **Later runs:** fetch from a week before the last stored day, so late corrections from npm overwrite the stored values. The latest day can be provisional if the run happens early in the UTC day; the next run corrects it.
+- **Stored as** `<owner>/<repo>/npm/<slug>.json`, one line per day (`@scope/name` becomes `scope--name`). Like the snapshots, these files are never rebuilt or pruned.
+- **Failures** (a package npm doesn't know, an npm outage) are warnings: the run goes on and the stored days stay.
+
+What you get:
+
+- **Dashboard:** an npm section with the last 30 days, a stacked daily chart per package with zoom, and a per-package table.
+- **Chart:** `charts/npm-downloads-light.svg` / `-dark.svg`, weekly downloads stacked by package. Limit it with `charts: { npm-downloads: { range: 1y } }` (see [Config](#config)).
+- **Badges:** `npm-downloads` (last 30 days), `npm-downloads-week`, `npm-downloads-total`, and `npm-<slug>` / `npm-<slug>-week` per package (see [Badges](#badges)).
+- **CSV:** one `npm_<slug>` column per package and `npm_total` in `daily.csv`, one row per npm day.
+
+A repo that only publishes to npm, with no files attached to its GitHub releases, needs nothing else: release-download sections, charts and badges are left out when no release asset counts as a download (set `releases: false` to leave them out anyway). For example, a monorepo publishing four packages:
+
+```yaml
+# .github/stats.yml
+npm:
+  - "@acme/core"
+  - "@acme/react"
+  - "@acme/vue"
+  - "@acme/svelte"
+```
+
+```markdown
+[![npm downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FOWNER%2FREPO%2Fstats-data%2FOWNER%2FREPO%2Fbadges%2Fnpm-downloads.json)](https://www.npmjs.com/org/acme)
+```
 
 ## Pages (optional)
 
