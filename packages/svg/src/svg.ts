@@ -45,6 +45,9 @@ const ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;'
 
 export const esc = (text: string): string => text.replace(/[&<>"']/g, (c) => ESCAPES[c] ?? c);
 
+/** `1 star`, `3 stars`. */
+export const plural = (n: number, word: string): string => `${n} ${word}${n === 1 ? '' : 's'}`;
+
 /** Rough width of a sans label at `size`: enough to keep labels apart, not to typeset them. */
 export const textWidth = (value: string, size = 11): number => value.length * size * 0.6;
 

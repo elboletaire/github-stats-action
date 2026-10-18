@@ -19,6 +19,7 @@ import {
   compact,
   type Box,
   type Theme,
+  plural,
 } from './svg';
 
 const box: Box = { left: 56, right: WIDTH - 24, top: 72, bottom: 256 };
@@ -66,7 +67,7 @@ export function starsChart(dataset: Dataset, theme: Theme): string {
     ...xLabels(axisLabels, box.bottom + 16, theme),
     `<path d="${line}L${px(lastX)} ${px(box.bottom)}L${px(xOf(first))} ${px(box.bottom)}Z" fill="${color}" fill-opacity="0.1"/>`,
     `<path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`,
-    `<circle cx="${px(lastX)}" cy="${px(lastY)}" r="4" fill="${color}" stroke="${c.surface}" stroke-width="2"><title>${esc(last.date)}: ${last.stars} stars</title></circle>`,
+    `<circle cx="${px(lastX)}" cy="${px(lastY)}" r="4" fill="${color}" stroke="${c.surface}" stroke-width="2"><title>${esc(last.date)}: ${plural(last.stars, 'star')}</title></circle>`,
     svgText({ x: lastX - 8, y: lastY - 8, value: compact(last.stars), fill: c.primary, anchor: 'end' }),
     ...hoverStrips(dataset, xOf, box),
   ]);
@@ -84,6 +85,6 @@ function hoverStrips(dataset: Dataset, xOf: (day: number) => number, box: Box): 
   }
   return [...strips].map(([bucket, p]) => {
     const left = box.left + bucket * STRIP;
-    return `<rect x="${px(left)}" y="${px(box.top)}" width="${STRIP}" height="${box.bottom - box.top}" fill-opacity="0"><title>${esc(p.date)}: ${p.stars} stars</title></rect>`;
+    return `<rect x="${px(left)}" y="${px(box.top)}" width="${STRIP}" height="${box.bottom - box.top}" fill-opacity="0"><title>${esc(p.date)}: ${plural(p.stars, 'star')}</title></rect>`;
   });
 }

@@ -136,6 +136,12 @@ describe('renderCharts', () => {
     expect(svg).not.toContain('stroke-width="1"><title>');
   });
 
+  it('says one release, not releases, in the note', async () => {
+    const dataset = await fixture();
+    const svg = chart(renderCharts({ ...dataset, epochs: [], releases: [release('v1.0.0', { app: 1, cli: 1 })] }), 'charts/downloads-per-release-light.svg');
+    expect(svg).toContain('Downloads per release: 1 release, stacked by group.');
+  });
+
   it('draws no columns when there are no releases', async () => {
     const dataset = { ...(await fixture()), releases: [], epochs: [] };
     const svg = chart(renderCharts(dataset), 'charts/downloads-per-release-light.svg');

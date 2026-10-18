@@ -20,6 +20,7 @@ import {
   type Box,
   type Key,
   type Theme,
+  plural,
 } from './svg';
 
 const box: Box = { left: 56, right: WIDTH - 24, top: 104, bottom: 256 };
@@ -91,7 +92,7 @@ export function downloadsPerReleaseChart(dataset: Dataset, theme: Theme): string
   const step = Math.max(1, Math.ceil(48 / slot));
   const tagLabels = releases.flatMap((r, i) => (i % step === 0 ? [{ x: box.left + i * slot + slot / 2, value: r.tag }] : []));
 
-  return svgDocument(theme, title, `${title}: ${releases.length} releases, stacked by group.`, [
+  return svgDocument(theme, title, `${title}: ${plural(releases.length, 'release')}, stacked by group.`, [
     ...heading(title, note, theme, keys),
     ...valueAxis(ticks, yOf, box, theme),
     ...markers,

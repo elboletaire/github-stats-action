@@ -21,6 +21,7 @@ import {
   type Key,
   type Segment,
   type Theme,
+  plural,
 } from './svg';
 
 /** Measured bars need at least this many snapshot days; before that the estimate is shown. */
@@ -33,7 +34,7 @@ export function downloadsPerDayChart(dataset: Dataset, theme: Theme): string {
   const keys: Key[] = dataset.groups.map((g) => ({ label: g.label, color: seriesColor(theme, g.color) }));
   const measured = dataset.measuredDaily.length;
   if (measured >= MIN_MEASURED_DAYS) return measuredBars(dataset, theme, keys);
-  const note = `Estimated, spread over each release's live window (measured needs ${MIN_MEASURED_DAYS} days, have ${measured})`;
+  const note = `Estimated, spread over each release's live window (measured needs ${MIN_MEASURED_DAYS} days, have ${plural(measured, 'day')})`;
   return estimatedAreas(dataset, theme, keys, note);
 }
 
@@ -63,7 +64,7 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[]): string {
     anchor: edgeAnchor(k, picks.length),
   }));
 
-  const note = `Measured, change between daily snapshots (${days.length} days)`;
+  const note = `Measured, change between daily snapshots (${plural(days.length, 'day')})`;
   return svgDocument(theme, title, `${title}: measured from daily snapshots.`, [
     ...heading(title, note, theme, keys),
     ...valueAxis(ticks, yOf, box, theme),
