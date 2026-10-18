@@ -135,7 +135,7 @@ dashboard/index.html              self-contained dashboard, all repos on the bra
   traffic/clones.json             same                                   (traffic: true)
   traffic/referrers/YYYY-MM-DD.json   GitHub's 14-day aggregate that day  (traffic: true)
   traffic/paths/YYYY-MM-DD.json       same                                (traffic: true)
-  daily.csv                       derived: one row per snapshot day
+  daily.csv                       derived: one row per snapshot or npm day; release, Docker and npm columns only when the repo has them
   dataset.json                    derived: everything the outputs read
   charts/*-light.svg, *-dark.svg  derived: SVG charts
   badges/*.json, badges/*.svg     derived: shields.io endpoint JSON and flat SVG badges

@@ -41,7 +41,7 @@ export async function deriveRepo(dir: string, repo: string, config: StatsConfig,
   const csv = buildDailyCsv(
     snapshots.map((s) => summariseDay(s, config, repo, names)),
     names,
-    dataset.releaseDownloads,
+    { downloads: dataset.releaseDownloads, docker: Boolean(config.docker), npm: dataset.npm?.packages ?? [] },
   );
   return { dataset, csv };
 }
