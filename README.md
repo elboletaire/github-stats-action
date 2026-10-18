@@ -66,10 +66,14 @@ Traffic is collected only with `traffic: true`. The daily views and clones are m
 
 ## Privacy
 
-- Release downloads, stars, forks, watchers, open issues and Docker Hub pulls are stored on the data branch. That branch is public when the repo is.
+- Release downloads, stars, forks, watchers, open issues and Docker Hub pulls are stored on the data branch. That branch is public when the repo is. npm's daily counts for the configured packages are stored there too; they're public npm data.
 - Stars are stored as timestamps only (`stargazers.json`). No logins are stored.
 - Traffic is opt-in twice. With `traffic: true`, views, clones, referrers and paths are stored on the data branch, which is public when the repo is. `pages-traffic: true` only controls whether the Pages copy includes traffic. Both default to `false`.
 - Planned for several repos: their data would live in one private central repo rather than in each public repo. Not implemented yet; one repo per run for now.
+
+## npm downloads
+
+npm publishes its download counts openly, so no token is needed. Each run fetches the days it lacks, and the week before the last stored day to pick up corrections. The first run backfills npm's 18-month window. npm keeps no daily counts older than that, so the days this action stores stay after they leave npm's window. A package npm doesn't know, or a failed request, is a warning; what was stored stays. The dashboard gets an npm section, and the badges `npm-downloads` (combined, last 30 days) and `npm-<package>` are written, with `charts/npm-downloads-*.svg`.
 
 ## Pages (optional)
 
@@ -126,6 +130,7 @@ dashboard/index.html              self-contained dashboard, all repos on the bra
 <owner>/<repo>/
   snapshots/YYYY-MM-DD.json       raw snapshot of the day (UTC); a rerun the same day overwrites it
   stargazers.json                 star timestamps, no logins
+  npm/<slug>.json                 daily npm counts per package, sorted (npm: in the config); slug: `@scope/name` becomes `scope--name`
   traffic/views.json              daily series, merged by date           (traffic: true)
   traffic/clones.json             same                                   (traffic: true)
   traffic/referrers/YYYY-MM-DD.json   GitHub's 14-day aggregate that day  (traffic: true)
@@ -136,7 +141,7 @@ dashboard/index.html              self-contained dashboard, all repos on the bra
   badges/*.json, badges/*.svg     derived: shields.io endpoint JSON and flat SVG badges
 ```
 
-Everything except `snapshots/`, `stargazers.json` and `traffic/` is rebuilt on every run, so the snapshots are the only source of truth.
+Everything except `snapshots/`, `stargazers.json`, `npm/` and `traffic/` is rebuilt on every run, so the snapshots and the stored counts are the only source of truth.
 
 ## Reading the dashboard
 
@@ -176,6 +181,7 @@ The badge JSON follows the shields.io endpoint schema, so any shields.io endpoin
 The file is YAML, optional, read from `.github/stats.yml` by default. Unknown keys are an error. Example: [examples/stats.yml](examples/stats.yml), for a project called `acme`.
 
 ```yaml
+releases: true              # false hides release downloads everywhere, even when assets count
 groups:                     # first match wins, so the more specific pattern goes first
   - { name: desktop, label: Desktop app, assets: "acme-desktop-*" }
   - { name: cli, label: CLI, assets: "acme-*" }
@@ -190,6 +196,9 @@ platforms:                  # label rules for asset names
 charts:                     # README SVG charts
   titles: true              # false hides every chart's title
 docker: acme/acme           # optional Docker Hub image
+npm:                        # optional npm packages, counted daily
+  - password-strength-meter
+  - { package: "@acme/core", label: Core }
 ```
 
 - `groups`: `name` (letters, digits, `-`, `_`; `other` and `ignored` are reserved), `label` (defaults to the name), `assets` (a glob). The first matching group wins, so list the more specific glob first. Without `groups`, every asset counts as `downloads`.
@@ -197,7 +206,9 @@ docker: acme/acme           # optional Docker Hub image
 - `counters`: `name`, `label`, `assets`, and `from`, an optional quoted semver; releases before it aren't counted. A counter's assets still count as downloads unless `ignore` also names them.
 - `epochs`: `version` as a quoted semver (`"v1.11.0"`, so YAML doesn't read `1.11` as a number), `label` defaults to the version. Optional.
 - `platforms`: `match` and `label`. Without a matching rule, the asset name minus the tag, repo name and archive suffixes is used.
-- `charts`: `titles` (default `true`) shows or hides the title of the README SVGs (a note that says what the data is stays: estimated or measured); a chart's own `title` (`stars`, `downloads-per-day`, `downloads-per-release`) overrides it. The dashboard keeps its headings.
+- `releases`: `true` by default. Release downloads show only when some release has an asset that counts (not ignored), so a repo without release assets gets no download views. `false` hides them even when assets count. The snapshots keep the counts either way, so turning it back on restores the history.
+- `npm`: npm package names, or `{ package, label }` (the label defaults to the name). Scoped names work. Up to 8, one colour each. Absent means no npm requests at all.
+- `charts`: `titles` (default `true`) shows or hides the title of the README SVGs (a note that says what the data is stays: estimated or measured); a chart's own `title` (`stars`, `downloads-per-day`, `downloads-per-release`, `npmDownloads`) overrides it. The dashboard keeps its headings.
 - `docker`: `namespace/name`.
 
 Globs: `*` matches any run of characters, everything else is literal.
