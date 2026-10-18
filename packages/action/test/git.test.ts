@@ -1,0 +1,78 @@
+import { execFileSync } from 'node:child_process';
+import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { checkoutDataBranch } from '../src/git';
+
+const git = (cwd: string, ...args: string[]) =>
+  execFileSync('git', args, { cwd, encoding: 'utf8', env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } }).trim();
+
+/** A bare remote and a workspace clone of it with one commit on `main`. */
+async function setup() {
+  const root = await mkdtemp(join(tmpdir(), 'stats-git-'));
+  const remote = join(root, 'remote.git');
+  const work = join(root, 'work');
+  git(root, 'init', '--bare', '-q', '-b', 'main', remote);
+  await mkdir(work);
+  git(work, 'init', '-q', '-b', 'main');
+  git(work, 'config', 'user.email', 'dev@example.com');
+  git(work, 'config', 'user.name', 'dev');
+  await writeFile(join(work, 'README.md'), 'code\n');
+  git(work, 'add', '-A');
+  git(work, 'commit', '-q', '-m', 'init');
+  git(work, 'remote', 'add', 'origin', remote);
+  git(work, 'push', '-q', 'origin', 'main');
+  return { root, remote, work };
+}
+
+describe('checkoutDataBranch', () => {
+  it('starts an orphan data branch when there is none, then appends to it', async () => {
+    const { root, remote, work } = await setup();
+    const first = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    await mkdir(join(first.dir, 'o', 'r'), { recursive: true });
+    await writeFile(join(first.dir, 'o', 'r', 'day1.json'), '{}\n');
+    expect(await first.publish('stats: day 1')).toBe(true);
+    expect(git(remote, 'show', 'stats-data:o/r/day1.json')).toBe('{}');
+    expect(git(remote, 'rev-list', '--count', 'stats-data')).toBe('1');
+
+    const second = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    await writeFile(join(second.dir, 'o', 'r', 'day2.json'), '{}\n');
+    expect(await second.publish('stats: day 2')).toBe(true);
+    expect(git(remote, 'rev-list', '--count', 'stats-data')).toBe('2');
+  });
+
+  it('publishes nothing when the run changed no file', async () => {
+    const { root, remote, work } = await setup();
+    const data = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    await writeFile(join(data.dir, 'a.json'), '1\n');
+    await data.publish('first');
+    const again = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    await writeFile(join(again.dir, 'a.json'), '1\n');
+    expect(await again.publish('same')).toBe(false);
+    expect(git(remote, 'rev-list', '--count', 'stats-data')).toBe('1');
+  });
+
+  it('rebases once when the branch moved on, keeping this run\'s file', async () => {
+    const { root, remote, work } = await setup();
+    const data = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    await writeFile(join(data.dir, 'seed.json'), '0\n');
+    await data.publish('seed');
+
+    const mine = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    const other = join(root, 'other');
+    git(root, 'clone', '-q', '-b', 'stats-data', remote, other);
+    git(other, 'config', 'user.email', 'x@example.com');
+    git(other, 'config', 'user.name', 'other');
+    await writeFile(join(other, 'theirs.json'), '2\n');
+    git(other, 'add', '-A');
+    git(other, 'commit', '-q', '-m', 'someone else');
+    git(other, 'push', '-q', 'origin', 'stats-data');
+
+    await writeFile(join(mine.dir, 'mine.json'), '3\n');
+    expect(await mine.publish('mine')).toBe(true);
+    expect(git(remote, 'show', 'stats-data:theirs.json')).toBe('2');
+    expect(git(remote, 'show', 'stats-data:mine.json')).toBe('3');
+    expect(await readFile(join(mine.dir, 'theirs.json'), 'utf8')).toBe('2\n');
+  });
+});

@@ -1,0 +1,48 @@
+name: GitHub stats
+description: Keeps release downloads, stars, traffic and Docker Hub pulls on a data branch, and builds a dashboard, charts and badges from them.
+branding:
+  icon: bar-chart-2
+  color: blue
+inputs:
+  token:
+    description: API token. Traffic needs a token with push access to the repo (a PAT); GITHUB_TOKEN gets 403 there.
+    required: false
+    default: ${{ github.token }}
+  config:
+    description: Path to the stats config file. A missing file means the defaults.
+    required: false
+    default: .github/stats.yml
+  data-branch:
+    description: Orphan branch the data lives on, created on first run.
+    required: false
+    default: stats-data
+  traffic:
+    description: Collect traffic (views, clones, referrers, paths).
+    required: false
+    default: "false"
+  pages:
+    description: Write the static site to pages-dir, for the Pages actions to deploy.
+    required: false
+    default: "false"
+  pages-dir:
+    description: Where the Pages site goes.
+    required: false
+    default: _site
+  pages-traffic:
+    description: Include traffic in the Pages site (it is always in the data branch's copy when collected).
+    required: false
+    default: "false"
+  dry-run:
+    description: Collect and build, but don't commit or push.
+    required: false
+    default: "false"
+outputs:
+  pages-dir:
+    description: Absolute path of the Pages site, empty when pages is off.
+  dataset:
+    description: Absolute path of the repo's dataset.json.
+  summary:
+    description: One-line totals.
+runs:
+  using: node24
+  main: dist/index.js
