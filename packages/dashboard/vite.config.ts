@@ -18,8 +18,8 @@ function filesUnder(dir: string): string[] {
   });
 }
 
-/** Inlines the entry's script and stylesheet, so the page works as one file. */
-function standalone(html: string, read: (path: string) => string): string {
+/** Inlines the entry's script, stylesheet and fonts, so the page works as one file. */
+function standalone(html: string, read: (path: string) => string, readBlob: (path: string) => string): string {
   return html
     .replace(/<script type="module"[^>]*src="\.\/(assets\/[^"]+\.js)"[^>]*><\/script>/, (_, path: string) => {
       // a `</script` inside the bundle would end the inline element early
@@ -27,7 +27,11 @@ function standalone(html: string, read: (path: string) => string): string {
       return `<script type="module">${js}</script>`;
     })
     .replace(/<link rel="stylesheet"[^>]*href="\.\/(assets\/[^"]+\.css)"[^>]*>/, (_, path: string) => {
-      const css = read(path).replace(/<\/style/gi, '<\\/style');
+      // the fonts sit beside the stylesheet, which url() names relative to itself
+      const dir = path.slice(0, path.lastIndexOf('/') + 1);
+      const css = read(path)
+        .replace(/url\(["']?\.\/([^"')]+\.woff2)["']?\)/g, (_, font: string) => `url(data:font/woff2;base64,${readBlob(dir + font)})`)
+        .replace(/<\/style/gi, '<\\/style');
       return `<style>${css}</style>`;
     });
 }
@@ -49,10 +53,13 @@ function embed(): Plugin {
     apply: 'build',
     closeBundle() {
       const files: Record<string, string> = {};
+      // the fonts, base64 encoded
+      const blobs: Record<string, string> = {};
       for (const path of filesUnder(dist)) {
         const key = relative(dist, path).split('\\').join('/');
-        if (!/\.(html|js|css)$/.test(key)) throw new Error(`dashboard build emitted ${key}; only text files can be embedded`);
-        files[key] = readFileSync(path, 'utf8');
+        if (/\.(html|js|css)$/.test(key)) files[key] = readFileSync(path, 'utf8');
+        else if (key.endsWith('.woff2')) blobs[key] = readFileSync(path).toString('base64');
+        else throw new Error(`dashboard build emitted ${key}; only text and woff2 files can be embedded`);
       }
       const html = files['index.html'];
       if (html === undefined) throw new Error('dashboard build has no index.html');
@@ -61,7 +68,13 @@ function embed(): Plugin {
         if (content === undefined) throw new Error(`dashboard build has no ${path}`);
         return content;
       };
+      const readBlob = (path: string): string => {
+        const content = blobs[path];
+        if (content === undefined) throw new Error(`dashboard build has no ${path}`);
+        return content;
+      };
       const lines = Object.entries(files).map(([key, value]) => `  ${JSON.stringify(key)}: ${JSON.stringify(value)},`);
+      const blobLines = Object.entries(blobs).map(([key, value]) => `  ${JSON.stringify(key)}: ${JSON.stringify(value)},`);
       writeFileSync(
         embedded,
         [
@@ -69,7 +82,10 @@ function embed(): Plugin {
           'export const PAGES_FILES: Readonly<Record<string, string>> = {',
           ...lines,
           '};',
-          `export const STANDALONE_HTML: string = ${JSON.stringify(standalone(html, read))};`,
+          'export const PAGES_BLOBS: Readonly<Record<string, string>> = {',
+          ...blobLines,
+          '};',
+          `export const STANDALONE_HTML: string = ${JSON.stringify(standalone(html, read, readBlob))};`,
           '',
         ].join('\n'),
       );

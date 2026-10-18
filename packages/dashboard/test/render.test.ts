@@ -25,6 +25,15 @@ describe('dashboardFiles', () => {
     expect(JSON.parse(data.content)).toEqual(JSON.parse(JSON.stringify(fixture)));
   });
 
+  it('inlines the fonts in the standalone page and ships them as base64 files in the pages build', () => {
+    const html = dashboardFiles([fixture], { mode: 'standalone' })[0]!.content;
+    expect(html).toContain('url(data:font/woff2;base64,');
+    expect(html).not.toMatch(/url\(["']?\.\//);
+    const fonts = dashboardFiles([fixture], { mode: 'pages' }).filter((f) => f.path.endsWith('.woff2'));
+    expect(fonts.length).toBeGreaterThan(0);
+    expect(fonts.every((f) => f.path.startsWith('assets/') && f.encoding === 'base64')).toBe(true);
+  });
+
   it('keeps `<` out of the inlined JSON so a value cannot close the script element', () => {
     const hostile = { ...fixture, repo: 'x/</script><b>' };
     const html = dashboardFiles([hostile], { mode: 'standalone' })[0]!.content;

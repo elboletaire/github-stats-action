@@ -2,7 +2,7 @@
 // standalone page embedded at build time (see vite.config.ts). Nothing here reads the disk.
 
 import type { Dataset, OutputFile } from '@github-stats-action/core';
-import { PAGES_FILES, STANDALONE_HTML } from './embedded';
+import { PAGES_BLOBS, PAGES_FILES, STANDALONE_HTML } from './embedded';
 
 /** The placeholder element the build leaves for the datasets or the repo list. */
 const CONFIG_PLACEHOLDER = '<script id="gsa-config" type="application/json">__GSA_CONFIG__</script>';
@@ -22,6 +22,7 @@ export function dashboardFiles(datasets: readonly Dataset[], options: { mode: 'p
   const assets = Object.entries(PAGES_FILES)
     .filter(([path]) => path !== 'index.html')
     .map(([path, content]) => ({ path, content }));
+  const fonts = Object.entries(PAGES_BLOBS).map(([path, content]) => ({ path, content, encoding: 'base64' as const }));
   const data = datasets.map((d) => ({ path: `data/${d.repo}/dataset.json`, content: `${JSON.stringify(d, null, 1)}\n` }));
-  return [{ path: 'index.html', content: index }, ...assets, ...data];
+  return [{ path: 'index.html', content: index }, ...assets, ...fonts, ...data];
 }

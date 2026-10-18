@@ -141,6 +141,6 @@ export async function writeOutputFiles(root: string, files: readonly OutputFile[
   for (const file of files) {
     const path = join(root, file.path);
     await mkdir(join(path, '..'), { recursive: true });
-    await writeFile(path, file.content);
+    await writeFile(path, file.encoding === 'base64' ? Buffer.from(file.content, 'base64') : file.content);
   }
 }
