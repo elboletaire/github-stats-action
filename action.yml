@@ -1,5 +1,5 @@
-name: GitHub stats
-description: Keeps release downloads, stars, traffic and Docker Hub pulls on a data branch, and builds a dashboard, charts and badges from them.
+name: Repo Stats
+description: Keeps a repository's release downloads, stars, traffic and Docker pulls on a data branch, with dashboard, charts and badges.
 branding:
   icon: bar-chart-2
   color: blue
@@ -9,9 +9,8 @@ inputs:
     required: false
     default: ${{ github.token }}
   config:
-    description: Path to the stats config file. A missing file means the defaults.
+    description: Path to the stats config file; .github/stats.yml when unset, which may be missing (then the defaults apply). A path set here must exist.
     required: false
-    default: .github/stats.yml
   data-branch:
     description: Orphan branch the data lives on, created on first run.
     required: false

@@ -2,10 +2,10 @@
 
 import type { Dataset } from '@github-stats-action/core';
 import { esc, f0, f1, plural } from '../format';
-import { niceMax, ticks } from '../scale';
+import { quarterMax, ticks } from '../scale';
 import { countedGroups, periodName, periodShort } from '../model';
 import { colorVar } from '../palette';
-import { resetSvg, roundedTop, svgEl, widthOf } from '../svg';
+import { gridLines, resetSvg, roundedTop, svgEl, widthOf } from '../svg';
 import { showTip, tipOn } from '../tooltip';
 import { makeSection, legendHtml, type Section } from './common';
 
@@ -73,16 +73,13 @@ function drawPeriods(svg: SVGSVGElement, d: Dataset): void {
   const P = d.periods;
   const W = widthOf(svg);
   const H = 230;
-  const m = { l: 44, r: 10, t: 14, b: 58 };
+  const m = { l: 44, r: 16, t: 26, b: 58 };
   resetSvg(svg, W, H);
-  const mx = niceMax(Math.max(0, ...P.flatMap((p) => groups.map((g) => p.avgPerDay[g.name] ?? 0))));
+  const mx = quarterMax(Math.max(0, ...P.flatMap((p) => groups.map((g) => p.avgPerDay[g.name] ?? 0))));
   const y = (v: number): number => m.t + (H - m.t - m.b) * (1 - v / mx);
   const slot = (W - m.l - m.r) / Math.max(1, P.length);
-  for (const t of ticks(mx)) {
-    svgEl('line', { x1: m.l, x2: W - m.r, y1: y(t), y2: y(t), class: 'axis' }, svg);
-    svgEl('text', { x: m.l - 6, y: y(t) + 4, 'text-anchor': 'end' }, svg).textContent = f0(t);
-  }
-  svgEl('text', { x: m.l, y: 10 }, svg).textContent = 'Average estimated downloads per day';
+  gridLines(svg, ticks(mx), y, m.l, W - m.r, f0);
+  svgEl('text', { x: m.l, y: 10, class: 'ink' }, svg).textContent = 'Average estimated downloads per day';
 
   P.forEach((p, i) => {
     const cx = m.l + slot * (i + 0.5);
@@ -93,7 +90,7 @@ function drawPeriods(svg: SVGSVGElement, d: Dataset): void {
       const h = y(0) - y(v);
       if (h <= 0) return;
       const bar = svgEl('path', { d: roundedTop(x, y(v), bw - 2, h, 4), fill: colorVar(g) }, svg);
-      svgEl('text', { x: x + (bw - 2) / 2, y: y(v) - 4, 'text-anchor': 'middle', class: 'ink' }, svg).textContent = f1(v);
+      svgEl('text', { x: x + (bw - 2) / 2, y: y(v) - 6, 'text-anchor': 'middle', class: 'ink' }, svg).textContent = f1(v);
       tipOn(bar, (ev) => showTip(
         `<b>${esc(periodName(p, d.epochs))}</b><br>${esc(g.label)}: ${f1(v)}/day avg (est.)<br>${f0(p.groups[g.name] ?? 0)} downloads over ${p.days.toFixed(1)} ${p.days === 1 ? 'day' : 'days'}`,
         ev,

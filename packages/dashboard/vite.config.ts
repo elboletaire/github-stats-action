@@ -5,6 +5,7 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
+import { themeCss } from '../core/src/theme';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = join(here, 'dist');
@@ -29,6 +30,17 @@ function standalone(html: string, read: (path: string) => string): string {
       const css = read(path).replace(/<\/style/gi, '<\\/style');
       return `<style>${css}</style>`;
     });
+}
+
+/** Puts the shared colour tokens into the stylesheet, so the page and the README charts stay one palette. */
+function theme(): Plugin {
+  return {
+    name: 'theme-tokens',
+    transform(code, id) {
+      if (!id.endsWith('/src/style.css')) return null;
+      return { code: code.replace('/* @theme */', themeCss()), map: null };
+    },
+  };
 }
 
 function embed(): Plugin {
@@ -68,7 +80,7 @@ function embed(): Plugin {
 export default defineConfig({
   root: here,
   base: './',
-  plugins: [embed()],
+  plugins: [theme(), embed()],
   build: {
     outDir: dist,
     emptyOutDir: true,

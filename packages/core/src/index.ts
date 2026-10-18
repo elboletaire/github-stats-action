@@ -13,6 +13,7 @@ export * from './traffic';
 export * from './store';
 export * from './import';
 export * from './outputs';
+export * from './theme';
 export * from './collectors/client';
 export * from './collectors/github';
 export * from './collectors/docker';

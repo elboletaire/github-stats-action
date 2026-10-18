@@ -48,10 +48,12 @@ export function kpis(d: Dataset): Section {
   const cards = tiles.map((t) => {
     const change = !latest || t.change === null
       ? '<div class="d">no change data</div>'
-      : `<div class="d"><b class="${t.change > 0 ? 'pos' : ''}">${sgn(t.change)}</b> on ${esc(latest.date)}${latest.days > 1 ? ` (over ${latest.days} days)` : ''}</div>`;
+      : `<div class="d"><b class="${t.change > 0 ? 'pos' : ''}">${sgn(t.change)}</b> on <span class="nw">${esc(latest.date)}</span>${latest.days > 1 ? ` (over ${latest.days} days)` : ''}</div>`;
     const swatch = t.swatch ? `<i class="sw" style="background:${t.swatch}"></i>` : '';
     const note = t.note ? `<div class="note">${esc(t.note)}</div>` : '';
     return `<div class="kpi"><div class="l">${swatch}${esc(t.label)}</div><div class="v">${f0(t.value)}</div>${change}${note}</div>`;
   });
-  return { el: makeSection(`<div class="kpis">${cards.join('')}</div>`) };
+  const el = makeSection(`<div class="kpis">${cards.join('')}</div>`);
+  el.className = 'kpis-wrap';
+  return { el };
 }

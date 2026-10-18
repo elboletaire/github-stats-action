@@ -181,6 +181,19 @@ describe('render from a git ref', () => {
     expect(JSON.parse(await readFile(join(out, REPO, 'dataset.json'), 'utf8')).repo).toBe(REPO);
   });
 
+  it('fails when a --config the user named does not exist, instead of using the defaults', async () => {
+    const out = await mkdtemp(join(tmpdir(), 'render-out-'));
+    const missing = join(out, 'nope.yml');
+    const errors: string[] = [];
+    const spy = vi.spyOn(console, 'error').mockImplementation((message: string) => { errors.push(message); });
+    try {
+      expect(await runCli(['render', '--data', out, '--out', out, '--config', missing])).toBe(1);
+    } finally {
+      spy.mockRestore();
+    }
+    expect(errors.join('\n')).toContain(`config file not found: ${missing}`);
+  });
+
   it('reports an unknown ref without writing anything', async () => {
     const repo = await mkdtemp(join(tmpdir(), 'render-git-'));
     git(repo, 'init', '-q', '-b', 'main');

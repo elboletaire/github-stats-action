@@ -3,13 +3,12 @@
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import * as core from '@actions/core';
-import { loadConfig } from '@github-stats-action/core';
+import { loadActionConfig } from './config';
 import { checkoutDataBranch } from './git';
 import { runStats, writeDerivedOutputs, writePagesSite } from './run';
 
 async function main(): Promise<void> {
   const token = core.getInput('token') || process.env.GITHUB_TOKEN || '';
-  const configPath = core.getInput('config') || '.github/stats.yml';
   const branch = core.getInput('data-branch') || 'stats-data';
   const pagesDirInput = core.getInput('pages-dir') || '_site';
   const pages = core.getBooleanInput('pages');
@@ -19,7 +18,7 @@ async function main(): Promise<void> {
   const repo = process.env.GITHUB_REPOSITORY;
   if (!repo) throw new Error('GITHUB_REPOSITORY is not set');
 
-  const config = await loadConfig(join(workspace, configPath));
+  const config = await loadActionConfig(workspace);
   const data = await checkoutDataBranch({ cwd: workspace, branch, tmp: process.env.RUNNER_TEMP ?? tmpdir() });
   try {
     const pagesDir = join(workspace, pagesDirInput);

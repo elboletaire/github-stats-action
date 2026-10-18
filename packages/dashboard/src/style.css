@@ -1,73 +1,8 @@
 /* Layout: one row of KPI tiles, then the periods, the per-release and per-day charts, the breakdowns,
-   stars, traffic, and the snapshot table. Colours are tokens so light and dark swap in one place. */
+   stars, traffic, and the snapshot table. The colour tokens (--bg, --surface, --ink, --c0..--c7, ...)
+   are written here at build time from packages/core/src/theme.ts, the palette the README charts use. */
 
-:root {
-  --bg: #f6f7f8;
-  --surface: #fcfcfb;
-  --ink: #0b0b0b;
-  --ink2: #52514e;
-  --muted: #6f6e69;
-  --line: #dcdedf;
-  --grid: #e8eaeb;
-  --good: #1f7a4d;
-  --warn: #9a6700;
-  /* categorical slots: the validated default palette, light steps */
-  --c0: #2a78d6;
-  --c1: #eb6834;
-  --c2: #1baf7a;
-  --c3: #eda100;
-  --c4: #e87ba4;
-  --c5: #008300;
-  --c6: #6250d6;
-  --c7: #e34948;
-  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: ui-monospace, Menlo, Consolas, monospace;
-  color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #121314;
-    --surface: #1a1a19;
-    --ink: #f0efec;
-    --ink2: #c3c2b7;
-    --muted: #a09f98;
-    --line: #33343a;
-    --grid: #2a2b2e;
-    --good: #5fc08a;
-    --warn: #d9a441;
-    --c0: #3987e5;
-    --c1: #d95926;
-    --c2: #199e70;
-    --c3: #c98500;
-    --c4: #d55181;
-    --c5: #008300;
-    --c6: #9085e9;
-    --c7: #e66767;
-    color-scheme: dark;
-  }
-}
-
-:root[data-theme="dark"] {
-  --bg: #121314;
-  --surface: #1a1a19;
-  --ink: #f0efec;
-  --ink2: #c3c2b7;
-  --muted: #a09f98;
-  --line: #33343a;
-  --grid: #2a2b2e;
-  --good: #5fc08a;
-  --warn: #d9a441;
-  --c0: #3987e5;
-  --c1: #d95926;
-  --c2: #199e70;
-  --c3: #c98500;
-  --c4: #d55181;
-  --c5: #008300;
-  --c6: #9085e9;
-  --c7: #e66767;
-  color-scheme: dark;
-}
+/* @theme */
 
 * {
   box-sizing: border-box;
@@ -78,7 +13,8 @@ body {
   background: var(--bg);
   color: var(--ink);
   font: 14px/1.5 var(--sans);
-  padding-block: 24px 40px;
+  -webkit-font-smoothing: antialiased;
+  padding-block: 28px 48px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
@@ -88,29 +24,31 @@ main {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 20px;
   min-width: 0;
 }
 
 h1 {
-  font-size: 26px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 650;
   margin: 0;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   text-wrap: balance;
 }
 
 h2 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   margin: 0 0 4px;
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
 h3 {
   font-size: 13px;
   font-weight: 600;
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   color: var(--ink2);
 }
 
@@ -130,7 +68,8 @@ code {
 
 .note {
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 12px;
+  line-height: 1.5;
   max-width: 78ch;
 }
 
@@ -138,10 +77,15 @@ code {
   font-variant-numeric: tabular-nums;
 }
 
+.nw {
+  white-space: nowrap;
+}
+
 header {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding-bottom: 4px;
 }
 
 .repo {
@@ -157,83 +101,113 @@ header {
   color: var(--ink);
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 6px;
-  height: 30px;
-  padding: 0 8px;
+  border-radius: 8px;
+  height: 32px;
+  padding: 0 10px;
   max-width: 100%;
+}
+
+/* the KPI row: the tiles sit directly on the page, each its own card */
+section.kpis-wrap {
+  background: none;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
 }
 
 .kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px;
 }
 
 .kpi {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 14px 14px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px 14px;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .kpi .l {
   min-width: 0;
   overflow-wrap: anywhere;
-  font-size: 11.5px;
+  font-size: 11px;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .kpi .v {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.2;
-  margin-top: 2px;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-top: 4px;
 }
 
 .kpi .d {
-  font-size: 12.5px;
-  color: var(--ink2);
+  font-size: 12px;
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
+  margin-top: 4px;
 }
 
 .kpi .d b {
   font-weight: 600;
+  color: var(--ink2);
+  border-radius: 999px;
+  padding: 1px 7px;
+  margin-right: 2px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
 }
 
 .kpi .d b.pos {
   color: var(--good);
+  background: color-mix(in srgb, var(--good) 12%, transparent);
 }
 
+/* the series dot: the one identity mark, beside text and in legends */
 .sw {
   display: inline-block;
-  width: 9px;
-  height: 9px;
-  border-radius: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
   margin-right: 6px;
-  vertical-align: baseline;
+  vertical-align: 0;
+  flex: none;
 }
 
 section {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .legend {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--ink2);
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
 }
 
 .legend .line {
@@ -242,7 +216,6 @@ section {
   height: 2px;
   border-radius: 1px;
   margin-right: 6px;
-  vertical-align: middle;
 }
 
 .scroll {
@@ -268,7 +241,7 @@ table {
 
 th,
 td {
-  padding: 7px 10px;
+  padding: 8px 10px;
   text-align: right;
   border-bottom: 1px solid var(--grid);
   white-space: nowrap;
@@ -282,13 +255,17 @@ td:first-child {
 th {
   font-weight: 500;
   color: var(--muted);
-  font-size: 11.5px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 tbody tr:last-child td {
   border-bottom: 0;
+}
+
+tbody tr:hover td {
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
 }
 
 td small {
@@ -307,22 +284,24 @@ td.pos {
   color: var(--good);
 }
 
+/* the "estimated" / "measured" tag beside a heading */
 .est {
   display: inline-block;
-  font-size: 11px;
+  font-size: 10.5px;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  border: 1px solid var(--warn);
   color: var(--warn);
-  border-radius: 4px;
-  padding: 0 6px;
+  background: color-mix(in srgb, var(--warn) 14%, transparent);
+  border-radius: 999px;
+  padding: 2px 8px;
   margin-left: 8px;
   vertical-align: 2px;
 }
 
 .meas {
-  border-color: var(--good);
   color: var(--good);
+  background: color-mix(in srgb, var(--good) 12%, transparent);
 }
 
 [hidden] {
@@ -336,10 +315,17 @@ svg {
 svg text {
   fill: var(--muted);
   font: 11px var(--sans);
+  font-variant-numeric: tabular-nums;
 }
 
 svg .ink {
   fill: var(--ink2);
+}
+
+svg .strong {
+  fill: var(--ink);
+  font-weight: 600;
+  font-size: 12px;
 }
 
 svg .axis {
@@ -347,10 +333,18 @@ svg .axis {
   stroke-width: 1;
 }
 
-svg .sep {
-  stroke: var(--muted);
-  stroke-dasharray: 3 3;
+svg .base {
+  stroke: var(--line);
   stroke-width: 1;
+}
+
+svg .sep {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+svg .cap {
+  fill: var(--muted);
 }
 
 [data-strip] {
@@ -366,19 +360,19 @@ svg .sep {
 .cols {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  gap: 24px;
 }
 
 .bars {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
 }
 
 .brow {
   display: grid;
   grid-template-columns: minmax(110px, 170px) 1fr 86px;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   font-size: 13px;
 }
@@ -400,15 +394,16 @@ svg .sep {
 
 .brow .t {
   background: var(--grid);
-  height: 10px;
-  border-radius: 5px;
+  height: 8px;
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .brow .t i {
   display: block;
   height: 100%;
-  border-radius: 0 4px 4px 0;
+  min-width: 2px;
+  border-radius: 4px;
 }
 
 .brow > span:last-child {
@@ -423,14 +418,19 @@ svg .sep {
   pointer-events: none;
   background: var(--surface);
   color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 6px 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
   font-size: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  line-height: 1.5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
   display: none;
   max-width: 260px;
   font-variant-numeric: tabular-nums;
+}
+
+#tip b {
+  font-weight: 600;
 }
 
 details summary {
@@ -447,13 +447,13 @@ summary:focus-visible {
 details > .scroll,
 details > p,
 details > .bars {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .vgroups {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .vgroups details summary {
@@ -475,20 +475,20 @@ details > .bars {
   color: var(--ink);
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 6px;
-  height: 30px;
+  border-radius: 8px;
+  height: 32px;
   cursor: pointer;
 }
 
 .vpick button {
-  width: 30px;
+  width: 32px;
   color: var(--ink2);
   font-size: 18px;
   line-height: 1;
 }
 
 .vpick select {
-  padding: 0 8px;
+  padding: 0 10px;
   max-width: 100%;
 }
 
@@ -529,32 +529,43 @@ details > .bars {
   text-align: left;
 }
 
+/* the zoom presets: a segmented control, the chosen range raised on the page tone */
 .presets {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: 10px;
   align-items: center;
+}
+
+.presets .group {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--bg);
+  border-radius: 8px;
 }
 
 .presets button {
   font: inherit;
-  font-size: 12.5px;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--ink2);
   background: none;
   border: 1px solid transparent;
-  border-radius: 4px;
-  padding: 2px 9px;
+  border-radius: 6px;
+  padding: 3px 10px;
   cursor: pointer;
 }
 
 .presets button:hover {
-  border-color: var(--line);
+  color: var(--ink);
 }
 
 .presets button[aria-pressed="true"] {
   color: var(--ink);
-  border-color: var(--line);
-  background: var(--grid);
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .presets button:focus-visible {
@@ -572,16 +583,45 @@ footer code {
 
 footer {
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   max-width: 90ch;
+  padding-top: 4px;
 }
 
 /* the page stays inside the phone width: wide content scrolls in its own box */
 @media (max-width: 600px) {
+  body {
+    padding-block: 20px 40px;
+  }
+
+  main {
+    gap: 14px;
+  }
+
   section {
-    padding: 14px;
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .kpis {
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kpi {
+    padding: 14px 14px 12px;
+    border-radius: 10px;
+  }
+
+  .kpi .v {
+    font-size: 24px;
+  }
+
+  /* the file names give the bars room on a phone */
+  .brow.v {
+    grid-template-columns: minmax(96px, 42%) 1fr 44px;
   }
 }

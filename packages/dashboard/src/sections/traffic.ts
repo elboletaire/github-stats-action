@@ -49,6 +49,7 @@ export function traffic(d: Dataset): Section | null {
     redraw: () => {
       if (!svg || xs.length === 0) return;
       drawTimeline(svg, {
+        id: 'traffic',
         xs,
         axis,
         unit: { one: 'per day', other: 'per day' },

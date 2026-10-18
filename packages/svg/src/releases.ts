@@ -1,14 +1,21 @@
 // Downloads per release: one stacked column per release, by group. Epochs are hairline markers
-// with their label above the plot, placed so the labels never overlap.
+// capped with a dot, their label beside the cap, placed so the labels never overlap.
 
 import type { Dataset } from '@github-stats-action/core';
+import { TYPE } from '@github-stats-action/core';
 import {
+  barWidth,
+  compact,
+  emptyNote,
+  esc,
   finite,
   heading,
   ink,
-  compact,
-  esc,
   niceTicks,
+  PAD,
+  PLOT_LEFT,
+  plural,
+  px,
   seriesColor,
   stack,
   svgDocument,
@@ -20,16 +27,15 @@ import {
   type Box,
   type Key,
   type Theme,
-  plural,
 } from './svg';
 
-const box: Box = { left: 56, right: WIDTH - 24, top: 104, bottom: 256 };
+/** The plot starts lower when there are epoch labels to make room for above it. */
+const plotBox = (labelled: boolean): Box => ({ left: PLOT_LEFT, right: WIDTH - PAD, top: labelled ? 112 : 80, bottom: 252 });
 const title = 'Downloads per release';
 
 /** Label rows above the plot, nearest first. Past the last one a label is left out, its marker stays. */
 const EPOCH_TIERS = 3;
-const TIER_HEIGHT = 13;
-const MARKER_TOP = 60;
+const TIER_HEIGHT = 14;
 
 interface Span {
   from: number;
@@ -42,11 +48,9 @@ export function downloadsPerReleaseChart(dataset: Dataset, theme: Theme): string
   const note = 'One column per release, stacked by group';
   const { releases } = dataset;
   const c = ink(theme);
+  const box = plotBox(dataset.epochs.some((_, e) => releases.some((r) => r.epoch === e)));
   if (releases.length === 0) {
-    return svgDocument(theme, title, `${title}: no releases yet.`, [
-      ...heading(title, note, theme, keys),
-      svgText({ x: WIDTH / 2, y: (box.top + box.bottom) / 2, value: 'No releases yet', fill: c.secondary, anchor: 'middle', size: 13 }),
-    ]);
+    return svgDocument(theme, title, `${title}: no releases yet.`, [...heading(title, note, theme, keys), emptyNote('No releases yet', box, theme)]);
   }
 
   const totals = releases.map((r) => dataset.groups.reduce((sum, g) => sum + finite(r.groups[g.name] ?? 0), 0));
@@ -55,7 +59,7 @@ export function downloadsPerReleaseChart(dataset: Dataset, theme: Theme): string
   const yOf = (v: number): number => box.bottom - (finite(v) / top) * (box.bottom - box.top);
 
   const slot = (box.right - box.left) / releases.length;
-  const width = Math.min(24, Math.max(1, slot - 2));
+  const width = barWidth(slot);
   const columns = releases.flatMap((r, i) => {
     const x = box.left + i * slot + (slot - width) / 2;
     return stack(
@@ -69,11 +73,12 @@ export function downloadsPerReleaseChart(dataset: Dataset, theme: Theme): string
     );
   });
 
+  // the latest release is labelled with its total, so the chart ends on a number
   const last = releases.length - 1;
   const lastTotal = totals[last] ?? 0;
   const totalLabel =
     lastTotal > 0
-      ? [svgText({ x: box.left + last * slot + slot / 2, y: yOf(lastTotal) - 4, value: compact(lastTotal), fill: c.primary, anchor: 'middle' })]
+      ? [svgText({ x: box.left + last * slot + slot / 2, y: yOf(lastTotal) - 8, value: compact(lastTotal), fill: c.primary, anchor: 'middle', size: TYPE.sm, weight: 600 })]
       : [];
 
   const placed: Span[] = [];
@@ -83,13 +88,15 @@ export function downloadsPerReleaseChart(dataset: Dataset, theme: Theme): string
     const x = box.left + k * slot;
     const text = `${epoch.version} ${epoch.label}`;
     const spot = placeLabel(x, text, placed);
+    const capY = spot ? labelY(box, spot.tier) - 4 : box.top - 8;
     return [
-      `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${MARKER_TOP}" y2="${box.bottom}" stroke="${c.axis}" stroke-width="1"><title>${esc(text)}</title></line>`,
-      ...(spot ? [svgText({ x: spot.x, y: labelY(spot.tier), value: text, fill: c.secondary, anchor: spot.anchor })] : []),
+      `<line x1="${px(x)}" x2="${px(x)}" y1="${px(capY)}" y2="${px(box.bottom)}" stroke="${c.axis}" stroke-width="1"><title>${esc(text)}</title></line>`,
+      `<circle cx="${px(x)}" cy="${px(capY)}" r="2.5" fill="${c.muted}"/>`,
+      ...(spot ? [svgText({ x: spot.x, y: labelY(box, spot.tier), value: text, fill: c.secondary, anchor: spot.anchor })] : []),
     ];
   });
 
-  const step = Math.max(1, Math.ceil(48 / slot));
+  const step = Math.max(1, Math.ceil(52 / slot));
   const tagLabels = releases.flatMap((r, i) => (i % step === 0 ? [{ x: box.left + i * slot + slot / 2, value: r.tag }] : []));
 
   return svgDocument(theme, title, `${title}: ${plural(releases.length, 'release')}, stacked by group.`, [
@@ -98,19 +105,19 @@ export function downloadsPerReleaseChart(dataset: Dataset, theme: Theme): string
     ...markers,
     ...columns,
     ...totalLabel,
-    ...xLabels(tagLabels, box.bottom + 16, theme),
+    ...xLabels(tagLabels, box.bottom + 20, theme),
   ]);
 }
 
-const labelY = (tier: number): number => box.top - 8 - tier * TIER_HEIGHT;
+const labelY = (box: Box, tier: number): number => box.top - 12 - tier * TIER_HEIGHT;
 
 /** The first free spot for an epoch label: right of its marker, else left of it, nearest tier first. */
 function placeLabel(x: number, text: string, placed: Span[]): { x: number; tier: number; anchor: 'start' | 'end' } | undefined {
   const width = textWidth(text);
   for (let tier = 0; tier < EPOCH_TIERS; tier++) {
     const options = [
-      { x: x + 4, anchor: 'start' as const, from: x + 4, to: x + 4 + width },
-      { x: x - 4, anchor: 'end' as const, from: x - 4 - width, to: x - 4 },
+      { x: x + 7, anchor: 'start' as const, from: x + 7, to: x + 7 + width },
+      { x: x - 7, anchor: 'end' as const, from: x - 7 - width, to: x - 7 },
     ];
     for (const option of options) {
       if (option.from < 8 || option.to > WIDTH - 8) continue;
