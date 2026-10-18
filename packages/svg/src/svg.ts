@@ -167,7 +167,7 @@ export function heading(title: string, note: string, theme: Theme, keys: Key[] =
     ];
   }
   return [
-    `<text x="${PAD}" y="32" fill="${INK[theme].primary}" font-size="${TYPE.lg}" font-weight="600" letter-spacing="-0.2">${esc(title)}</text>`,
+    `<text x="${PAD}" y="32" fill="${INK[theme].primary}" font-size="${TYPE.lg}" font-weight="600">${esc(title)}</text>`,
     svgText({ x: PAD, y: 50, value: note, fill: INK[theme].muted, size: TYPE.sm }),
     ...(keys.length > 1 ? legend(keys, theme, WIDTH - PAD, 32) : []),
   ];

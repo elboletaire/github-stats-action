@@ -226,7 +226,7 @@ describe('chart options', () => {
       expect(content).toContain('<desc id="desc">');
       expect(content).toContain('aria-labelledby="title desc"');
       expect(drawn(content), path).not.toMatch(/>(Stars over time|Downloads per day|Downloads per release|Cumulative stargazers|One column)/);
-      expect(drawn(content), path).not.toMatch(/font-size="15"/);
+      expect(drawn(content), path).not.toMatch(/font-size="16"/);
     }
   });
 

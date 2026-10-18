@@ -66,7 +66,7 @@ export function seriesColor(theme: Theme, slot: number): string {
 }
 
 /** Font sizes in px, a 1.25 scale from 11 up. */
-export const TYPE = { xs: 11, sm: 12, md: 13, base: 14, lg: 15, xl: 19, xxl: 24, hero: 30 } as const;
+export const TYPE = { xs: 11, sm: 12, md: 13, base: 14, lg: 16, xl: 19, xxl: 24, hero: 30 } as const;
 
 export const FONT = {
   sans: '"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif',
