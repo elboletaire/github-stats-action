@@ -15,7 +15,7 @@
     "build": "tsdown",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "stats": "tsx packages/action/src/cli.ts",
+    "stats": "tsx packages/action/src/bin.ts",
     "fixtures": "tsx scripts/build-fixture-dataset.ts"
   },
   "devDependencies": {

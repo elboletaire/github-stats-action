@@ -68,7 +68,7 @@ Traffic is collected only with `traffic: true`. The daily views and clones are m
 
 - Release downloads, stars, forks, watchers, open issues and Docker Hub pulls are stored on the data branch. That branch is public when the repo is.
 - Stars are stored as timestamps only (`stargazers.json`). No logins are stored.
-- Traffic is opt-in twice: `traffic: true` collects it into the data branch, and `pages-traffic: true` also publishes it on the Pages site. Both default to `false`.
+- Traffic is opt-in twice. With `traffic: true`, views, clones, referrers and paths are stored on the data branch, which is public when the repo is. `pages-traffic: true` only controls whether the Pages copy includes traffic. Both default to `false`.
 - Planned for several repos: their data would live in one private central repo rather than in each public repo. Not implemented yet; one repo per run for now.
 
 ## Pages (optional)
@@ -179,11 +179,14 @@ The file is YAML, optional, read from `.github/stats.yml` by default. Unknown ke
 groups:                     # first match wins; unmatched assets are "other"
   - { name: app, label: Desktop app, assets: "manga-downloader-gui-*" }
   - { name: cli, label: CLI, assets: "manga-downloader-*" }
-ignore: ["*.md5"]           # not counted as downloads (still stored)
+ignore: ["*.md5", "*-SHA256SUMS.txt"]   # not counted as downloads (still stored)
 counters:                   # named counts of matching assets, not downloads
   - { name: updates, label: In-app updates, assets: "manga-downloader-gui-*-SHA256SUMS.txt", from: v1.19.0 }
 epochs:                     # dashboard periods and chart markers
-  - { version: "v1.11.0", label: First desktop app }
+  - { version: v1.0.0, label: 1.0 rewrite }
+  - { version: v1.11.0, label: First desktop app }
+  - { version: v1.18.0, label: Installer and updater }
+  - { version: v1.20.0, label: Multilingual }
 platforms:                  # label rules for asset names
   - { match: "*-windows-amd64-installer.exe", label: Windows amd64 installer }
 docker: elboletaire/manga-downloader   # optional Docker Hub image
@@ -222,7 +225,9 @@ The imported days go to `out/elboletaire/manga-downloader/snapshots/`, alongside
 
 Push a `vX.Y.Z` tag on the commit to release, or run the Release workflow with a version. The workflow builds `dist/` onto a `chore(release)` commit above the tagged one, moves the tag there, moves `vX` and `vX.Y` when this is the newest stable release of that series, and creates the GitHub Release with generated notes.
 
-To test a branch, tag it (e.g. `v0.1.0`) and use `@v0.1.0`. A branch has no `dist/`, so `@<branch>` can't run.
+`workflow_dispatch` tags the head of the branch you select, unless the version tag already exists.
+
+To test a branch, tag it (e.g. `v0.1.0`) and use `@v0.1.0`. A branch has no `dist/`, so `@<branch>` can't run. Warning: a test tag like `v0.1.0` creates a real GitHub Release and moves `v0` and `v0.1` to it. Delete the release and those tags afterwards if you don't want them.
 
 ## Development
 
