@@ -13,6 +13,8 @@ const BOT = {
   email: '41898282+github-actions[bot]@users.noreply.github.com',
 };
 
+const AS_BOT = ['-c', `user.name=${BOT.name}`, '-c', `user.email=${BOT.email}`];
+
 export interface DataBranch {
   /** The worktree holding the branch; the run writes here. */
   dir: string;
@@ -71,18 +73,20 @@ export async function checkoutDataBranch(options: { cwd: string; branch: string;
     async publish(message: string, rederive?: () => Promise<unknown>): Promise<boolean> {
       await git(['add', '-A'], dir);
       if (!(await hasStagedChanges(dir))) return false;
-      await git(['-c', `user.name=${BOT.name}`, '-c', `user.email=${BOT.email}`, 'commit', '--quiet', '-m', message], dir);
+      await git([...AS_BOT, 'commit', '--quiet', '-m', message], dir);
       try {
         await git(['push', '--quiet', 'origin', `HEAD:refs/heads/${branch}`], dir);
       } catch {
         await git(['fetch', '--quiet', '--no-tags', 'origin', `+refs/heads/${branch}:${remoteRef}`], dir);
-        await git(['-c', `user.name=${BOT.name}`, '-c', `user.email=${BOT.email}`, 'rebase', '--quiet', '-X', 'theirs', remoteRef], dir);
-        if (rederive) {
-          await rederive();
-          await git(['add', '-A'], dir);
-          if (await hasStagedChanges(dir)) {
-            await git(['-c', `user.name=${BOT.name}`, '-c', `user.email=${BOT.email}`, 'commit', '--quiet', '--amend', '--no-edit'], dir);
-          }
+        await git([...AS_BOT, 'rebase', '--quiet', '-X', 'theirs', remoteRef], dir);
+        // The rebase drops this run's commit when the remote already holds the same change.
+        const ours = (await git(['rev-parse', 'HEAD'], dir)) !== (await git(['rev-parse', remoteRef], dir));
+        await rederive?.();
+        await git(['add', '-A'], dir);
+        if (await hasStagedChanges(dir)) {
+          await git([...AS_BOT, 'commit', '--quiet', ...(ours ? ['--amend', '--no-edit'] : ['-m', message])], dir);
+        } else if (!ours) {
+          return false;
         }
         await git(['push', '--quiet', 'origin', `HEAD:refs/heads/${branch}`], dir);
       }

@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import * as core from '@actions/core';
 import { loadConfig } from '@github-stats-action/core';
 import { checkoutDataBranch } from './git';
-import { runStats, writeDerivedOutputs } from './run';
+import { runStats, writeDerivedOutputs, writePagesSite } from './run';
 
 async function main(): Promise<void> {
   const token = core.getInput('token') || process.env.GITHUB_TOKEN || '';
@@ -22,13 +22,14 @@ async function main(): Promise<void> {
   const config = await loadConfig(join(workspace, configPath));
   const data = await checkoutDataBranch({ cwd: workspace, branch, tmp: process.env.RUNNER_TEMP ?? tmpdir() });
   const pagesDir = join(workspace, pagesDirInput);
+  const pagesOptions = pages ? { dir: pagesDir, traffic: core.getBooleanInput('pages-traffic') } : undefined;
   const result = await runStats({
     repo,
     token,
     config,
     dataDir: data.dir,
     traffic: core.getBooleanInput('traffic'),
-    pages: pages ? { dir: pagesDir, traffic: core.getBooleanInput('pages-traffic') } : undefined,
+    pages: pagesOptions,
     now,
     log: core,
   });
@@ -36,9 +37,12 @@ async function main(): Promise<void> {
   if (dryRun) {
     core.info('dry-run: nothing committed or pushed');
   } else {
-    const pushed = await data.publish(`stats: ${result.dataset.snapshotAt.slice(0, 10)}`, () =>
-      writeDerivedOutputs(data.dir, repo, config, now),
-    );
+    // After a rebase onto a moved branch, the outputs are rebuilt from the merged snapshots.
+    const rederive = async (): Promise<void> => {
+      const rebuilt = await writeDerivedOutputs(data.dir, repo, config, now);
+      if (pagesOptions) await writePagesSite(pagesOptions, repo, rebuilt);
+    };
+    const pushed = await data.publish(`stats: ${result.dataset.snapshotAt.slice(0, 10)}`, rederive);
     core.info(pushed ? `pushed ${branch}` : `${branch} unchanged`);
   }
   core.setOutput('pages-dir', pages ? pagesDir : '');

@@ -110,4 +110,41 @@ describe('checkoutDataBranch', () => {
     expect(git(remote, 'show', 'stats-data:daily.csv')).toBe('2026-01-01.json\n2026-01-02.json\n2026-01-03.json');
     expect(git(remote, 'rev-list', '--count', 'stats-data')).toBe('3');
   });
+
+  describe('when the rebase drops this run\'s commit', () => {
+    /** The data branch with `a.json` = 1 pushed by someone else after this run took its checkout. */
+    async function raced() {
+      const { root, remote, work } = await setup();
+      const seed = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+      await writeFile(join(seed.dir, 'seed.json'), '0\n');
+      await seed.publish('seed');
+
+      const mine = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+      await writeFile(join(mine.dir, 'a.json'), '1\n');
+      const other = join(root, 'other');
+      git(root, 'clone', '-q', '-b', 'stats-data', remote, other);
+      git(other, 'config', 'user.email', 'x@example.com');
+      git(other, 'config', 'user.name', 'other');
+      await writeFile(join(other, 'a.json'), '1\n');
+      git(other, 'add', '-A');
+      git(other, 'commit', '-q', '-m', 'same change');
+      git(other, 'push', '-q', 'origin', 'stats-data');
+      return { remote, mine, other };
+    }
+
+    it('reports nothing published and leaves the remote tip alone', async () => {
+      const { remote, mine, other } = await raced();
+      expect(await mine.publish('mine')).toBe(false);
+      expect(git(remote, 'rev-parse', 'stats-data')).toBe(git(other, 'rev-parse', 'HEAD'));
+    });
+
+    it('commits the rederived files on top of the remote instead of amending it', async () => {
+      const { remote, mine, other } = await raced();
+      const derive = () => writeFile(join(mine.dir, 'daily.csv'), 'day\n');
+      expect(await mine.publish('mine', derive)).toBe(true);
+      expect(git(remote, 'show', 'stats-data:daily.csv')).toBe('day');
+      expect(git(remote, 'log', '-1', '--format=%s', 'stats-data')).toBe('mine');
+      expect(git(remote, 'rev-parse', 'stats-data^')).toBe(git(other, 'rev-parse', 'HEAD'));
+    });
+  });
 });

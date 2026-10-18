@@ -73,6 +73,15 @@ export async function writeDerivedOutputs(dataDir: string, repo: string, config:
   return dataset;
 }
 
+/** Writes the Pages site: the dashboard and the dataset, without traffic unless `traffic` is set. */
+export async function writePagesSite(pages: { dir: string; traffic: boolean }, repo: string, dataset: Dataset): Promise<void> {
+  const pagesDataset = pages.traffic ? dataset : { ...dataset, traffic: undefined };
+  const datasetPath = join(pages.dir, 'data', repo, 'dataset.json');
+  await mkdir(join(datasetPath, '..'), { recursive: true });
+  await writeFile(datasetPath, `${JSON.stringify(pagesDataset, null, 1)}\n`);
+  await writeOutputFiles(pages.dir, renderDashboard([pagesDataset], { mode: 'pages' }));
+}
+
 export async function runStats(options: RunOptions): Promise<RunResult> {
   const { repo, config, now, log } = options;
   const fetchFn = options.fetch ?? fetch;
@@ -109,13 +118,7 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
 
   const dataset = await writeDerivedOutputs(options.dataDir, repo, config, now);
 
-  if (options.pages) {
-    const pagesDataset = options.pages.traffic ? dataset : { ...dataset, traffic: undefined };
-    const datasetPath = join(options.pages.dir, 'data', repo, 'dataset.json');
-    await mkdir(join(datasetPath, '..'), { recursive: true });
-    await writeFile(datasetPath, `${JSON.stringify(pagesDataset, null, 1)}\n`);
-    await writeOutputFiles(options.pages.dir, renderDashboard([pagesDataset], { mode: 'pages' }));
-  }
+  if (options.pages) await writePagesSite(options.pages, repo, dataset);
 
   return { dataset, datasetPath: join(dir, 'dataset.json'), summary: summaryLine(dataset) };
 }

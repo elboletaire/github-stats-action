@@ -17,11 +17,14 @@ export async function exportBranchData(ref: string, cwd: string, dest: string): 
     cwd,
     maxBuffer: 64 * 1024 * 1024,
   }).catch((error: Error) => {
-      throw new Error(`git: cannot read ref '${ref}': ${error.message.split('\n')[0]}`);
-    });
+    throw new Error(`git: cannot read ref '${ref}': ${error.message.split('\n')[0]}`);
+  });
   const paths = list.stdout.split('\n').filter((p) => DATA_PATH.test(p));
   for (const path of paths) {
-    const { stdout } = await execFileAsync('git', ['show', '--end-of-options', `${ref}:${path}`], { cwd, maxBuffer: 64 * 1024 * 1024 });
+    const { stdout } = await execFileAsync('git', ['show', '--end-of-options', `${ref}:${path}`], {
+      cwd,
+      maxBuffer: 64 * 1024 * 1024,
+    });
     const target = join(dest, path);
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, stdout);
