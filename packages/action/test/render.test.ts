@@ -1,10 +1,9 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-  importOldSnapshots,
   loadConfig,
   mergeTrafficDays,
   repoDir,
@@ -26,11 +25,11 @@ const log = { info: vi.fn(), warning: vi.fn() };
 const read = async <T>(path: string): Promise<T> =>
   JSON.parse(await readFile(new URL(path, FIXTURES), 'utf8')) as T;
 
-/** A data branch folder built from the fixtures: the old snapshots, stargazers and traffic. */
+/** A data branch folder built from the fixtures: the snapshots, stargazers and traffic. */
 async function fixtureData(root: string, repo = REPO): Promise<void> {
   const dir = repoDir(root, repo);
   const config = await loadConfig(CONFIG);
-  await importOldSnapshots(new URL('old', FIXTURES).pathname, dir, config.docker);
+  await cp(new URL('snapshots/', FIXTURES).pathname, join(dir, 'snapshots'), { recursive: true });
   await writeStargazers(dir, await read<string[]>('stargazers.json'));
   const raw: TrafficRaw = {
     views: await read('traffic/views.json'),

@@ -1,16 +1,15 @@
-// The fixtures' Dataset, built the way the action builds it. The 2026-10-18 snapshot comes
-// from releases.json, since the old file predates v1.20.0.
+// The fixtures' Dataset, built the way the action builds it. The 2026-10-18 releases come from
+// releases.json, since the stored day in snapshots/ predates v1.20.0.
 
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import {
   buildDataset,
-  convertOldSnapshot,
   loadConfig,
   mergeTrafficDays,
+  readSnapshots,
   toTrafficResponse,
   type Dataset,
-  type OldSnapshot,
   type Snapshot,
   type SnapshotRelease,
   type TrafficRaw,
@@ -24,8 +23,7 @@ export async function buildFixtureDataset(): Promise<Dataset> {
   const repo = 'elboletaire/manga-downloader';
   const config = await loadConfig(fixtures + 'manga-downloader.stats.yml');
 
-  const old17 = await read<OldSnapshot>('old/snapshots/2026-10-17.json');
-  const old18 = await read<OldSnapshot>('old/snapshots/2026-10-18.json');
+  const [snapshot17, stored18] = await readSnapshots(fixtures);
   const apiReleases = await read<
     { tag_name: string; draft: boolean; prerelease: boolean; published_at: string; assets: { name: string; download_count: number }[] }[]
   >('releases.json');
@@ -39,19 +37,7 @@ export async function buildFixtureDataset(): Promise<Dataset> {
       assets: r.assets.map((a) => ({ name: a.name, downloads: a.download_count })),
     }));
 
-  const snapshot18: Snapshot = {
-    schema: 1,
-    date: '2026-10-18',
-    takenAt: FIXTURE_TAKEN_AT,
-    repo: {
-      stars: old18.repo.stars,
-      forks: old18.repo.forks,
-      watchers: old18.repo.subscribers,
-      openIssues: old18.repo.open_issues,
-    },
-    docker: { image: config.docker!, pulls: old18.docker!.pull_count },
-    releases,
-  };
+  const snapshot18: Snapshot = { ...stored18!, takenAt: FIXTURE_TAKEN_AT, releases };
 
   const raw: TrafficRaw = {
     views: await read('traffic/views.json'),
@@ -64,7 +50,7 @@ export async function buildFixtureDataset(): Promise<Dataset> {
   return buildDataset({
     repo,
     config,
-    snapshots: [convertOldSnapshot(old17, '2026-10-17', config.docker), snapshot18],
+    snapshots: [snapshot17!, snapshot18],
     // Synthetic sample: 18 timestamps, not the repo's stargazers (totals.stars is 271), so the stars chart ends at 18.
     stargazers: await read<string[]>('stargazers.json'),
     traffic: {

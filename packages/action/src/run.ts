@@ -1,8 +1,7 @@
 // One run: collect, write the day's snapshot, rebuild the derived files and the outputs.
 // Everything is fetched before anything is written, so a failed run leaves the branch as it was.
 
-import { stat } from 'node:fs/promises';
-import { isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { join } from 'node:path';
 import { renderBadges } from '@github-stats-action/badges';
 import { dashboardFiles } from '@github-stats-action/dashboard';
 import {
@@ -15,7 +14,6 @@ import {
   fetchTraffic,
   githubClient,
   mergeTrafficDays,
-  importOldSnapshots,
   readDatasets,
   readStargazers,
   readTrafficSeries,
@@ -45,8 +43,6 @@ export interface RunOptions {
   traffic: boolean;
   /** The Pages site, when `pages` is on. */
   pages?: { dir: string; traffic: boolean };
-  /** An old-format `snapshots/` under the data root (`.` for the root), imported before the day is written. */
-  importOld?: string;
   now: Date;
   log: Logger;
   fetch?: FetchFn;
@@ -74,14 +70,6 @@ export async function writeDerivedOutputs(dataDir: string, repo: string, config:
   await writeOutputFiles(dir, [...renderCharts(dataset), ...renderBadges(dataset)]);
   await writeOutputFiles(dataDir, dashboardFiles(await readDatasets(dataDir), { mode: 'standalone' }));
   return dataset;
-}
-
-async function isDirectory(path: string): Promise<boolean> {
-  try {
-    return (await stat(path)).isDirectory();
-  } catch {
-    return false;
-  }
 }
 
 /** Writes the Pages site: the dashboard and the dataset, without traffic unless `traffic` is set. */
@@ -117,18 +105,6 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
     ...(config.docker && dockerPulls !== undefined ? { docker: { image: config.docker, pulls: dockerPulls } } : {}),
     releases,
   };
-  if (options.importOld) {
-    const oldDir = resolve(options.dataDir, options.importOld);
-    const inside = relative(options.dataDir, oldDir);
-    if (isAbsolute(inside) || inside === '..' || inside.startsWith(`..${sep}`)) {
-      throw new Error(`import-old: ${options.importOld} is outside the data branch`);
-    }
-    if (!(await isDirectory(join(oldDir, 'snapshots')))) {
-      throw new Error(`import-old: no snapshots/ folder at ${options.importOld} on the data branch`);
-    }
-    const imported = await importOldSnapshots(oldDir, dir, config.docker);
-    log.info(`import: ${imported.imported.length} days imported, ${imported.kept.length} kept`);
-  }
   await writeSnapshot(dir, snapshot);
   await writeStargazers(dir, stargazers);
   if (traffic) {

@@ -1,10 +1,8 @@
-import { execFileSync } from 'node:child_process';
-import { cp, mkdir, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
-import { convertOldSnapshot, parseConfig, type Dataset } from '@github-stats-action/core';
-import { checkoutDataBranch } from '../src/git';
+import { parseConfig, type Dataset } from '@github-stats-action/core';
 import { runStats, summaryLine } from '../src/run';
 
 const config = parseConfig(`
@@ -56,8 +54,6 @@ function network(releasesStatus = 200, dockerStatus = 200) {
 const log = { info: vi.fn(), warning: vi.fn() };
 const now = new Date('2026-01-03T09:00:00Z');
 const REPO = 'elboletaire/manga-downloader';
-
-const git = (cwd: string, ...args: string[]) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
 
 describe('runStats', () => {
   it('collects, writes the day and the derived files, and reports the totals', async () => {
@@ -115,84 +111,5 @@ describe('runStats', () => {
     });
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('docker hub'));
     expect(result.dataset.totals.docker).toBeNull();
-  });
-});
-
-describe('import-old', () => {
-  it('converts the old root snapshots into the repo folder, keeping days already there and the root files', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'stats-import-run-'));
-    const remote = join(root, 'remote.git');
-    const work = join(root, 'work');
-    git(root, 'init', '--bare', '-q', '-b', 'main', remote);
-    await mkdir(work);
-    git(work, 'init', '-q', '-b', 'main');
-    git(work, 'config', 'user.email', 'dev@example.com');
-    git(work, 'config', 'user.name', 'dev');
-    await writeFile(join(work, 'README.md'), 'code\n');
-    git(work, 'add', '-A');
-    git(work, 'commit', '-q', '-m', 'init');
-    git(work, 'remote', 'add', 'origin', remote);
-    git(work, 'push', '-q', 'origin', 'main');
-
-    // the old layout: manga-downloader's stats-data branch, snapshots at the root
-    const old = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
-    const oldNames = (await readdir(new URL('../../../fixtures/old/snapshots/', import.meta.url))).sort();
-    await mkdir(join(old.dir, 'snapshots'), { recursive: true });
-    for (const name of oldNames) {
-      await cp(new URL(`../../../fixtures/old/snapshots/${name}`, import.meta.url), join(old.dir, 'snapshots', name));
-    }
-    await old.publish('old layout');
-
-    // a day already in the new layout, which the import must keep
-    const kept = convertOldSnapshot(
-      JSON.parse(await readFile(join(old.dir, 'snapshots', oldNames[0]!), 'utf8')),
-      oldNames[0]!.replace(/\.json$/, ''),
-      config.docker,
-    );
-    kept.takenAt = '2026-10-01T00:00:00Z';
-    const data = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
-    await mkdir(join(data.dir, REPO, 'snapshots'), { recursive: true });
-    await writeFile(join(data.dir, REPO, 'snapshots', oldNames[0]!), `${JSON.stringify(kept, null, 2)}\n`);
-    expect(await data.publish('new layout')).toBe(true);
-
-    const run = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
-    const info = vi.fn();
-    await runStats({
-      repo: REPO,
-      token: 'x',
-      config,
-      dataDir: run.dir,
-      traffic: false,
-      importOld: '.',
-      now,
-      log: { info, warning: vi.fn() },
-      fetch: network(),
-    });
-    expect(info).toHaveBeenCalledWith(`import: ${oldNames.length - 1} days imported, 1 kept`);
-    expect(await run.publish('stats: 2026-01-03')).toBe(true);
-
-    const onBranch = (dir: string) => git(remote, 'ls-tree', '--name-only', 'stats-data', `${dir}/`).split('\n').map((p) => p.split('/').at(-1));
-    expect(onBranch('snapshots').sort()).toEqual(oldNames);
-    expect(onBranch(REPO + '/snapshots').sort()).toEqual([...oldNames, '2026-01-03.json'].sort());
-    expect(git(remote, 'show', `stats-data:${REPO}/snapshots/${oldNames[0]}`)).toContain('"takenAt": "2026-10-01T00:00:00Z"');
-  });
-
-  it('refuses an import path that leaves the data branch, relative or absolute', async () => {
-    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
-    const outside = await mkdtemp(join(tmpdir(), 'stats-outside-'));
-    await mkdir(join(outside, 'snapshots'));
-    const run = (importOld: string) =>
-      runStats({ repo: REPO, config, dataDir, traffic: false, importOld, now, log, fetch: network() });
-    await expect(run('../' + outside.split('/').at(-1))).rejects.toThrow('is outside the data branch');
-    await expect(run(outside)).rejects.toThrow(`${outside} is outside the data branch`);
-    expect(await readdir(dataDir)).toEqual([]);
-  });
-
-  it('fails clearly when the path holds no snapshots/ folder', async () => {
-    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
-    await expect(
-      runStats({ repo: REPO, config, dataDir, traffic: false, importOld: 'old', now, log, fetch: network() }),
-    ).rejects.toThrow('import-old: no snapshots/ folder at old on the data branch');
-    expect(await readdir(dataDir)).toEqual([]);
   });
 });
