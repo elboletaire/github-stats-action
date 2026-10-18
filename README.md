@@ -207,7 +207,7 @@ npm:                        # optional npm packages, counted daily
 - `epochs`: `version` as a quoted semver (`"v1.11.0"`, so YAML doesn't read `1.11` as a number), `label` defaults to the version. Optional.
 - `platforms`: `match` and `label`. Without a matching rule, the asset name minus the tag, repo name and archive suffixes is used.
 - `releases`: `true` by default. Release downloads show only when some release has an asset that counts (not ignored), so a repo without release assets gets no download views. `false` hides them even when assets count. The snapshots keep the counts either way, so turning it back on restores the history.
-- `npm`: npm package names, or `{ package, label }` (the label defaults to the name). Scoped names work. Up to 8, one colour each. Absent means no npm requests at all.
+- `npm`: npm package names, or `{ package, label }` (the label defaults to the name). Scoped names work. Up to 8: each package takes one of the eight palette colours, and a ninth would repeat one in the stacked charts, where two touching segments of one colour can't be told apart. Absent means no npm requests at all.
 - `charts`: `titles` (default `true`) shows or hides the title of the README SVGs (a note that says what the data is stays: estimated or measured); a chart's own `title` (`stars`, `downloads-per-day`, `downloads-per-release`, `npmDownloads`) overrides it. The dashboard keeps its headings.
 - `docker`: `namespace/name`.
 
