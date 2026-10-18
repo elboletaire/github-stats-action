@@ -9,7 +9,7 @@ inputs:
     required: false
     default: ${{ github.token }}
   config:
-    description: Path to the stats config file. A missing file means the defaults.
+    description: Path to the stats config file. Only the default path may be missing (then the defaults apply); a path set here must exist.
     required: false
     default: .github/stats.yml
   data-branch:

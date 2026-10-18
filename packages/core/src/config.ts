@@ -206,14 +206,30 @@ export function parseConfig(text: string): StatsConfig {
   return config;
 }
 
-/** Reads the config file; a missing file is not an error and gives the defaults. */
-export async function loadConfig(path: string): Promise<StatsConfig> {
+/** Where the config is looked for when no path is given. */
+export const DEFAULT_CONFIG_PATH = '.github/stats.yml';
+
+export interface LoadedConfig {
+  config: StatsConfig;
+  /** The file read, or null when the default path was missing and the defaults are in use. */
+  file: string | null;
+}
+
+// Reads the config file. Only the default path may be missing, silently giving the defaults;
+// a path the user named must exist, so a typo can't quietly drop every group and ignore rule.
+export async function loadConfigFile(path: string, options: { explicit: boolean }): Promise<LoadedConfig> {
   let text: string;
   try {
     text = await readFile(path, 'utf8');
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return parseConfig('');
-    throw error;
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    if (options.explicit) throw new Error(`config file not found: ${path}`);
+    return { config: parseConfig(''), file: null };
   }
-  return parseConfig(text);
+  return { config: parseConfig(text), file: path };
+}
+
+/** Reads the config file; a missing file is not an error and gives the defaults. */
+export async function loadConfig(path: string): Promise<StatsConfig> {
+  return (await loadConfigFile(path, { explicit: false })).config;
 }

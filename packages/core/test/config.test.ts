@@ -2,7 +2,7 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ConfigError, DEFAULT_CONFIG, loadConfig, parseConfig } from '../src/config';
+import { ConfigError, DEFAULT_CONFIG, loadConfig, loadConfigFile, parseConfig } from '../src/config';
 
 const FIXTURE = new URL('../../../fixtures/manga-downloader.stats.yml', import.meta.url);
 
@@ -79,5 +79,27 @@ describe('loadConfig', () => {
     const path = join(dir, 'stats.yml');
     await writeFile(path, 'docker: a/b\n');
     expect((await loadConfig(path)).docker).toBe('a/b');
+  });
+});
+
+describe('loadConfigFile', () => {
+  it('gives the defaults, with no file, when the default path is missing', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'stats-config-'));
+    expect(await loadConfigFile(join(dir, 'missing.yml'), { explicit: false })).toEqual({ config: DEFAULT_CONFIG, file: null });
+  });
+
+  it('fails when a path the user named is missing', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'stats-config-'));
+    const path = join(dir, 'missing.yml');
+    await expect(loadConfigFile(path, { explicit: true })).rejects.toThrow(`config file not found: ${path}`);
+  });
+
+  it('names the file it read', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'stats-config-'));
+    const path = join(dir, 'stats.yml');
+    await writeFile(path, 'docker: a/b\n');
+    const loaded = await loadConfigFile(path, { explicit: true });
+    expect(loaded.file).toBe(path);
+    expect(loaded.config.docker).toBe('a/b');
   });
 });

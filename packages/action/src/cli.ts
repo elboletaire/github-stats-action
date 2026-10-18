@@ -5,7 +5,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
-import { importOldSnapshots, loadConfig, repoDir, type Logger } from '@github-stats-action/core';
+import { DEFAULT_CONFIG_PATH, importOldSnapshots, loadConfigFile, repoDir, type Logger, type StatsConfig } from '@github-stats-action/core';
 import { exportBranchData } from './branch';
 import { renderData } from './render';
 import { runStats } from './run';
@@ -24,7 +24,7 @@ const USAGE = `usage:
       --from-branch  a git ref of the repo in the current directory, e.g. origin/stats-data;
                      read with git, the working tree is not touched
 
-  --config  stats config (default .github/stats.yml; a missing file means the defaults)`;
+  --config  stats config (default .github/stats.yml; only the default may be missing, giving the defaults)`;
 
 const log: Logger = {
   info: (message) => console.log(message),
@@ -34,7 +34,7 @@ const log: Logger = {
 const OPTIONS = {
   repo: { type: 'string' },
   out: { type: 'string' },
-  config: { type: 'string', default: '.github/stats.yml' },
+  config: { type: 'string' },
   traffic: { type: 'boolean', default: false },
   'dry-run': { type: 'boolean', default: false },
   'import-old': { type: 'string' },
@@ -45,9 +45,16 @@ const OPTIONS = {
 
 type Values = ReturnType<typeof parseArgs<{ options: typeof OPTIONS; allowPositionals: true }>>['values'];
 
+/** The config from --config, or the default path when it was not given (which may then be missing). */
+async function readConfig(values: Values): Promise<StatsConfig> {
+  const { config, file } = await loadConfigFile(values.config ?? DEFAULT_CONFIG_PATH, { explicit: values.config !== undefined });
+  log.info(file ? `config: ${file}` : 'config: no config file, using the defaults');
+  return config;
+}
+
 async function collect(values: Values): Promise<void> {
   if (!values.repo || !values.out) throw new Error('collect needs --repo and --out');
-  const config = await loadConfig(values.config);
+  const config = await readConfig(values);
   if (values['import-old']) {
     const imported = await importOldSnapshots(values['import-old'], repoDir(values.out, values.repo), config.docker);
     log.info(`import: ${imported.imported.length} days imported, ${imported.kept.length} kept`);
@@ -70,7 +77,7 @@ async function render(values: Values, cwd: string): Promise<void> {
   if (Boolean(values.data) === Boolean(values['from-branch'])) {
     throw new Error('render needs exactly one of --data or --from-branch');
   }
-  const config = await loadConfig(values.config);
+  const config = await readConfig(values);
   const options = { outDir: values.out, config, repo: values.repo, log };
   if (values.data) {
     await renderData({ ...options, dataRoot: values.data });
