@@ -6,6 +6,7 @@ import { countedGroups } from './model';
 import { estimated } from './sections/estimated';
 import { kpis } from './sections/kpis';
 import { measured } from './sections/measured';
+import { npm } from './sections/npm';
 import { periods } from './sections/periods';
 import { platforms } from './sections/platforms';
 import { releases } from './sections/releases';
@@ -25,21 +26,24 @@ export interface RepoChoice {
 let current: Section[] = [];
 
 export function mount(root: HTMLElement, d: Dataset, choice?: RepoChoice): void {
-  const sections: Section[] = [
+  // the release sections need release downloads; without them the page is stars, npm and the rest
+  const sections: Array<Section | null> = [
     kpis(d),
-    periods(d),
-    releases(d),
-    versions(d),
-    estimated(d),
-    measured(d),
-    platforms(d),
+    d.releaseDownloads ? periods(d) : null,
+    d.releaseDownloads ? releases(d) : null,
+    d.releaseDownloads ? versions(d) : null,
+    d.releaseDownloads ? estimated(d) : null,
+    d.releaseDownloads ? measured(d) : null,
+    d.releaseDownloads ? platforms(d) : null,
+    npm(d),
     stars(d),
     traffic(d),
     snapshots(d),
-  ].filter((s): s is Section => s !== null);
-  root.replaceChildren(header(d, choice), ...sections.map((s) => s.el), footer(d));
-  current = sections;
-  for (const s of sections) s.redraw?.();
+  ];
+  const shown = sections.filter((s): s is Section => s !== null);
+  root.replaceChildren(header(d, choice), ...shown.map((s) => s.el), footer(d));
+  current = shown;
+  for (const s of shown) s.redraw?.();
 }
 
 /** Redraws the mounted charts for the current width. */
@@ -47,10 +51,25 @@ export function redrawAll(): void {
   for (const s of current) s.redraw?.();
 }
 
+/** Joins words as an English list: `A`, `A and B`, `A, B, and C`. */
+export function joinWords(words: readonly string[]): string {
+  if (words.length < 3) return words.join(' and ');
+  return `${words.slice(0, -1).join(', ')}, and ${words[words.length - 1]}`;
+}
+
+/** What the page shows, named after its sources: release downloads when they count, else stars and the rest. */
+export function subtitle(d: Dataset): string {
+  if (d.releaseDownloads) {
+    const labels = countedGroups(d).map((g) => g.label).join(' and ');
+    return `GitHub release downloads for ${esc(d.repo)}${labels ? `, split into ${esc(labels)}` : ''}${d.npm ? ', and npm downloads' : ''}.`;
+  }
+  const others = ['Stars', ...(d.totals.docker !== null ? ['Docker pulls'] : []), ...(d.npm ? ['npm downloads'] : [])];
+  return `${joinWords(others)} for ${esc(d.repo)}.`;
+}
+
 function header(d: Dataset, choice: RepoChoice | undefined): HTMLElement {
-  const labels = countedGroups(d).map((g) => g.label).join(' and ');
   const el = document.createElement('header');
-  el.innerHTML = `<h1>Download stats</h1><p class="sub">GitHub release downloads for ${esc(d.repo)}${labels ? `, split into ${esc(labels)}` : ''}.</p>`;
+  el.innerHTML = `<h1>Download stats</h1><p class="sub">${subtitle(d)}</p>`;
   if (choice) {
     const label = document.createElement('label');
     label.className = 'repo';
@@ -69,9 +88,18 @@ function header(d: Dataset, choice: RepoChoice | undefined): HTMLElement {
 
 function footer(d: Dataset): HTMLElement {
   const counters = d.counters.map((c) => `${esc(c.label)} counts downloads of the files matching <code>${esc(c.assets)}</code>${c.from ? `, from ${esc(c.from)}` : ''}.`);
+  const sources = [
+    ...(d.releaseDownloads ? ['the GitHub Releases API (per-file download counts, all releases)'] : []),
+    "GitHub's repository counts",
+    ...(d.totals.docker !== null ? ['Docker Hub pulls'] : []),
+    ...(d.npm ? ["npm's daily download counts"] : []),
+  ];
+  const where = d.npm ? 'as stored on the data branch' : 'as stored in the daily snapshots';
   const el = document.createElement('footer');
-  el.innerHTML = `<p>Data built ${esc(isoDay(d.generatedAt))}, from the snapshot taken ${esc(d.snapshotAt)}. Sources: the GitHub Releases API (per-file download counts, all releases), GitHub's repository counts, and Docker Hub pulls, as stored in the daily snapshots.</p>` +
-    `<p>Method: groups are split by file name, and ignored files are left out of the totals. Per-day numbers are estimates from cumulative counts spread evenly over each release's live window, so they smooth over launch-day spikes. Counts include repeat downloads and automated fetches, and GitHub never reports downloads of deleted assets.</p>` +
+  el.innerHTML = `<p>Data built ${esc(isoDay(d.generatedAt))}, from the snapshot taken ${esc(d.snapshotAt)}. Sources: ${joinWords(sources)}, ${where}.</p>` +
+    (d.releaseDownloads
+      ? `<p>Method: groups are split by file name, and ignored files are left out of the totals. Per-day numbers are estimates from cumulative counts spread evenly over each release's live window, so they smooth over launch-day spikes. Counts include repeat downloads and automated fetches, and GitHub never reports downloads of deleted assets.</p>`
+      : '') +
     (counters.length ? `<p>${counters.join(' ')}</p>` : '');
   return el;
 }

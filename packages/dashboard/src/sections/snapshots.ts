@@ -8,14 +8,15 @@ import { makeSection, type Section } from './common';
 export function snapshots(d: Dataset): Section {
   const groups = countedGroups(d);
   const hasDocker = d.measuredDaily.some((e) => e.docker !== null);
-  const head = `<thead><tr><th>Date</th><th>Days</th>${groups.map((g) => `<th>${esc(g.label)} +</th>`).join('')}<th>Total +</th>` +
+  // the group and total columns are release downloads; they are left out without them
+  const head = `<thead><tr><th>Date</th><th>Days</th>${groups.map((g) => `<th>${esc(g.label)} +</th>`).join('')}${d.releaseDownloads ? '<th>Total +</th>' : ''}` +
     (hasDocker ? '<th>Docker +</th>' : '') + '<th>Stars +</th>' +
     d.counters.map((c) => `<th>${esc(c.label)} +</th>`).join('') + '</tr></thead>';
   const rows = d.measuredDaily.slice().reverse().map((e) => {
     const total = groups.reduce((s, g) => s + (e.groups[g.name] ?? 0), 0);
     const cell = (v: number | null): string => `<td class="${v !== null && v > 0 ? 'pos' : ''}">${sgn(v)}</td>`;
     return `<tr><td>${esc(e.date)}</td><td>${e.days}</td>` +
-      groups.map((g) => cell(e.groups[g.name] ?? 0)).join('') + cell(total) +
+      groups.map((g) => cell(e.groups[g.name] ?? 0)).join('') + (d.releaseDownloads ? cell(total) : '') +
       (hasDocker ? cell(e.docker) : '') + cell(e.stars) +
       d.counters.map((c) => cell(e.counters[c.name] ?? 0)).join('') + '</tr>';
   });

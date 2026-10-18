@@ -19,29 +19,34 @@ export function kpis(d: Dataset): Section {
   const latest = d.measuredDaily.at(-1);
   const tiles: Tile[] = [];
   const groups = countedGroups(d);
-  tiles.push({
-    label: 'All-time downloads',
-    value: d.totals.downloads,
-    change: latest ? groups.reduce((sum, g) => sum + (latest.groups[g.name] ?? 0), 0) : null,
-  });
-  for (const g of groups) {
+  // release downloads, and the counters of their assets, only when they count
+  if (d.releaseDownloads) {
     tiles.push({
-      label: g.label,
-      value: d.totals.groups[g.name] ?? 0,
-      change: latest ? (latest.groups[g.name] ?? 0) : null,
-      swatch: colorVar(g),
+      label: 'All-time downloads',
+      value: d.totals.downloads,
+      change: latest ? groups.reduce((sum, g) => sum + (latest.groups[g.name] ?? 0), 0) : null,
     });
+    for (const g of groups) {
+      tiles.push({
+        label: g.label,
+        value: d.totals.groups[g.name] ?? 0,
+        change: latest ? (latest.groups[g.name] ?? 0) : null,
+        swatch: colorVar(g),
+      });
+    }
   }
   if (d.totals.docker !== null) {
     tiles.push({ label: 'Docker pulls', value: d.totals.docker, change: latest ? latest.docker : null });
   }
-  for (const counter of d.counters) {
-    tiles.push({
-      label: counter.label,
-      value: d.totals.counters[counter.name]?.downloads ?? 0,
-      change: latest ? (latest.counters[counter.name] ?? 0) : null,
-      note: counter.from ? `Counted from ${counter.from}` : undefined,
-    });
+  if (d.releaseDownloads) {
+    for (const counter of d.counters) {
+      tiles.push({
+        label: counter.label,
+        value: d.totals.counters[counter.name]?.downloads ?? 0,
+        change: latest ? (latest.counters[counter.name] ?? 0) : null,
+        note: counter.from ? `Counted from ${counter.from}` : undefined,
+      });
+    }
   }
   tiles.push({ label: 'GitHub stars', value: d.totals.stars, change: latest ? latest.stars : null });
 

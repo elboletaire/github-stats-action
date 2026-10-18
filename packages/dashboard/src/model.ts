@@ -1,6 +1,7 @@
 // Reshaping of the Dataset that more than one section needs. Pure, so it is unit tested.
 
-import type { Dataset, GroupInfo, Period, ReleaseRow } from '@github-stats-action/core';
+import type { Dataset, GroupInfo, NpmData, Period, ReleaseRow } from '@github-stats-action/core';
+import { DAY_MS } from './days';
 
 /** The group of files the ignore list matched: kept in the data, never counted. */
 export const IGNORED = 'ignored';
@@ -62,4 +63,16 @@ export function releaseCells(release: ReleaseRow): Map<string, number> {
   const cells = new Map<string, number>();
   for (const file of release.files) cells.set(`${file.group}\u0001${file.label}`, file.downloads);
   return cells;
+}
+
+/** The npm packages on one day axis: one value per UTC day from the first stored day to the latest, per package. */
+export function npmDaily(npm: NpmData): { start: string; series: number[][] } {
+  const first = Date.parse(`${npm.first}T00:00:00Z`);
+  const n = Math.round((Date.parse(`${npm.latest}T00:00:00Z`) - first) / DAY_MS) + 1;
+  const series = npm.packages.map((pkg) => {
+    const values = new Array<number>(n).fill(0);
+    for (const day of pkg.days) values[Math.round((Date.parse(`${day.date}T00:00:00Z`) - first) / DAY_MS)] = day.downloads;
+    return values;
+  });
+  return { start: npm.first, series };
 }
