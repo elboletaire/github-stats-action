@@ -139,6 +139,27 @@ describe('sampleTicks', () => {
     ]);
   });
 
+  it('keeps the last label over a tight one before it, so the end label never runs into it', () => {
+    // samples 0, 3 and 4 are 2019, 2020 and 2021: 2021 is one sample after 2020, too close, so 2020 goes
+    const samples = [
+      { date: '2019-06-01', stars: 1 },
+      { date: '2019-07-01', stars: 2 },
+      { date: '2019-08-01', stars: 3 },
+      { date: '2020-06-01', stars: 4 },
+      { date: '2021-06-01', stars: 5 },
+    ];
+    expect(sampleTicks(samples, 2)).toEqual([
+      { index: 0, label: '2019' },
+      { index: 4, label: '2021' },
+    ]);
+  });
+
+  it('keeps every year when each one has room', () => {
+    // five years, three samples each: every first sample is three samples after the last
+    const samples = Array.from({ length: 15 }, (_, i) => ({ date: `${2019 + Math.floor(i / 3)}-03-01`, stars: i + 1 }));
+    expect(sampleTicks(samples, 3).map((t) => t.label)).toEqual(['2019', '2020', '2021', '2022', '2023']);
+  });
+
   it('gives nothing without samples', () => {
     expect(sampleTicks([], 1)).toEqual([]);
   });
@@ -170,6 +191,19 @@ describe('monotoneCurve', () => {
         const y = u ** 3 * seg.from[1] + 3 * u * u * t * seg.c1[1] + 3 * u * t * t * seg.c2[1] + t ** 3 * seg.to[1];
         expect(y).toBeGreaterThanOrEqual(previous - 1e-9);
         previous = y;
+      }
+    }
+  });
+
+  it('never overshoots a dip either: each segment stays between its end points', () => {
+    const ys = [0, 5, 3, 8, 8, 2, 9];
+    const points = ys.map((y, i) => [i * 10, y] as const);
+    for (const seg of monotoneCurve(points)) {
+      const lo = Math.min(seg.from[1], seg.to[1]);
+      const hi = Math.max(seg.from[1], seg.to[1]);
+      for (const c of [seg.c1[1], seg.c2[1]]) {
+        expect(c).toBeGreaterThanOrEqual(lo - 1e-9);
+        expect(c).toBeLessThanOrEqual(hi + 1e-9);
       }
     }
   });

@@ -16,7 +16,7 @@ export function stars(d: Dataset): Section {
   }
   const even = starsSpacing(d.charts) === 'even';
   const note = even
-    ? 'Points are evenly spaced by stars, not by time.'
+    ? 'Points are evenly spaced by stars, not by time. Hover or tap a point for its date.'
     : 'Cumulative stars at the end of each UTC day, from the stargazers\' timestamps. Hover for a day.';
   const axis = dayAxis(points[0]!.date);
   const xs = points.map((p) => axis.indexOf(Date.parse(`${p.date}T00:00:00Z`)));

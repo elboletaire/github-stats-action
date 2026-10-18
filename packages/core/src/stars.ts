@@ -43,25 +43,30 @@ export interface SampleTick {
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-/** Axis labels: the year at each year's first sample, or the month under a year's span. Labels closer than `minGap` samples are dropped. */
+/** Axis labels: the year at each year's first sample, or the month under a year's span. A newer label drops the one before it when they are within `minGap` samples; the first label stays. */
 export function sampleTicks(samples: readonly StarPoint[], minGap: number): SampleTick[] {
   const first = samples[0];
   const last = samples.at(-1);
   if (!first || !last) return [];
   const monthly = Date.parse(last.date) - Date.parse(first.date) < 365 * 86_400_000;
-  const ticks: SampleTick[] = [];
+  const candidates: SampleTick[] = [];
   let period: string | undefined;
   samples.forEach((p, index) => {
     const key = monthly ? p.date.slice(0, 7) : p.date.slice(0, 4);
     if (key === period) return;
     period = key;
-    const previous = ticks.at(-1);
-    if (previous && index - previous.index < minGap) return;
     const year = p.date.slice(0, 4);
     const month = MONTHS[Number(p.date.slice(5, 7)) - 1] ?? '';
     const label = !monthly ? year : index === 0 || month === 'Jan' ? `${month} ${year}` : month;
-    ticks.push({ index, label });
+    candidates.push({ index, label });
   });
+  const ticks: SampleTick[] = [];
+  for (const tick of candidates) {
+    // the first label keeps its place, so a newer label that clashes with it is the one left out
+    while (ticks.length > 1 && tick.index - ticks.at(-1)!.index < minGap) ticks.pop();
+    const previous = ticks.at(-1);
+    if (!previous || tick.index - previous.index >= minGap) ticks.push(tick);
+  }
   return ticks;
 }
 

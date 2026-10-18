@@ -207,7 +207,7 @@ function parseCharts(value: unknown): ChartsConfig {
     return sub;
   };
   const stars = section('stars', ['title', 'spacing']);
-  const spacing = stars.spacing ?? DEFAULT_STARS_SPACING;
+  const spacing = stars.spacing === undefined ? DEFAULT_STARS_SPACING : stars.spacing;
   if (spacing !== 'even' && spacing !== 'time') throw new ConfigError(`charts.stars.spacing must be 'even' or 'time'`);
   const perDay = section('downloads-per-day', ['title']);
   const perRelease = section('downloads-per-release', ['title']);

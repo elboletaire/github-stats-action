@@ -135,10 +135,15 @@ export interface Key {
   color: string;
 }
 
+/** The width of a legend row: a dot and a label per series, 18px apart. */
+function legendWidth(keys: Key[]): number {
+  return keys.reduce((sum, k) => sum + 14 + textWidth(k.label, TYPE.sm), 0) + 18 * Math.max(0, keys.length - 1);
+}
+
 /** Legend on the title line, right-aligned: a dot and a text label per series. */
 function legend(keys: Key[], theme: Theme, right: number, y: number): string[] {
   const widths = keys.map((k) => 14 + textWidth(k.label, TYPE.sm));
-  const total = widths.reduce((sum, w) => sum + w, 0) + 18 * Math.max(0, keys.length - 1);
+  const total = legendWidth(keys);
   let x = right - total;
   return keys.flatMap((k, i) => {
     const at = x;
@@ -153,8 +158,11 @@ function legend(keys: Key[], theme: Theme, right: number, y: number): string[] {
 /** Title, note line and legend (when there is more than one series). Without a title, the hint (a small note that says what the data is) and the legend stay on the top line. */
 export function heading(title: string, note: string, theme: Theme, keys: Key[] = [], titled = true, hint = ''): string[] {
   if (!titled) {
+    // a hint that would run into the legend takes a line of its own, under the top line
+    const legendLeft = WIDTH - PAD - (keys.length > 1 ? legendWidth(keys) : 0);
+    const hintY = PAD + textWidth(hint, TYPE.xs) + 16 > legendLeft ? 34 : 20;
     return [
-      ...(hint ? [svgText({ x: PAD, y: 20, value: hint, fill: INK[theme].muted, size: TYPE.xs })] : []),
+      ...(hint ? [svgText({ x: PAD, y: hintY, value: hint, fill: INK[theme].muted, size: TYPE.xs })] : []),
       ...(keys.length > 1 ? legend(keys, theme, WIDTH - PAD, 20) : []),
     ];
   }

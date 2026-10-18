@@ -216,7 +216,7 @@ describe('chart options', () => {
   it('shows each title and note by default', async () => {
     const files = renderCharts(await fixture());
     expect(chart(files, 'charts/stars-light.svg')).toContain('>Stars over time<');
-    expect(chart(files, 'charts/stars-light.svg')).toContain('samples evenly spaced by star count');
+    expect(chart(files, 'charts/stars-light.svg')).toContain('evenly spaced by stars, not time');
     expect(chart(files, 'charts/downloads-per-release-light.svg')).toContain('>Downloads per release<');
   });
 
@@ -232,8 +232,8 @@ describe('chart options', () => {
 
   it('keeps the estimated note and the stars spacing when titles are hidden', async () => {
     const files = renderCharts(await withCharts({ titles: false }));
-    expect(drawn(chart(files, 'charts/downloads-per-day-light.svg'))).toContain('>Estimated, spread over each release');
-    expect(drawn(chart(files, 'charts/stars-light.svg'))).toContain('>Evenly spaced by star count<');
+    expect(drawn(chart(files, 'charts/downloads-per-day-light.svg'))).toContain('>Estimated per day<');
+    expect(drawn(chart(files, 'charts/stars-light.svg'))).toContain('>Evenly spaced by stars, not time<');
     expect(drawn(chart(files, 'charts/stars-light.svg'))).not.toContain('Cumulative stargazers');
   });
 
@@ -241,7 +241,20 @@ describe('chart options', () => {
     const dataset = await withCharts({ titles: false });
     const days = Array.from({ length: 20 }, (_, i) => ({ date: new Date(Date.UTC(2026, 8, 1) + i * 86_400_000).toISOString().slice(0, 10), days: 1, groups: { app: 1, cli: 2 }, stars: 1, docker: null, counters: {} }));
     const svg = chart(renderCharts({ ...dataset, measuredDaily: days }), 'charts/downloads-per-day-light.svg');
-    expect(drawn(svg)).toContain('>Measured, change between daily snapshots (20 days)<');
+    expect(drawn(svg)).toContain('>Measured per day<');
+  });
+
+  it('moves the hint to its own line when three long group labels take the legend', async () => {
+    const dataset = await withCharts({ titles: false });
+    const groups = [
+      { name: 'app', label: 'Desktop application installer builds', color: 0 },
+      { name: 'cli', label: 'Command line interface tool builds', color: 1 },
+      { name: 'other', label: 'Everything else that matched no group', color: 2 },
+    ];
+    const long = drawn(chart(renderCharts({ ...dataset, groups }), 'charts/downloads-per-day-light.svg'));
+    expect(long).toMatch(/y="34\.0"[^>]*>Estimated per day</);
+    const short = drawn(chart(renderCharts(dataset), 'charts/downloads-per-day-light.svg'));
+    expect(short).toMatch(/y="20\.0"[^>]*>Estimated per day</);
   });
 
   it('shows no stars hint in time spacing, which has no hint', async () => {

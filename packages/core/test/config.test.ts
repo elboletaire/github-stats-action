@@ -144,6 +144,11 @@ charts:
     expect(() => parseConfig('charts: { downloads-per-release: { title: 0 } }')).toThrow('charts.downloads-per-release.title must be true or false');
   });
 
+  it('rejects a null spacing and a null title alike', () => {
+    expect(() => parseConfig('charts: { stars: { spacing: null } }')).toThrow("charts.stars.spacing must be 'even' or 'time'");
+    expect(() => parseConfig('charts: { stars: { title: null } }')).toThrow('charts.stars.title must be true or false');
+  });
+
   it('rejects unknown chart keys', () => {
     expect(() => parseConfig('charts: { pie: {} }')).toThrow('charts.pie is not a known key');
     expect(() => parseConfig('charts: { stars: { colour: red } }')).toThrow('charts.stars.colour is not a known key');

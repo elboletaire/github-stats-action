@@ -42,9 +42,9 @@ export function starsChart(dataset: Dataset, theme: Theme): string {
   const even = starsSpacing(dataset.charts) === 'even';
   const titled = showTitle(dataset, 'stars');
   const box = boxOf(titled);
-  const note = even ? 'Cumulative stargazers, samples evenly spaced by star count' : 'Cumulative stargazers, one point per day';
+  const note = even ? 'Cumulative stargazers, evenly spaced by stars, not time' : 'Cumulative stargazers, one point per day';
   // the spacing is the only thing the subtitle says that the title doesn't, so it stays when the title is hidden
-  const hint = even ? 'Evenly spaced by star count' : '';
+  const hint = even ? 'Evenly spaced by stars, not time' : '';
   const [head] = dataset.stars;
   const last = dataset.stars.at(-1);
 
