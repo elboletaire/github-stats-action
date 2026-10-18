@@ -262,6 +262,17 @@ section {
   .npm-table .optional {
     display: none;
   }
+  .npm-table th,
+  .npm-table td {
+    padding: 6px 4px;
+  }
+  .npm-table th {
+    white-space: normal;
+  }
+  .npm-table td:first-child {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
 }
 
 .scroll[hidden] {
