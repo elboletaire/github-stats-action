@@ -69,8 +69,8 @@ export function seriesColor(theme: Theme, slot: number): string {
 export const TYPE = { xs: 11, sm: 12, md: 13, base: 14, lg: 15, xl: 19, xxl: 24, hero: 30 } as const;
 
 export const FONT = {
-  sans: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-  mono: 'ui-monospace, Menlo, Consolas, monospace',
+  sans: '"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif',
+  mono: '"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace',
 } as const;
 
 /** Mark sizes every chart draws with. */

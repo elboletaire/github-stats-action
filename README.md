@@ -245,4 +245,4 @@ pnpm typecheck && pnpm test && pnpm build
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE). The dashboard embeds IBM Plex under the SIL OFL 1.1 ([notice](packages/dashboard/fonts/OFL.txt)).
