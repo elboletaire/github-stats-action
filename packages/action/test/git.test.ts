@@ -147,4 +147,68 @@ describe('checkoutDataBranch', () => {
       expect(git(remote, 'rev-parse', 'stats-data^')).toBe(git(other, 'rev-parse', 'HEAD'));
     });
   });
+
+  it('starts the orphan branch even when the workspace already has a local branch of that name', async () => {
+    const { root, remote, work } = await setup();
+    git(work, 'branch', 'stats-data');
+    const data = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+    await writeFile(join(data.dir, 'day1.json'), '{}\n');
+    expect(await data.publish('stats: day 1')).toBe(true);
+    expect(git(remote, 'ls-tree', '--name-only', 'stats-data')).toBe('day1.json');
+    expect(git(work, 'rev-parse', 'stats-data')).toBe(git(work, 'rev-parse', 'main'));
+  });
+
+  describe('when other runs keep pushing first', () => {
+    /** Commits `file` on the data branch from another clone, the way a concurrent run would. */
+    async function pushElsewhere(other: string, file: string): Promise<void> {
+      git(other, 'fetch', '-q', 'origin');
+      git(other, 'reset', '-q', '--hard', 'origin/stats-data');
+      await writeFile(join(other, file), '1\n');
+      git(other, 'add', '-A');
+      git(other, 'commit', '-q', '-m', `race ${file}`);
+      git(other, 'push', '-q', 'origin', 'stats-data');
+    }
+
+    /** A data branch with `seed.json`, this run's checkout, and a clone to race it with. */
+    async function seeded() {
+      const { root, remote, work } = await setup();
+      const seed = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+      await writeFile(join(seed.dir, 'seed.json'), '0\n');
+      await seed.publish('seed');
+      const mine = await checkoutDataBranch({ cwd: work, branch: 'stats-data', tmp: root });
+      await writeFile(join(mine.dir, 'mine.json'), '1\n');
+      const other = join(root, 'other');
+      git(root, 'clone', '-q', '-b', 'stats-data', remote, other);
+      git(other, 'config', 'user.email', 'x@example.com');
+      git(other, 'config', 'user.name', 'other');
+      return { remote, mine, other };
+    }
+
+    it('rebases again when the second push also loses the race', async () => {
+      const { remote, mine, other } = await seeded();
+      await pushElsewhere(other, 'first.json');
+      let calls = 0;
+      const derive = async () => {
+        if (++calls === 1) await pushElsewhere(other, 'second.json');
+      };
+      expect(await mine.publish('mine', derive)).toBe(true);
+      expect(git(remote, 'ls-tree', '--name-only', 'stats-data').split('\n').sort()).toEqual([
+        'first.json',
+        'mine.json',
+        'second.json',
+        'seed.json',
+      ]);
+      expect(git(remote, 'log', '-1', '--format=%s', 'stats-data')).toBe('mine');
+    });
+
+    it('gives up after three rejected pushes and leaves the remote tip alone', async () => {
+      const { remote, mine, other } = await seeded();
+      await pushElsewhere(other, 'first.json');
+      let calls = 0;
+      const derive = () => pushElsewhere(other, `race-${++calls}.json`);
+      await expect(mine.publish('mine', derive)).rejects.toThrow();
+      expect(calls).toBe(2);
+      expect(git(remote, 'rev-parse', 'stats-data')).toBe(git(other, 'rev-parse', 'HEAD'));
+    });
+  });
 });

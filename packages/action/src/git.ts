@@ -2,6 +2,7 @@
 // touching the workspace's own checkout.
 
 import { execFile } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { mkdtemp } from 'node:fs/promises';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
@@ -14,6 +15,9 @@ const BOT = {
 };
 
 const AS_BOT = ['-c', `user.name=${BOT.name}`, '-c', `user.email=${BOT.email}`];
+
+/** Pushes tried before giving up: the first, then two rebased retries. */
+const PUSH_ATTEMPTS = 3;
 
 export interface DataBranch {
   /** The worktree holding the branch; the run writes here. */
@@ -48,7 +52,7 @@ async function hasStagedChanges(cwd: string): Promise<boolean> {
 }
 
 // Checks out `branch` into a worktree under `tmp`, starting an orphan one when it doesn't exist yet.
-// A push rejected as non-fast-forward rebases onto the new remote tip, keeping this run's files.
+// A push rejected as non-fast-forward rebases onto the new tip and retries, keeping this run's files.
 export async function checkoutDataBranch(options: { cwd: string; branch: string; tmp: string }): Promise<DataBranch> {
   const { cwd, branch } = options;
   const remoteRef = `refs/remotes/origin/${branch}`;
@@ -59,7 +63,8 @@ export async function checkoutDataBranch(options: { cwd: string; branch: string;
   if (exists) {
     await git(['worktree', 'add', '--quiet', '--detach', dir, remoteRef], cwd);
   } else {
-    await git(['worktree', 'add', '--quiet', '--orphan', '-b', branch, dir], cwd);
+    // A throwaway branch: `--orphan` refuses a name the workspace already has, and the push names the real one.
+    await git(['worktree', 'add', '--quiet', '--orphan', '-b', `orphan-${randomUUID()}`, dir], cwd);
   }
 
   return {
@@ -68,9 +73,13 @@ export async function checkoutDataBranch(options: { cwd: string; branch: string;
       await git(['add', '-A'], dir);
       if (!(await hasStagedChanges(dir))) return false;
       await git([...AS_BOT, 'commit', '--quiet', '-m', message], dir);
-      try {
-        await git(['push', '--quiet', 'origin', `HEAD:refs/heads/${branch}`], dir);
-      } catch {
+      for (let attempt = 1; ; attempt++) {
+        try {
+          await git(['push', '--quiet', 'origin', `HEAD:refs/heads/${branch}`], dir);
+          return true;
+        } catch (error) {
+          if (attempt === PUSH_ATTEMPTS) throw error;
+        }
         await git(['fetch', '--quiet', '--no-tags', 'origin', `+refs/heads/${branch}:${remoteRef}`], dir);
         await git([...AS_BOT, 'rebase', '--quiet', '-X', 'theirs', remoteRef], dir);
         // The rebase drops this run's commit when the remote already holds the same change.
@@ -82,9 +91,7 @@ export async function checkoutDataBranch(options: { cwd: string; branch: string;
         } else if (!ours) {
           return false;
         }
-        await git(['push', '--quiet', 'origin', `HEAD:refs/heads/${branch}`], dir);
       }
-      return true;
     },
   };
 }
