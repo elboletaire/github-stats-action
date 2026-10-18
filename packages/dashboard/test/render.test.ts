@@ -29,9 +29,22 @@ describe('dashboardFiles', () => {
     const html = dashboardFiles([fixture], { mode: 'standalone' })[0]!.content;
     expect(html).toContain('url(data:font/woff2;base64,');
     expect(html).not.toMatch(/url\(["']?\.\//);
-    const fonts = dashboardFiles([fixture], { mode: 'pages' }).filter((f) => f.path.endsWith('.woff2'));
+    const pages = dashboardFiles([fixture], { mode: 'pages' });
+    const fonts = pages.filter((f) => f.path.endsWith('.woff2'));
     expect(fonts.length).toBeGreaterThan(0);
     expect(fonts.every((f) => f.path.startsWith('assets/') && f.encoding === 'base64')).toBe(true);
+    for (const font of fonts) {
+      expect(Buffer.from(font.content, 'base64').subarray(0, 4).toString('latin1')).toBe('wOF2');
+    }
+    // every font url in the pages stylesheet is relative and names a file the build emits
+    const emitted = new Set(pages.map((f) => f.path));
+    const css = pages.find((f) => f.path.startsWith('assets/') && f.path.endsWith('.css'))!.content;
+    const urls = [...css.matchAll(/url\(["']?([^"')]+)["']?\)/g)].map((m) => m[1]!);
+    expect(urls.length).toBeGreaterThan(0);
+    for (const url of urls) {
+      expect(url).toMatch(/^\.\/[^/]+\.woff2$/);
+      expect(emitted.has(`assets/${url.slice(2)}`)).toBe(true);
+    }
   });
 
   it('keeps `<` out of the inlined JSON so a value cannot close the script element', () => {
