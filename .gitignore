@@ -2,3 +2,5 @@ node_modules/
 .worktrees/
 coverage/
 .vitest/
+packages/dashboard/src/embedded.ts
+packages/dashboard/dist/

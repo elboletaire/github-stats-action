@@ -35,12 +35,25 @@ importers:
 
   packages/core:
     dependencies:
+      '@github-stats-action/dashboard':
+        specifier: workspace:*
+        version: link:../dashboard
       up-fetch:
         specifier: ^2.6.1
         version: 2.6.1
       yaml:
         specifier: ^2.9.1
         version: 2.9.1
+
+  packages/dashboard:
+    dependencies:
+      '@github-stats-action/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      vite:
+        specifier: ^8.3.4
+        version: 8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1)
 
 packages:
 

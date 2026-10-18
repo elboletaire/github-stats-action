@@ -1,0 +1,18 @@
+{
+  "name": "@github-stats-action/dashboard",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/render.ts"
+  },
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@github-stats-action/core": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^8.3.4"
+  }
+}

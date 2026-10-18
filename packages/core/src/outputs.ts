@@ -1,6 +1,7 @@
 // Output renderers. Each returns the files to write; the action and the CLI do the writing.
-// Stubs until the dashboard, svg and badges packages fill them in.
+// The dashboard is in @github-stats-action/dashboard; charts and badges are still stubs.
 
+import { dashboardFiles } from '@github-stats-action/dashboard';
 import type { Dataset } from './types';
 
 export interface OutputFile {
@@ -15,9 +16,7 @@ export interface OutputFile {
  * paths are relative to the Pages dir (the action writes the datasets there).
  */
 export function renderDashboard(datasets: readonly Dataset[], options: { mode: 'pages' | 'standalone' }): OutputFile[] {
-  void datasets;
-  void options;
-  return [];
+  return dashboardFiles(datasets, options);
 }
 
 /** SVG charts for one repo; paths are relative to `<owner>/<repo>/` (`charts/*.svg`). */

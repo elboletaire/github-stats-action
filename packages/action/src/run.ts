@@ -1,7 +1,6 @@
 // One run: collect, write the day's snapshot, rebuild the derived files and the outputs.
 // Everything is fetched before anything is written, so a failed run leaves the branch as it was.
 
-import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
   createClient,
@@ -104,9 +103,6 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
 
   if (options.pages) {
     const pagesDataset = options.pages.traffic ? dataset : { ...dataset, traffic: undefined };
-    const datasetPath = join(options.pages.dir, 'data', repo, 'dataset.json');
-    await mkdir(join(datasetPath, '..'), { recursive: true });
-    await writeFile(datasetPath, `${JSON.stringify(pagesDataset, null, 1)}\n`);
     await writeOutputFiles(options.pages.dir, renderDashboard([pagesDataset], { mode: 'pages' }));
   }
 
