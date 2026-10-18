@@ -90,5 +90,8 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           if ! gh release view "$VERSION" > /dev/null 2>&1; then
-            gh release create "$VERSION" --verify-tag --generate-notes --title "$VERSION"
+            # a backport shouldn't become the repo's latest release
+            newest=$(git tag -l 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+            latest=$([ "$newest" = "$VERSION" ] && echo true || echo false)
+            gh release create "$VERSION" --verify-tag --generate-notes --title "$VERSION" --latest="$latest"
           fi
