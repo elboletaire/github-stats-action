@@ -8,6 +8,7 @@ import {
   createClient,
   deriveRepo,
   fetchDockerPulls,
+  fetchNpmSeries,
   fetchReleases,
   fetchRepoCounts,
   fetchStargazers,
@@ -15,11 +16,13 @@ import {
   githubClient,
   mergeTrafficDays,
   readDatasets,
+  readNpmSeries,
   readStargazers,
   readTrafficSeries,
   repoDir,
   utcDate,
   writeDerived,
+  writeNpmSeries,
   writeOutputFiles,
   writeSnapshot,
   writeStargazers,
@@ -28,6 +31,8 @@ import {
   type Dataset,
   type FetchFn,
   type Logger,
+  type NpmRule,
+  type NpmSeries,
   type Snapshot,
   type StatsConfig,
 } from '@github-stats-action/core';
@@ -79,6 +84,17 @@ export async function writePagesSite(pages: { dir: string; traffic: boolean }, r
   await writeOutputFiles(pages.dir, dashboardFiles([pagesDataset], { mode: 'pages' }));
 }
 
+/** Brings each npm package's stored days up to date. A package that fails keeps what it had, with a warning. */
+async function collectNpm(dir: string, packages: NpmRule[], today: string, fetchFn: FetchFn, log: Logger): Promise<NpmSeries[]> {
+  const api = createClient({ fetch: fetchFn, baseUrl: 'https://api.npmjs.org' });
+  const series: NpmSeries[] = [];
+  for (const rule of packages) {
+    const fetched = await fetchNpmSeries(api, rule.package, await readNpmSeries(dir, rule.package), today, log);
+    if (fetched) series.push(fetched);
+  }
+  return series;
+}
+
 export async function runStats(options: RunOptions): Promise<RunResult> {
   const { repo, config, now, log } = options;
   const fetchFn = options.fetch ?? fetch;
@@ -96,6 +112,7 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
   const dockerPulls = config.docker
     ? await fetchDockerPulls(createClient({ fetch: fetchFn, baseUrl: 'https://hub.docker.com' }), config.docker, log)
     : undefined;
+  const npm = config.npm?.length ? await collectNpm(dir, config.npm, date, fetchFn, log) : [];
 
   const snapshot: Snapshot = {
     schema: 1,
@@ -107,6 +124,7 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
   };
   await writeSnapshot(dir, snapshot);
   await writeStargazers(dir, stargazers);
+  for (const series of npm) await writeNpmSeries(dir, series);
   if (traffic) {
     await writeTrafficSeries(dir, 'views', mergeTrafficDays(await readTrafficSeries(dir, 'views'), traffic.views));
     await writeTrafficSeries(dir, 'clones', mergeTrafficDays(await readTrafficSeries(dir, 'clones'), traffic.clones));

@@ -113,3 +113,72 @@ describe('runStats', () => {
     expect(result.dataset.totals.docker).toBeNull();
   });
 });
+
+/** npm's downloads API: two downloads a day over the requested range; `failing` is answered with a 404. */
+function withNpm(base: typeof fetch, failing = ''): typeof fetch {
+  return vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = new URL(input instanceof Request ? input.url : String(input));
+    if (url.hostname !== 'api.npmjs.org') return base(input, init);
+    if (failing && url.pathname.includes(failing)) return json({ error: 'not found' }, 404);
+    const [start, end] = url.pathname.split('/')[3]!.split(':');
+    const days = [];
+    for (let t = Date.parse(`${start}T00:00:00Z`); t <= Date.parse(`${end}T00:00:00Z`); t += 864e5) {
+      days.push({ day: new Date(t).toISOString().slice(0, 10), downloads: 2 });
+    }
+    return json({ start, end, downloads: days });
+  }) as unknown as typeof fetch;
+}
+
+describe('runStats with npm packages', () => {
+  const withPackages = parseConfig(`
+npm:
+  - password-strength-meter
+  - { package: "@passcore/core", label: Core }
+`);
+
+  it('stores each package under npm/ and puts the figures on the dataset', async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
+    const result = await runStats({
+      repo: REPO,
+      config: withPackages,
+      dataDir,
+      traffic: false,
+      now,
+      log,
+      fetch: withNpm(network()),
+    });
+    const repo = join(dataDir, 'elboletaire', 'manga-downloader');
+    expect((await readdir(join(repo, 'npm'))).sort()).toEqual(['passcore--core.json', 'password-strength-meter.json']);
+    const stored = JSON.parse(await readFile(join(repo, 'npm', 'passcore--core.json'), 'utf8'));
+    expect(stored).toMatchObject({ schema: 1, package: '@passcore/core' });
+    expect(stored.days.at(-1)).toEqual({ date: '2026-01-02', downloads: 2 });
+    expect(result.dataset.npm!.packages.map((p) => p.label)).toEqual(['password-strength-meter', 'Core']);
+    expect(result.dataset.npm!.totals.lastDay).toBe(4);
+    expect(result.dataset.npm!.totals.last30).toBe(120);
+  });
+
+  it('warns about a package npm does not know and keeps the others', async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
+    const warn = vi.fn();
+    const result = await runStats({
+      repo: REPO,
+      config: withPackages,
+      dataDir,
+      traffic: false,
+      now,
+      log: { info: vi.fn(), warning: warn },
+      fetch: withNpm(network(), 'password-strength-meter'),
+    });
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('password-strength-meter downloads not collected'));
+    expect(result.dataset.npm!.packages.map((p) => p.package)).toEqual(['@passcore/core']);
+  });
+
+  it('does no npm work without an npm list', async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
+    const fetchFn = withNpm(network());
+    const result = await runStats({ repo: REPO, config, dataDir, traffic: false, now, log, fetch: fetchFn });
+    expect(result.dataset.npm).toBeUndefined();
+    const hosts = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock.calls.map(([input]) => new URL(String(input instanceof Request ? input.url : input)).hostname);
+    expect(hosts).not.toContain('api.npmjs.org');
+  });
+});
