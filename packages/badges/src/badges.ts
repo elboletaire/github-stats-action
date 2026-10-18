@@ -28,7 +28,8 @@ export function buildBadges(dataset: Dataset): Badge[] {
   const { totals } = dataset;
   const badges: Badge[] = [
     { name: 'downloads', label: 'downloads', message: formatCompact(totals.downloads), color: COLORS.total },
-    ...dataset.groups.map((group) => ({
+    // a single group would only repeat the total
+    ...(dataset.groups.length < 2 ? [] : dataset.groups).map((group) => ({
       name: `downloads-${slug(group.name)}`,
       label: `downloads (${group.label})`,
       message: formatCompact(totals.groups[group.name] ?? 0),
@@ -36,6 +37,7 @@ export function buildBadges(dataset: Dataset): Badge[] {
     })),
   ];
 
+  // core sorts releases by publish date, so the last stable one is the latest
   const latest = dataset.releases.filter((release) => !release.prerelease).at(-1);
   if (latest) {
     const downloads = Object.values(latest.groups).reduce((sum, count) => sum + count, 0);
