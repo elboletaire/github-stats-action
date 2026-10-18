@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { Dataset, MeasuredDay, ReleaseRow } from '@github-stats-action/core';
 import { renderCharts } from '../src/index';
+import { niceTicks } from '../src/svg';
 
 const fixture = async (): Promise<Dataset> =>
   JSON.parse(await readFile(resolve(import.meta.dirname, '../../../fixtures/dataset.json'), 'utf8')) as Dataset;
@@ -146,9 +147,44 @@ describe('renderCharts', () => {
   it('escapes group labels', async () => {
     const dataset = await fixture();
     const groups = [{ name: 'app', label: 'A & <B> "C"', color: 0 }, { name: 'cli', label: 'CLI', color: 1 }];
-    const svg = chart(renderCharts({ ...dataset, groups }), 'charts/downloads-per-release-light.svg');
+    const epochs = dataset.epochs.map((e, i) => (i === 1 ? { version: 'v1.11.0', label: 'Desktop & <beta> "x"' } : e));
+    const svg = chart(renderCharts({ ...dataset, groups, epochs }), 'charts/downloads-per-release-light.svg');
     expectWellFormed(svg);
     expect(svg).toContain('A &amp; &lt;B&gt; &quot;C&quot;');
+    expect(svg).toContain('v1.11.0 Desktop &amp; &lt;beta&gt; &quot;x&quot;');
     expect(svg).not.toContain('<B>');
+    expect(svg).not.toContain('<beta>');
+  });
+
+  it('puts hover targets along the stars line at most every 4px', async () => {
+    const svg = chart(renderCharts(await fixture()), 'charts/stars-light.svg');
+    const strips = svg.match(/fill-opacity="0"><title>/g)?.length ?? 0;
+    expect(strips).toBeGreaterThan(0);
+    expect(strips).toBeLessThanOrEqual(Math.ceil(720 / 4) + 1);
+  });
+
+  it('drops points on a flat run of the estimate, keeping the outline', async () => {
+    const dataset = await fixture();
+    const flat: Dataset = {
+      ...dataset,
+      estimatedDaily: { start: '2020-01-01', groups: { app: Array(1000).fill(0), cli: Array(1000).fill(5) } },
+    };
+    const svg = chart(renderCharts(flat), 'charts/downloads-per-day-light.svg');
+    const areas = [...svg.matchAll(/<path d="([^"]*)" fill="[^"]*" fill-opacity="0.1"\/>/g)];
+    expect(areas).toHaveLength(1);
+    expect(areas[0]?.[1]?.match(/[ML]/g)).toHaveLength(4);
+  });
+});
+
+describe('niceTicks', () => {
+  it('never goes finer than one download', () => {
+    expect(niceTicks(1)).toEqual([0, 1]);
+    expect(niceTicks(2)).toEqual([0, 1, 2]);
+    expect(niceTicks(4)).toEqual([0, 1, 2, 3, 4]);
+  });
+
+  it('starts at zero and reaches the maximum in clean steps', () => {
+    expect(niceTicks(0)).toEqual([0, 1]);
+    expect(niceTicks(5000)).toEqual([0, 2000, 4000, 6000]);
   });
 });

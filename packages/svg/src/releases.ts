@@ -7,6 +7,7 @@ import {
   heading,
   ink,
   compact,
+  esc,
   niceTicks,
   seriesColor,
   stack,
@@ -82,7 +83,7 @@ export function downloadsPerReleaseChart(dataset: Dataset, theme: Theme): string
     const text = `${epoch.version} ${epoch.label}`;
     const spot = placeLabel(x, text, placed);
     return [
-      `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${MARKER_TOP}" y2="${box.bottom}" stroke="${c.axis}" stroke-width="1"><title>${text}</title></line>`,
+      `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${MARKER_TOP}" y2="${box.bottom}" stroke="${c.axis}" stroke-width="1"><title>${esc(text)}</title></line>`,
       ...(spot ? [svgText({ x: spot.x, y: labelY(spot.tier), value: text, fill: c.secondary, anchor: spot.anchor })] : []),
     ];
   });

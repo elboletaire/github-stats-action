@@ -3,6 +3,7 @@
 import type { Dataset } from '@github-stats-action/core';
 import {
   dayOf,
+  esc,
   finite,
   heading,
   monthLabel,
@@ -65,7 +66,26 @@ export function starsChart(dataset: Dataset, theme: Theme): string {
     ...xLabels(axisLabels, box.bottom + 16, theme),
     `<path d="${line}L${px(lastX)} ${px(box.bottom)}L${px(xOf(first))} ${px(box.bottom)}Z" fill="${color}" fill-opacity="0.1"/>`,
     `<path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`,
-    `<circle cx="${px(lastX)}" cy="${px(lastY)}" r="4" fill="${color}" stroke="${c.surface}" stroke-width="2"><title>${last.date}: ${last.stars} stars</title></circle>`,
+    `<circle cx="${px(lastX)}" cy="${px(lastY)}" r="4" fill="${color}" stroke="${c.surface}" stroke-width="2"><title>${esc(last.date)}: ${last.stars} stars</title></circle>`,
     svgText({ x: lastX - 8, y: lastY - 8, value: compact(last.stars), fill: c.primary, anchor: 'end' }),
+    ...hoverStrips(dataset, xOf, box),
   ]);
+}
+
+const STRIP = 4;
+
+/**
+ * Hover targets along the line: one transparent strip per 4px, titled with the last day in it,
+ * so a tooltip is at most a few px from any point without a rect per day.
+ */
+function hoverStrips(dataset: Dataset, xOf: (day: number) => number, box: Box): string[] {
+  const strips = new Map<number, { x: number; date: string; stars: number }>();
+  for (const p of dataset.stars) {
+    const x = xOf(dayOf(p.date));
+    strips.set(Math.floor((x - box.left) / STRIP), { x, date: p.date, stars: p.stars });
+  }
+  return [...strips].map(([bucket, p]) => {
+    const left = box.left + bucket * STRIP;
+    return `<rect x="${px(left)}" y="${px(box.top)}" width="${STRIP}" height="${box.bottom - box.top}" fill-opacity="0"><title>${esc(p.date)}: ${p.stars} stars</title></rect>`;
+  });
 }

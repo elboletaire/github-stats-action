@@ -26,7 +26,7 @@ export const ink = (theme: Theme): Ink => INK[theme];
 
 /** The categorical slots of the reference palette, in their fixed order, per mode. */
 const CATEGORICAL: Record<Theme, string[]> = {
-  light: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#6250d6', '#e34948'],
+  light: ['#2a78d6', '#eb6834', '#0c9080', '#b57f00', '#c44a80', '#008300', '#6250d6', '#e34948'],
   dark: ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767'],
 };
 
@@ -58,13 +58,13 @@ export function compact(value: number): string {
   return short(v);
 }
 
-/** Clean ticks from 0 to at least `max`, about `count` steps. */
+/** Clean ticks from 0 to at least `max`, about `count` steps; never finer than 1, as the values are counts. */
 export function niceTicks(max: number, count = 4): number[] {
   const top = finite(max);
   if (top <= 0) return [0, 1];
   const raw = top / count;
   const base = 10 ** Math.floor(Math.log10(raw));
-  const step = [1, 2, 2.5, 5, 10].map((m) => m * base).find((s) => s >= raw) ?? base * 10;
+  const step = Math.max(1, [1, 2, 2.5, 5, 10].map((m) => m * base).find((s) => s >= raw) ?? base * 10);
   const steps = Math.ceil(top / step);
   return Array.from({ length: steps + 1 }, (_, i) => i * step);
 }

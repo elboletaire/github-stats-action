@@ -118,10 +118,15 @@ function edgeAnchor(k: number, count: number): 'start' | 'middle' | 'end' {
   return k === 0 ? 'start' : 'end';
 }
 
-/** The band between `base` and `upper`: a 10% wash, with a 2px line along `upper`. */
+/**
+ * The band between `base` and `upper`: a 10% wash, with a 2px line along `upper`. A point that lies
+ * on a straight run (equal to both neighbours on both edges) is dropped; the shape is unchanged.
+ */
 function areaShape(xOf: (i: number) => number, yOf: (v: number) => number, upper: number[], base: number[], color: string): string {
-  const top = upper.map((v, i) => `${i === 0 ? 'M' : 'L'}${px(xOf(i))} ${px(yOf(v))}`).join('');
-  const bottom = base.map((v, i) => `L${px(xOf(i))} ${px(yOf(v))}`).reverse().join('');
+  const bends = (a: number[], i: number): boolean => a[i] !== a[i - 1] || a[i] !== a[i + 1];
+  const kept = upper.map((_, i) => i).filter((i) => bends(upper, i) || bends(base, i));
+  const top = kept.map((i, k) => `${k === 0 ? 'M' : 'L'}${px(xOf(i))} ${px(yOf(upper[i] ?? 0))}`).join('');
+  const bottom = kept.map((i) => `L${px(xOf(i))} ${px(yOf(base[i] ?? 0))}`).reverse().join('');
   return [
     `<path d="${top}${bottom}Z" fill="${color}" fill-opacity="0.1"/>`,
     `<path d="${top}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`,
