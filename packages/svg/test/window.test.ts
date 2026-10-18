@@ -100,6 +100,7 @@ describe('downloads per release window', () => {
     expect(svg).toContain(`${inside.length} releases, stacked by group`);
     expect(segments(svg)).toBe(inside.reduce((n, r) => n + data.groups.filter((g) => (r.groups[g.name] ?? 0) > 0).length, 0));
     expect(svg).not.toContain('<title>v1.0.0,');
+    expect(svg).not.toContain('<title>v1.0.0 ');
     expect(svg).toContain(`${data.epochs[1]!.version} ${data.epochs[1]!.label}`);
   });
 
@@ -110,6 +111,9 @@ describe('downloads per release window', () => {
     expect(svg).toContain('20 releases, stacked by group');
     expect(svg).toContain(`<title>${kept[0]!.tag}, `);
     expect(svg).not.toContain(`<title>${data.releases[data.releases.length - 21]!.tag}, `);
+    // the first epoch began before the last 20, so its marker goes; the second began inside them
+    expect(svg).not.toContain(`<title>${data.epochs[0]!.version} `);
+    expect(svg).toContain(`<title>${data.epochs[1]!.version} `);
   });
 });
 

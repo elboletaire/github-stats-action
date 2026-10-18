@@ -8,7 +8,6 @@ import {
   type Dataset,
   type EstimatedDaily,
   type NpmData,
-  type ReleaseRow,
   type StarPoint,
 } from '@github-stats-action/core';
 import { dayLabel, dayOf } from './svg';
@@ -52,9 +51,20 @@ function clipEstimate(estimate: EstimatedDaily, w: ChartWindow): EstimatedDaily 
   };
 }
 
-function clipReleases(releases: ReleaseRow[], w: ChartWindow | undefined, last: number | undefined): ReleaseRow[] {
-  const inside = w ? releases.filter((r) => inWindow(utcDate(Date.parse(r.publishedAt)), w)) : releases;
-  return last === undefined ? inside : inside.slice(-last);
+/** The releases kept, and the epochs whose first release is among them: an epoch that began before the window has no marker. */
+function clipReleases(dataset: Dataset, w: ChartWindow | undefined, last: number | undefined): Dataset {
+  const inside = w ? dataset.releases.filter((r) => inWindow(utcDate(Date.parse(r.publishedAt)), w)) : dataset.releases;
+  const kept = last === undefined ? inside : inside.slice(-last);
+  const shown = dataset.epochs.flatMap((_, i) => {
+    const first = dataset.releases.find((r) => r.epoch === i);
+    return first !== undefined && kept.includes(first) ? [i] : [];
+  });
+  // the releases point at the epochs that are still shown, by their new index; -1 for a hidden one
+  return {
+    ...dataset,
+    epochs: shown.map((i) => dataset.epochs[i]!),
+    releases: kept.map((r) => ({ ...r, epoch: shown.indexOf(r.epoch) })),
+  };
 }
 
 /** The npm weeks start at the window's first day, so the first week is the short one that begins there. */
@@ -79,7 +89,7 @@ export function windowed(dataset: Dataset, chart: ChartName): Dataset {
     };
   }
   if (chart === 'downloads-per-release' && (w || last !== undefined)) {
-    return { ...dataset, releases: clipReleases(dataset.releases, w, last) };
+    return clipReleases(dataset, w, last);
   }
   if (chart === 'npmDownloads' && w && dataset.npm) return { ...dataset, npm: clipNpm(dataset.npm, w) };
   return dataset;
