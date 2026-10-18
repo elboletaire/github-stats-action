@@ -48,7 +48,6 @@ Use `@v1` (the latest 1.x release, moved by the release workflow) or pin a full 
 | `pages-dir` | `_site` | Where the Pages site goes. |
 | `pages-traffic` | `false` | Include traffic in the Pages site. |
 | `dry-run` | `false` | Collect and build, but don't commit or push. |
-| `import-old` | empty | Path of an old-format `snapshots/` in the data branch (`.` for the root), converted into this repo's folder before the run. See [Data branch](#data-branch). |
 
 Outputs: `pages-dir` (absolute, empty when `pages` is off), `dataset` (absolute path of the repo's `dataset.json`) and `summary` (one line of totals).
 
@@ -139,10 +138,6 @@ dashboard/index.html              self-contained dashboard, all repos on the bra
 
 Everything except `snapshots/`, `stargazers.json` and `traffic/` is rebuilt on every run, so the snapshots are the only source of truth.
 
-### Migrating an old data branch
-
-To move manga-downloader's old `snapshots/` (at the branch root) into `<owner>/<repo>/snapshots/`, set `import-old: .` for one run. The days are converted and committed; days already in the new folder are kept, and the old root files are left alone. Check the branch, then remove the root `snapshots/` by hand if you want it gone, and unset `import-old`.
-
 ## Reading the dashboard
 
 Without Pages, the dashboard is on the data branch:
@@ -178,28 +173,26 @@ The badge JSON follows the shields.io endpoint schema, so any shields.io endpoin
 
 ## Config
 
-The file is YAML, optional, read from `.github/stats.yml` by default. Unknown keys are an error. Example: [examples/stats.yml](examples/stats.yml), the config of manga-downloader.
+The file is YAML, optional, read from `.github/stats.yml` by default. Unknown keys are an error. Example: [examples/stats.yml](examples/stats.yml), for a project called `acme`.
 
 ```yaml
-groups:                     # first match wins; unmatched assets are "other"
-  - { name: app, label: Desktop app, assets: "manga-downloader-gui-*" }
-  - { name: cli, label: CLI, assets: "manga-downloader-*" }
-ignore: ["*.md5", "*-SHA256SUMS.txt"]   # not counted as downloads (still stored)
+groups:                     # first match wins, so the more specific pattern goes first
+  - { name: desktop, label: Desktop app, assets: "acme-desktop-*" }
+  - { name: cli, label: CLI, assets: "acme-*" }
+ignore: ["*.sha256", "acme-desktop-*-update.json"]   # checksums and the updater's manifest aren't downloads
 counters:                   # named counts of matching assets, not downloads
-  - { name: updates, label: In-app updates, assets: "manga-downloader-gui-*-SHA256SUMS.txt", from: v1.19.0 }
+  - { name: updates, label: In-app updates, assets: "acme-desktop-*-update.json", from: v2.3.0 }
 epochs:                     # dashboard periods and chart markers
-  - { version: v1.0.0, label: 1.0 rewrite }
-  - { version: v1.11.0, label: First desktop app }
-  - { version: v1.18.0, label: Installer and updater }
-  - { version: v1.20.0, label: Multilingual }
+  - { version: v1.0.0, label: Rewrite }
+  - { version: v2.0.0, label: Desktop app }
 platforms:                  # label rules for asset names
-  - { match: "*-windows-amd64-installer.exe", label: Windows amd64 installer }
-docker: elboletaire/manga-downloader   # optional Docker Hub image
+  - { match: "acme-desktop-*-windows-x64-setup.exe", label: Windows installer }
+docker: acme/acme           # optional Docker Hub image
 ```
 
-- `groups`: `name` (letters, digits, `-`, `_`; `other` and `ignored` are reserved), `label` (defaults to the name), `assets` (a glob). Without `groups`, every asset counts as `downloads`.
+- `groups`: `name` (letters, digits, `-`, `_`; `other` and `ignored` are reserved), `label` (defaults to the name), `assets` (a glob). The first matching group wins, so list the more specific glob first. Without `groups`, every asset counts as `downloads`.
 - `ignore`: globs on asset names.
-- `counters`: `name`, `label`, `assets`, and `from`, an optional quoted semver; releases before it aren't counted.
+- `counters`: `name`, `label`, `assets`, and `from`, an optional quoted semver; releases before it aren't counted. A counter's assets still count as downloads unless `ignore` also names them.
 - `epochs`: `version` as a quoted semver (`"v1.11.0"`, so YAML doesn't read `1.11` as a number), `label` defaults to the version. Optional.
 - `platforms`: `match` and `label`. Without a matching rule, the asset name minus the tag, repo name and archive suffixes is used.
 - `docker`: `namespace/name`.
@@ -209,22 +202,11 @@ Globs: `*` matches any run of characters, everything else is literal.
 ## Command line
 
 ```
-github-stats [collect] --repo owner/name --out <dir> [--config <file>] [--traffic] [--dry-run] [--import-old <dir>]
+github-stats [collect] --repo owner/name --out <dir> [--config <file>] [--traffic] [--dry-run]
 github-stats render (--data <dir> | --from-branch <ref>) --out <dir> [--repo owner/name] [--config <file>]
 ```
 
 `collect` needs `GITHUB_TOKEN` in the environment. `--dry-run` is accepted for parity with the action, and the CLI never pushes: copy the output into the data branch yourself.
-
-### Importing the old format
-
-manga-downloader's old `stats-data` branch (`snapshots/YYYY-MM-DD.json` from its `tools/stats-snapshot`) converts into this layout with `--import-old`, which takes a checkout of that branch:
-
-```sh
-git clone --branch stats-data --single-branch https://github.com/elboletaire/manga-downloader /tmp/mdl-stats
-GITHUB_TOKEN=... github-stats --repo elboletaire/manga-downloader --out ./out --import-old /tmp/mdl-stats
-```
-
-The imported days go to `out/elboletaire/manga-downloader/snapshots/`, alongside the snapshot of today. Commit them to the data branch to keep the history.
 
 ## Releasing
 

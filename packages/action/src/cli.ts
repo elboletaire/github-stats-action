@@ -5,17 +5,16 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
-import { DEFAULT_CONFIG_PATH, importOldSnapshots, loadConfigFile, repoDir, type Logger, type StatsConfig } from '@github-stats-action/core';
+import { DEFAULT_CONFIG_PATH, loadConfigFile, type Logger, type StatsConfig } from '@github-stats-action/core';
 import { exportBranchData } from './branch';
 import { renderData } from './render';
 import { runStats } from './run';
 
 const USAGE = `usage:
-  github-stats [collect] --repo owner/name --out <dir> [--config <file>] [--traffic] [--dry-run] [--import-old <dir>]
+  github-stats [collect] --repo owner/name --out <dir> [--config <file>] [--traffic] [--dry-run]
       fetch from GitHub, write the day's snapshot and render into <dir>.
       --traffic     collect traffic (needs a token with push access, a PAT)
       --dry-run     accepted for parity with the action; the CLI never pushes
-      --import-old  a stats-data checkout of manga-downloader's old layout, imported first
       token         read from GITHUB_TOKEN
 
   github-stats render (--data <dir> | --from-branch <ref>) --out <dir> [--repo owner/name] [--config <file>]
@@ -37,7 +36,6 @@ const OPTIONS = {
   config: { type: 'string' },
   traffic: { type: 'boolean', default: false },
   'dry-run': { type: 'boolean', default: false },
-  'import-old': { type: 'string' },
   data: { type: 'string' },
   'from-branch': { type: 'string' },
   help: { type: 'boolean', short: 'h', default: false },
@@ -55,10 +53,6 @@ async function readConfig(values: Values): Promise<StatsConfig> {
 async function collect(values: Values): Promise<void> {
   if (!values.repo || !values.out) throw new Error('collect needs --repo and --out');
   const config = await readConfig(values);
-  if (values['import-old']) {
-    const imported = await importOldSnapshots(values['import-old'], repoDir(values.out, values.repo), config.docker);
-    log.info(`import: ${imported.imported.length} days imported, ${imported.kept.length} kept`);
-  }
   const result = await runStats({
     repo: values.repo,
     token: process.env.GITHUB_TOKEN,

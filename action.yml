@@ -35,10 +35,6 @@ inputs:
     description: Collect and build, but don't commit or push.
     required: false
     default: "false"
-  import-old:
-    description: Path in the data branch of an old-format snapshots/ folder (`.` for the root), converted into this repo's folder first. Days already there are kept, the old files are left alone. Empty means off.
-    required: false
-    default: ""
 outputs:
   pages-dir:
     description: Absolute path of the Pages site, empty when pages is off.

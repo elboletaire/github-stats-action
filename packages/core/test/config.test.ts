@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { ConfigError, DEFAULT_CONFIG, loadConfig, loadConfigFile, parseConfig } from '../src/config';
 
 const FIXTURE = new URL('../../../fixtures/manga-downloader.stats.yml', import.meta.url);
+const EXAMPLE = new URL('../../../examples/stats.yml', import.meta.url);
 
 describe('parseConfig', () => {
   it('gives the defaults for an empty document', () => {
@@ -101,5 +102,15 @@ describe('loadConfigFile', () => {
     const loaded = await loadConfigFile(path, { explicit: true });
     expect(loaded.file).toBe(path);
     expect(loaded.config.docker).toBe('a/b');
+  });
+});
+
+describe('the example config', () => {
+  it('loads and keeps the more specific group first', async () => {
+    const config = await loadConfig(EXAMPLE.pathname);
+    expect(config.groups.map((g) => g.name)).toEqual(['desktop', 'cli']);
+    expect(config.counters.map((c) => c.name)).toEqual(['updates']);
+    expect(config.epochs.map((e) => e.version)).toEqual(['v1.0.0', 'v2.0.0']);
+    expect(config.docker).toBe('acme/acme');
   });
 });

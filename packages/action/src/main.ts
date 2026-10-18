@@ -30,7 +30,6 @@ async function main(): Promise<void> {
       dataDir: data.dir,
       traffic: core.getBooleanInput('traffic'),
       pages: pagesOptions,
-      importOld: core.getInput('import-old') || undefined,
       now,
       log: core,
     });
