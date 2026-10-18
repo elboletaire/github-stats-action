@@ -3,6 +3,7 @@
 import type { StatsConfig } from './config';
 import { OTHER } from './assets';
 import { DAY_MS, estimateDaily, utcDate, utcMidnight } from './estimate';
+import { buildNpmData, type NpmInput } from './npm';
 import { buildPeriods } from './periods';
 import { parseVersion, compareVersions } from './semver';
 import { groupNames, summariseDay, summariseRelease } from './summary';
@@ -26,6 +27,8 @@ export interface BuildInput {
   /** Starred-at timestamps, oldest first. */
   stargazers?: readonly string[];
   traffic?: TrafficData;
+  /** The configured npm packages with their stored days, in config order. */
+  npm?: NpmInput[];
   now: Date;
 }
 
@@ -165,6 +168,7 @@ export function buildDataset(input: BuildInput): Dataset {
   const releases = buildReleases(latest, config, repo, names, nowMs);
   const { d0, daily } = estimateDaily(releases, names, nowMs);
   const periods = buildPeriods({ releases, epochs: config.epochs, counters: config.counters, names, d0, daily });
+  const npm = input.npm ? buildNpmData(input.npm) : undefined;
 
   return {
     repo,
@@ -185,5 +189,6 @@ export function buildDataset(input: BuildInput): Dataset {
     stars: buildStars(input.stargazers ?? [], nowMs),
     charts: config.charts,
     ...(input.traffic ? { traffic: input.traffic } : {}),
+    ...(npm ? { npm } : {}),
   };
 }

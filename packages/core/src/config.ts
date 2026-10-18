@@ -3,6 +3,7 @@
 
 import { readFile } from 'node:fs/promises';
 import { parse } from 'yaml';
+import { NPM_NAME_MAX, NPM_NAME_RE, npmSlug } from './npm';
 import { compareVersions, parseVersion } from './semver';
 
 export interface GroupRule {
@@ -31,6 +32,12 @@ export interface PlatformRule {
   label: string;
 }
 
+export interface NpmRule {
+  /** npm package name, `name` or `@scope/name`. */
+  package: string;
+  label: string;
+}
+
 /** Options of one README chart; `title` overrides `charts.titles` for that chart. */
 export interface ChartConfig {
   title?: boolean;
@@ -42,9 +49,10 @@ export interface ChartsConfig {
   stars: ChartConfig;
   'downloads-per-day': ChartConfig;
   'downloads-per-release': ChartConfig;
+  npmDownloads: ChartConfig;
 }
 
-/** The charts the README SVGs are made of, by file name. */
+/** The charts the README SVGs are made of, by config key (the file name differs for `npmDownloads`). */
 export type ChartName = Exclude<keyof ChartsConfig, 'titles'>;
 
 export interface StatsConfig {
@@ -56,6 +64,8 @@ export interface StatsConfig {
   charts: ChartsConfig;
   /** Docker Hub image, `namespace/name`. */
   docker?: string;
+  /** npm packages to count daily; absent means no npm work at all. */
+  npm?: NpmRule[];
 }
 
 export class ConfigError extends Error {
@@ -71,8 +81,11 @@ export const DEFAULT_CONFIG: StatsConfig = {
   counters: [],
   epochs: [],
   platforms: [],
-  charts: { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {} },
+  charts: { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, npmDownloads: {} },
 };
+
+/** One colour per package in the npm chart and the dashboard, so the list is capped at the palette's slots. */
+const NPM_MAX_PACKAGES = 8;
 
 /** Names the dataset uses for its own buckets, so a group can't take them. */
 const RESERVED_GROUPS = new Set(['other', 'ignored']);
@@ -194,7 +207,7 @@ function optionalBoolean(obj: Obj, key: string, path: string): boolean | undefin
 
 function parseCharts(value: unknown): ChartsConfig {
   const obj = expectObject(value, 'charts');
-  checkKeys(obj, ['titles', 'stars', 'downloads-per-day', 'downloads-per-release'], 'charts');
+  checkKeys(obj, ['titles', 'stars', 'downloads-per-day', 'downloads-per-release', 'npmDownloads'], 'charts');
   const section = (name: string, keys: string[]): Obj => {
     const sub = obj[name] === undefined ? {} : expectObject(obj[name], `charts.${name}`);
     checkKeys(sub, keys, `charts.${name}`);
@@ -203,11 +216,13 @@ function parseCharts(value: unknown): ChartsConfig {
   const stars = section('stars', ['title']);
   const perDay = section('downloads-per-day', ['title']);
   const perRelease = section('downloads-per-release', ['title']);
+  const npm = section('npmDownloads', ['title']);
   return {
     titles: optionalBoolean(obj, 'titles', 'charts') ?? true,
     stars: chartOptions(optionalBoolean(stars, 'title', 'charts.stars')),
     'downloads-per-day': chartOptions(optionalBoolean(perDay, 'title', 'charts.downloads-per-day')),
     'downloads-per-release': chartOptions(optionalBoolean(perRelease, 'title', 'charts.downloads-per-release')),
+    npmDownloads: chartOptions(optionalBoolean(npm, 'title', 'charts.npmDownloads')),
   };
 }
 
@@ -228,6 +243,27 @@ function parsePlatforms(value: unknown): PlatformRule[] {
   });
 }
 
+function parseNpm(value: unknown): NpmRule[] {
+  const rules = expectList(value, 'npm').map((item, i) => {
+    const path = `npm[${i}]`;
+    const obj = typeof item === 'string' ? { package: item } : expectObject(item, path);
+    checkKeys(obj, ['package', 'label'], path);
+    const name = expectString(obj.package, `${path}.package`);
+    if (name.length > NPM_NAME_MAX || !NPM_NAME_RE.test(name)) {
+      throw new ConfigError(`${path}.package '${name}' is not an npm package name`);
+    }
+    if (npmSlug(name) === 'downloads') {
+      throw new ConfigError(`${path}.package '${name}' clashes with the combined npm badge (npm-downloads)`);
+    }
+    return { package: name, label: optionalString(obj, 'label', path) ?? name };
+  });
+  if (rules.length > NPM_MAX_PACKAGES) {
+    throw new ConfigError(`npm lists ${rules.length} packages; at most ${NPM_MAX_PACKAGES}, one colour each`);
+  }
+  unique(rules.map((r) => npmSlug(r.package)), 'npm package');
+  return rules;
+}
+
 /** Parses and validates the YAML text; an empty document gives the defaults. */
 export function parseConfig(text: string): StatsConfig {
   let doc: unknown;
@@ -238,7 +274,7 @@ export function parseConfig(text: string): StatsConfig {
   }
   if (doc === null || doc === undefined) return structuredClone(DEFAULT_CONFIG);
   const root = expectObject(doc, 'the file');
-  checkKeys(root, ['groups', 'ignore', 'counters', 'epochs', 'platforms', 'charts', 'docker'], 'top level');
+  checkKeys(root, ['groups', 'ignore', 'counters', 'epochs', 'platforms', 'charts', 'docker', 'npm'], 'top level');
 
   const config: StatsConfig = {
     groups: root.groups === undefined ? structuredClone(DEFAULT_CONFIG.groups) : parseGroups(root.groups),
@@ -253,6 +289,7 @@ export function parseConfig(text: string): StatsConfig {
     if (!DOCKER_RE.test(docker)) throw new ConfigError(`docker must be 'namespace/name', got '${docker}'`);
     config.docker = docker;
   }
+  if (root.npm !== undefined) config.npm = parseNpm(root.npm);
   return config;
 }
 

@@ -117,7 +117,13 @@ describe('the example config', () => {
 
 describe('charts', () => {
   it('defaults to every title shown', () => {
-    expect(parseConfig('').charts).toEqual({ titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {} });
+    expect(parseConfig('').charts).toEqual({
+      titles: true,
+      stars: {},
+      'downloads-per-day': {},
+      'downloads-per-release': {},
+      npmDownloads: {},
+    });
   });
 
   it('reads the global titles switch and a title per chart', () => {
@@ -132,6 +138,7 @@ charts:
       stars: { title: true },
       'downloads-per-day': { title: false },
       'downloads-per-release': {},
+      npmDownloads: {},
     });
   });
 
@@ -151,5 +158,42 @@ charts:
   it('rejects unknown chart keys', () => {
     expect(() => parseConfig('charts: { pie: {} }')).toThrow('charts.pie is not a known key');
     expect(() => parseConfig('charts: { stars: { colour: red } }')).toThrow('charts.stars.colour is not a known key');
+  });
+});
+
+describe('npm', () => {
+  it('is absent when not configured, so no npm work runs', () => {
+    expect(parseConfig('').npm).toBeUndefined();
+  });
+
+  it('accepts names as strings or objects, labels defaulting to the name', () => {
+    const config = parseConfig(`
+npm:
+  - password-strength-meter
+  - { package: "@passcore/core", label: Core }
+`);
+    expect(config.npm).toEqual([
+      { package: 'password-strength-meter', label: 'password-strength-meter' },
+      { package: '@passcore/core', label: 'Core' },
+    ]);
+  });
+
+  it('reads an empty list as no packages', () => {
+    expect(parseConfig('npm: []\n').npm).toEqual([]);
+  });
+
+  it('reads the npmDownloads chart title', () => {
+    expect(parseConfig('charts:\n  npmDownloads: { title: false }\n').charts.npmDownloads).toEqual({ title: false });
+  });
+
+  it.each([
+    ['a name with a space', 'npm: [a b]\n', "npm[0].package 'a b' is not an npm package name"],
+    ['an uppercase-free name over 214 characters', `npm: [${'a'.repeat(215)}]\n`, 'npm[0].package'],
+    ['the name the combined badge uses', 'npm: [downloads]\n', 'clashes with the combined npm badge'],
+    ['two packages with one file name', 'npm: [a--b, "@a/b"]\n', "npm package 'a--b' is listed twice"],
+    ['more packages than colours', `npm: [${Array.from({ length: 9 }, (_, i) => `p${i}`).join(', ')}]\n`, 'npm lists 9 packages; at most 8'],
+    ['an unknown key', 'npm:\n  - { package: a, lable: x }\n', 'npm[0].lable is not a known key'],
+  ])('rejects %s', (_, text, message) => {
+    expect(() => parseConfig(text)).toThrow(message);
   });
 });

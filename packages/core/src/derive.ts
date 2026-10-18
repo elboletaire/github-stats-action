@@ -1,15 +1,27 @@
 // The derived files of one repo, computed from what's stored in its folder. No API calls.
 
 import { buildDataset } from './dataset';
+import type { NpmInput } from './npm';
 import type { StatsConfig } from './config';
 import { buildDailyCsv } from './csv';
-import { readSnapshots, readStargazers, readTraffic } from './store';
+import { readNpmSeries, readSnapshots, readStargazers, readTraffic } from './store';
 import { groupNames, summariseDay } from './summary';
 import type { Dataset } from './types';
 
 export interface DerivedRepo {
   dataset: Dataset;
   csv: string;
+}
+
+/** The stored days of each configured npm package; none when the config lists none. */
+async function readNpmInputs(dir: string, config: StatsConfig): Promise<NpmInput[] | undefined> {
+  if (!config.npm) return undefined;
+  return Promise.all(
+    config.npm.map(async (rule) => ({
+      label: rule.label,
+      series: (await readNpmSeries(dir, rule.package)) ?? { schema: 1 as const, package: rule.package, days: [] },
+    })),
+  );
 }
 
 /** Builds the Dataset and daily.csv from the snapshots, stargazers and traffic in `dir` (`<owner>/<repo>/`). */
@@ -22,6 +34,7 @@ export async function deriveRepo(dir: string, repo: string, config: StatsConfig,
     snapshots,
     stargazers: await readStargazers(dir),
     traffic: await readTraffic(dir),
+    npm: await readNpmInputs(dir, config),
     now,
   });
   const names = groupNames(config, snapshots);

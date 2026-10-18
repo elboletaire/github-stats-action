@@ -4,7 +4,8 @@
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { OutputFile } from './outputs';
-import type { Dataset, PopularPath, Referrer, Snapshot, TrafficDay, TrafficData } from './types';
+import { npmSlug } from './npm';
+import type { Dataset, NpmSeries, PopularPath, Referrer, Snapshot, TrafficDay, TrafficData } from './types';
 
 export const SNAPSHOT_RE = /^(\d{4}-\d{2}-\d{2})\.json$/;
 
@@ -61,6 +62,17 @@ export async function readStargazers(dir: string): Promise<string[]> {
 
 export async function writeStargazers(dir: string, starredAt: readonly string[]): Promise<void> {
   await writeJson(join(dir, 'stargazers.json'), starredAt);
+}
+
+/** The stored daily counts of an npm package (`npm/<slug>.json`), undefined when none were stored. */
+export async function readNpmSeries(dir: string, pkg: string): Promise<NpmSeries | undefined> {
+  const series = await readJson<NpmSeries>(join(dir, 'npm', `${npmSlug(pkg)}.json`));
+  if (series && series.schema !== 1) throw new Error(`npm/${npmSlug(pkg)}.json: unsupported schema`);
+  return series;
+}
+
+export async function writeNpmSeries(dir: string, series: NpmSeries): Promise<void> {
+  await writeJson(join(dir, 'npm', `${npmSlug(series.package)}.json`), series);
 }
 
 export async function readTrafficSeries(dir: string, kind: 'views' | 'clones'): Promise<TrafficDay[]> {

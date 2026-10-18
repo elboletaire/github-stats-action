@@ -202,6 +202,51 @@ export interface StarPoint {
   stars: number;
 }
 
+/** One day of npm downloads, UTC. */
+export interface NpmDay {
+  date: string;
+  downloads: number;
+}
+
+/** A package's daily counts as stored on the data branch (`npm/<slug>.json`). */
+export interface NpmSeries {
+  schema: 1;
+  package: string;
+  /** Sorted by date, one entry per day, all before the day they were fetched. */
+  days: NpmDay[];
+}
+
+/** Downloads over a window ending on the latest stored day (`last7`, `last30` include it). */
+export interface NpmTotals {
+  lastDay: number;
+  last7: number;
+  last30: number;
+  /** Every stored day, including those older than npm's 18-month window. */
+  all: number;
+}
+
+export interface NpmPackageStats {
+  package: string;
+  label: string;
+  /** The file name the package is stored under, and its badge's suffix. */
+  slug: string;
+  /** First stored day. */
+  first: string;
+  totals: NpmTotals;
+  days: NpmDay[];
+}
+
+/** The npm figures of one repo; absent when no configured package has stored days. */
+export interface NpmData {
+  /** The latest stored day; every window ends on it. */
+  latest: string;
+  /** The first stored day across the packages. */
+  first: string;
+  /** Summed over the packages. */
+  totals: NpmTotals;
+  packages: NpmPackageStats[];
+}
+
 /** One repo's derived view, written as dataset.json and inlined in the standalone dashboard; snapshots only. */
 export interface Dataset {
   /** owner/name. */
@@ -223,6 +268,8 @@ export interface Dataset {
   charts?: ChartsConfig;
   /** Present only when traffic was collected. */
   traffic?: TrafficData;
+  /** Present only when the config lists npm packages with stored days. */
+  npm?: NpmData;
 }
 
 /** Log sink for warnings and progress; the action sends it to @actions/core. */

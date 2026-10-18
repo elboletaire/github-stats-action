@@ -9681,7 +9681,8 @@
   "titles": true,
   "stars": {},
   "downloads-per-day": {},
-  "downloads-per-release": {}
+  "downloads-per-release": {},
+  "npmDownloads": {}
  },
  "traffic": {
   "views": [
