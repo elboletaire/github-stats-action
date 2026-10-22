@@ -410,4 +410,14 @@ describe('motion', () => {
     const [stillFiles] = await sets({ animate: false });
     for (const { content, path } of moving!) expect(still(content), path).toBe(still(chart(stillFiles!, path)));
   });
+
+  it('rises each measured bar on its own up to 60 days, and the whole run as one group past that', async () => {
+    const dataset = await fixture();
+    const rises = (count: number): number => {
+      const measuredDaily = Array.from({ length: count }, (_, i) => day(i, { app: 1, cli: 2 }));
+      return chart(renderCharts({ ...dataset, measuredDaily }), 'charts/downloads-per-day-light.svg').match(/class="gs-rise"/g)?.length ?? 0;
+    };
+    expect(rises(60)).toBe(60);
+    expect(rises(61)).toBe(1);
+  });
 });

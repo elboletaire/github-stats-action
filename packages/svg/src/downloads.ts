@@ -37,6 +37,9 @@ import { windowed, windowSet } from './window';
 /** Measured bars need at least this many snapshot days; before that the estimate is shown. */
 export const MIN_MEASURED_DAYS = 14;
 
+/** Up to this many bars each rises on its own, staggered; past it the stagger is under a millisecond a bar, so they rise as one group. */
+const STAGGERED_BARS = 60;
+
 /** The hint kept when titles are hidden: short, so it clears the legend. */
 const ESTIMATED_HINT = 'Estimated per day';
 const MEASURED_HINT = 'Measured per day';
@@ -78,6 +81,7 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, tit
 
   const slot = (box.right - box.left) / days.length;
   const width = barWidth(slot);
+  const staggered = days.length <= STAGGERED_BARS;
   const bars = days.flatMap((d, i) => {
     const x = box.left + i * slot + (slot - width) / 2;
     const span = d.days > 1 ? ` (${d.days} days)` : '';
@@ -85,7 +89,8 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, tit
       const value = finite(d.groups[g.name] ?? 0);
       return { value, color: seriesColor(theme, g.color), title: `${d.date}, ${g.label}: ${value}${span}` };
     });
-    return animated(motion, 'rise', stack(x, width, yOf, segments), staggerDelay(i, days.length));
+    const column = stack(x, width, yOf, segments);
+    return staggered ? animated(motion, 'rise', column, staggerDelay(i, days.length)) : column;
   });
 
   // the labels follow the window's length, like the estimate's: days, months or years
@@ -102,7 +107,7 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, tit
     ...heading(title, note, theme, keys, titled, MEASURED_HINT),
     ...valueAxis(ticks, yOf, box, theme),
     ...xLabels(labels, box.bottom + 20, theme),
-    ...bars,
+    ...(staggered ? bars : animated(motion, 'rise', bars)),
   ], motion ? ['rise'] : []);
 }
 
