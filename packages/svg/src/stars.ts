@@ -2,7 +2,7 @@
 // their dates, joined by a monotone curve with a dot on each, over a fade to the baseline.
 
 import type { Dataset, StarPoint } from '@github-stats-action/core';
-import { TYPE, animates, monotonePath, sampleStars, type CurvePoint } from '@github-stats-action/core';
+import { TYPE, animates, drawShares, monotonePath, sampleStars, type CurvePoint } from '@github-stats-action/core';
 import {
   areaGradient,
   compact,
@@ -32,7 +32,7 @@ import {
   type Box,
   type Theme,
 } from './svg';
-import { animated } from './motion';
+import { DRAW_MS, LATE_MS, animated } from './motion';
 import { windowed, windowSet } from './window';
 
 const boxOf = (titled: boolean): Box => ({ left: PLOT_LEFT, right: WIDTH - PAD, top: plotTop(titled), bottom: 252 });
@@ -83,9 +83,13 @@ export function starsChart(all: Dataset, theme: Theme): string {
   const points: CurvePoint[] = samples.map((p, i) => [xs[i]!, yOf(p.stars)]);
   const line = monotonePath(points);
   const lastX = xs[xs.length - 1]!;
+  // each dot pops in as the drawn line reaches it: its share of the line's length, of the draw
+  const shares = drawShares(points);
   const dots = samples.slice(0, -1).map((p, i) => {
     const tip = `${p.date}: ${plural(p.stars, 'star')}`;
-    return `<circle cx="${px(xs[i]!)}" cy="${px(yOf(p.stars))}" r="3" fill="${color}" stroke="${ink(theme).surface}" stroke-width="2"><title>${esc(tip)}</title></circle>`;
+    const reached = Math.round(DRAW_MS * shares[i]!);
+    const dot = `<circle cx="${px(xs[i]!)}" cy="${px(yOf(p.stars))}" r="3" fill="${color}" stroke="${ink(theme).surface}" stroke-width="2"><title>${esc(tip)}</title></circle>`;
+    return animated(motion, 'pop', [dot], reached ? `animation-delay:${reached}ms` : '');
   });
   const hover = samples.map((p, i) => {
     // each sample owns the plot up to the midpoints with its neighbours, so a tooltip is never far from a point
@@ -103,9 +107,10 @@ export function starsChart(all: Dataset, theme: Theme): string {
     ...animated(motion, 'draw', [
       `<path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"${motion ? ' pathLength="1"' : ''}/>`,
     ]),
-    ...animated(motion, 'fade', [...dots, ...endLabel(lastX, yOf(last.stars), last, color, theme, box)], 'animation-delay:800ms'),
+    ...dots.flat(),
+    ...animated(motion, 'fade', endLabel(lastX, yOf(last.stars), last, color, theme, box), `animation-delay:${LATE_MS}ms`),
     ...hover,
-  ], motion ? ['draw', 'fade'] : []);
+  ], motion ? ['draw', 'fade', 'pop'] : []);
 }
 
 /** The labels of a linear time axis: both ends, then each January (or month start under a year) clear of its neighbours. */

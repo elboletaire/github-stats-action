@@ -109,7 +109,7 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
   };
   syncPresets();
 
-  // the series wipe in one after another within 250 ms; a dot or label lands once its series' wipe (0.6 s, as in style.css) is done
+  // the series wipe in one after another within 500 ms; a dot or label lands once its series' wipe (1.2 s, as in style.css) is done
   const wipeAt = (j: number): number => introStagger(j, series.length);
 
   // the chart: the window's lines, a crosshair and a tooltip per day
@@ -149,7 +149,7 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
       const fill: Attrs = stacked ? { fill: s.color, 'fill-opacity': MARK.areaStack } : { fill: fadeFill(chart, `${options.id}-fade-${j}`, s.color) };
       svgEl('path', { d, ...fill, ...wipe }, chart);
       svgEl('path', { d: `M${pts}`, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', ...wipe }, chart);
-      svgEl('circle', { cx: x(b), cy: y(top[b] ?? 0), r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'late', ...introDelay(wipeAt(j) + 600) }, chart);
+      svgEl('circle', { cx: x(b), cy: y(top[b] ?? 0), r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'late', ...introDelay(wipeAt(j) + 1200) }, chart);
     });
     // end labels beside the dots, nudged apart when two lines end close together
     const ends = series.map((s, j) => ({ s, j, y: y(tops[j]![b] ?? 0) })).sort((p, q) => p.y - q.y);
@@ -161,7 +161,7 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
       const endX = x(b);
       // the label goes left of the line when it would still run past the right edge
       const left = endX + 10 + e.s.label.length * 6.5 > W - 2;
-      svgEl('text', { x: left ? endX - 10 : endX + 10, y: Math.min(H - m.b - 4, e.y + 4), class: 'ink late', 'text-anchor': left ? 'end' : 'start', ...introDelay(wipeAt(e.j) + 600) }, chart).textContent = e.s.label;
+      svgEl('text', { x: left ? endX - 10 : endX + 10, y: Math.min(H - m.b - 4, e.y + 4), class: 'ink late', 'text-anchor': left ? 'end' : 'start', ...introDelay(wipeAt(e.j) + 1200) }, chart).textContent = e.s.label;
     }
 
     const cross = svgEl('line', { y1: m.t, y2: y(0), class: 'base', visibility: 'hidden' }, chart);

@@ -13,12 +13,15 @@ export function finishLoad(): void {
   loading = false;
 }
 
+/** How long a line takes to draw, in ms: its dots land as it reaches them, the end label once it is done (as in style.css). */
+export const DRAW_MS = 1600;
+
 /** An inline animation delay for one element of the intro, in milliseconds. */
 export function introDelay(ms: number): { style: string } {
   return { style: `animation-delay:${Math.round(ms)}ms` };
 }
 
-/** When item `i` of a run of `count` starts: the run starts one after another over 250 ms, as in the README SVGs (motion.ts). */
+/** When item `i` of a run of `count` starts: the run starts one after another over 500 ms, as in the README SVGs (motion.ts). */
 export function introStagger(i: number, count: number): number {
-  return (250 * i) / Math.max(1, count);
+  return (500 * i) / Math.max(1, count);
 }

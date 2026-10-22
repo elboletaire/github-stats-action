@@ -30,7 +30,7 @@ import {
   type Key,
   type Theme,
 } from './svg';
-import { STAGGER_MAX, animated, staggerDelay } from './motion';
+import { LATE_MS, STAGGER_MAX, animated, staggerDelay } from './motion';
 import { windowed } from './window';
 
 /** The plot starts lower when there are epoch labels to make room for above it. */
@@ -116,9 +116,9 @@ export function downloadsPerReleaseChart(all: Dataset, theme: Theme): string {
   return svgDocument(theme, title, `${title}: ${plural(releases.length, 'release')}, stacked by group.`, [
     ...heading(title, note, theme, keys, titled),
     ...valueAxis(ticks, yOf, box, theme),
-    ...animated(motion, 'fade', markers, 'animation-delay:850ms'),
+    ...animated(motion, 'fade', markers, `animation-delay:${LATE_MS}ms`),
     ...(staggered ? columns : animated(motion, 'rise', columns)),
-    ...animated(motion, 'fade', totalLabel, 'animation-delay:850ms'),
+    ...animated(motion, 'fade', totalLabel, `animation-delay:${LATE_MS}ms`),
     ...xLabels(tagLabels, box.bottom + 20, theme),
   ], motion ? ['rise', ...(fading ? ['fade' as const] : [])] : []);
 }

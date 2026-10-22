@@ -13,10 +13,10 @@ describe('intro', () => {
     expect(introDelay(149.6)).toEqual({ style: 'animation-delay:150ms' });
   });
 
-  it('starts a run over 250 ms, whatever its count', () => {
+  it('starts a run over 500 ms, whatever its count', () => {
     expect(introStagger(0, 4)).toBe(0);
-    expect(introStagger(2, 4)).toBe(125);
-    expect(introStagger(9, 10)).toBe(225);
+    expect(introStagger(2, 4)).toBe(250);
+    expect(introStagger(9, 10)).toBe(450);
     expect(introStagger(0, 0)).toBe(0);
   });
 });

@@ -1,14 +1,14 @@
 // The stars chart's sampled view: about 30 samples placed at their dates on the same day axis as the daily
 // view, a monotone curve through them, a dot on each and a tooltip per sample.
 
-import { monotonePath, type CurvePoint } from '@github-stats-action/core/stars';
+import { drawShares, monotonePath, type CurvePoint } from '@github-stats-action/core/stars';
 import type { StarPoint } from '@github-stats-action/core';
 import { type DayAxis, xTicks } from './days';
 import { esc, f0 } from './format';
 import { fadeFill, gridLines, resetSvg, svgEl, widthOf } from './svg';
 import { quarterMax, ticks } from './scale';
 import { showTip, tipOn } from './tooltip';
-import { playsIntro } from './intro';
+import { DRAW_MS, introDelay, playsIntro } from './intro';
 
 const HEIGHT = 240;
 /** The least gap between the start label and the next tick, in px. */
@@ -56,8 +56,10 @@ export function drawSampled(svg: SVGSVGElement, o: SampledOptions): void {
   const endX = x(xs[n - 1]!);
   svgEl('path', { d: `${line}L${endX.toFixed(1)},${base.toFixed(1)}L${x(first).toFixed(1)},${base.toFixed(1)}Z`, fill: fadeFill(svg, `${o.id}-fade`, color), class: 'fade' }, svg);
   svgEl('path', { d: line, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', pathLength: 1, class: 'draw' }, svg);
+  // each dot pops in as the drawn line reaches it: its share of the line's length, of the draw
+  const shares = drawShares(points);
   samples.slice(0, -1).forEach((p, i) => {
-    svgEl('circle', { cx: x(xs[i]!), cy: y(p.stars), r: 3, fill: color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'late' }, svg);
+    svgEl('circle', { cx: x(xs[i]!), cy: y(p.stars), r: 3, fill: color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'pop', ...introDelay(DRAW_MS * shares[i]!) }, svg);
   });
   const endY = y(samples[n - 1]!.stars);
   svgEl('circle', { cx: endX, cy: endY, r: 4, fill: color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'late' }, svg);

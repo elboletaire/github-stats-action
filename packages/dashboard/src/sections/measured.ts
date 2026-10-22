@@ -81,7 +81,7 @@ function drawMeasured(svg: SVGSVGElement, d: Dataset, series: MeasuredSeries, ha
     svgEl('text', { x: W - 2, y: M.t - 10, 'text-anchor': 'end' }, svg).textContent = 'Docker';
   }
 
-  // the columns grow in day order, the whole run within 250 ms; a stack grows as one, from its baseline
+  // the columns grow in day order, the whole run within 500 ms; a stack grows as one, from its baseline
   for (const [day, e] of entries) {
     const x = cx(day) - bw / 2;
     const column = svgEl('g', { class: 'grow', ...introDelay(introStagger(day, N)) }, svg);

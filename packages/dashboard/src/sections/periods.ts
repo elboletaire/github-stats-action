@@ -86,7 +86,7 @@ function drawPeriods(svg: SVGSVGElement, d: Dataset, animate: boolean): void {
   P.forEach((p, i) => {
     const cx = m.l + slot * (i + 0.5);
     const bw = Math.min(36, (slot - 8) / Math.max(1, groups.length));
-    // the bars grow left to right, the whole run within 250 ms
+    // the bars grow left to right, the whole run within 500 ms
     const grow = { class: 'grow', ...introDelay(introStagger(i, P.length)) };
     groups.forEach((g, j) => {
       const v = p.avgPerDay[g.name] ?? 0;

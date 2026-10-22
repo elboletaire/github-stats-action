@@ -393,6 +393,23 @@ describe('motion', () => {
     expect(chart(estimated!, 'charts/npm-downloads-light.svg')).toContain('class="gs-wipe"');
   });
 
+  it('pops each stars dot in as the line reaches it, and the end dot once the line is drawn', async () => {
+    const [files] = await sets();
+    const svg = chart(files!, 'charts/stars-light.svg');
+    // each dot's group, with its delay if it has one, and its x
+    const dots = [...svg.matchAll(/<g class="gs-pop"(?: style="animation-delay:(\d+)ms")?><circle cx="([\d.]+)"/g)].map((m) => ({ ms: m[1] === undefined ? 0 : Number(m[1]), x: Number(m[2]) }));
+    expect(dots.length).toBeGreaterThan(1);
+    // the first dot is reached at once, and later dots are reached later, further along the line
+    expect(dots[0]!.ms).toBe(0);
+    expect(svg).not.toContain('<g class="gs-pop" style="animation-delay:0ms">');
+    for (let i = 1; i < dots.length; i++) {
+      expect(dots[i]!.x).toBeGreaterThan(dots[i - 1]!.x);
+      expect(dots[i]!.ms).toBeGreaterThanOrEqual(dots[i - 1]!.ms);
+    }
+    expect(dots.at(-1)!.ms).toBeLessThan(1600);
+    expect(svg).toContain('<g class="gs-fade" style="animation-delay:1600ms"><circle');
+  });
+
   it('adds no style, class, animation or path length when charts.animate is false', async () => {
     for (const files of await sets({ animate: false })) {
       for (const { content, path } of files) expect(content, path).not.toMatch(/<style|class="|animation|pathLength/);

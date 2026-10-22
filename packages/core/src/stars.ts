@@ -91,6 +91,21 @@ export function monotoneCurve(points: readonly CurvePoint[]): CubicSegment[] {
   });
 }
 
+/**
+ * Each point's share, from 0 to 1, of the length of the polyline through `points`: the share of a line's draw by
+ * which the line reaches it. Measured along the line, so a steep stretch takes its share of the time, not its width.
+ */
+export function drawShares(points: readonly CurvePoint[]): number[] {
+  const lengths = [0];
+  for (let i = 1; i < points.length; i++) {
+    const [x0, y0] = points[i - 1]!;
+    const [x1, y1] = points[i]!;
+    lengths.push(lengths[i - 1]! + Math.hypot(x1 - x0, y1 - y0));
+  }
+  const total = lengths.at(-1) ?? 0;
+  return lengths.map((length) => (total > 0 ? length / total : 0));
+}
+
 /** The monotone curve as SVG path data (`M` then `C` per segment), coordinates to one decimal. */
 export function monotonePath(points: readonly CurvePoint[]): string {
   const [first] = points;
