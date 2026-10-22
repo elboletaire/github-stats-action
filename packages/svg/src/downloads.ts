@@ -31,14 +31,11 @@ import {
   type Segment,
   type Theme,
 } from './svg';
-import { animated, staggerDelay } from './motion';
+import { STAGGER_MAX, animated, staggerDelay } from './motion';
 import { windowed, windowSet } from './window';
 
 /** Measured bars need at least this many snapshot days; before that the estimate is shown. */
 export const MIN_MEASURED_DAYS = 14;
-
-/** Up to this many bars each rises on its own, staggered; past it the stagger is under a millisecond a bar, so they rise as one group. */
-const STAGGERED_BARS = 60;
 
 /** The hint kept when titles are hidden: short, so it clears the legend. */
 const ESTIMATED_HINT = 'Estimated per day';
@@ -81,7 +78,7 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, tit
 
   const slot = (box.right - box.left) / days.length;
   const width = barWidth(slot);
-  const staggered = days.length <= STAGGERED_BARS;
+  const staggered = days.length <= STAGGER_MAX;
   const bars = days.flatMap((d, i) => {
     const x = box.left + i * slot + (slot - width) / 2;
     const span = d.days > 1 ? ` (${d.days} days)` : '';

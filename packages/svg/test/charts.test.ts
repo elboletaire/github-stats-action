@@ -420,4 +420,14 @@ describe('motion', () => {
     expect(rises(60)).toBe(60);
     expect(rises(61)).toBe(1);
   });
+
+  it('rises each release column on its own up to 60 releases, and the whole run as one group past that', async () => {
+    const dataset = await fixture();
+    const rises = (count: number): number => {
+      const releases = Array.from({ length: count }, (_, i) => release(`v${i}.0.0`, { app: 1, cli: 2 }));
+      return chart(renderCharts({ ...dataset, releases, epochs: [] }), 'charts/downloads-per-release-light.svg').match(/class="gs-rise"/g)?.length ?? 0;
+    };
+    expect(rises(60)).toBe(60);
+    expect(rises(61)).toBe(1);
+  });
 });

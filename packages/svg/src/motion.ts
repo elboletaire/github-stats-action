@@ -1,6 +1,6 @@
-// Motion for the README charts: CSS keyframes in each chart's own <style>, so an SVG in an <img> plays with no script.
-// A chart plays once on load, about a second in all. The base styles are the end state and the animations fill backwards only,
-// so a renderer without CSS animation shows the whole chart. Reduced motion turns every animation off.
+// Motion for the README charts: CSS keyframes in each chart's <style>, so an <img> plays them with no script.
+// A chart plays once, about a second in all. Base styles are the end state and animations fill backwards only,
+// so a renderer without CSS animation shows the full chart. Reduced motion turns every animation off.
 
 /** A column grows up from the baseline, a band is wiped in from the left, a line is drawn, an element fades in. */
 export type Effect = 'rise' | 'wipe' | 'draw' | 'fade';
@@ -16,6 +16,9 @@ const RULES: Record<Effect, string> = {
 export function motionCss(effects: Effect[]): string {
   return [...new Set(effects)].map((effect) => RULES[effect]).join('') + '@media (prefers-reduced-motion: reduce){*{animation:none!important}}';
 }
+
+/** Up to this many items of a run each rise on their own, staggered; past it the stagger is under a millisecond each, so the run rises as one group. */
+export const STAGGER_MAX = 60;
 
 /** A run of items starts one after another over 250 ms, so the run takes the same time whatever its count: the last one ends by 0.85 s. */
 export const staggerDelay = (i: number, count: number): string => {

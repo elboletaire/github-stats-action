@@ -30,7 +30,7 @@ import {
   type Key,
   type Theme,
 } from './svg';
-import { animated, staggerDelay } from './motion';
+import { STAGGER_MAX, animated, staggerDelay } from './motion';
 import { windowed } from './window';
 
 /** The plot starts lower when there are epoch labels to make room for above it. */
@@ -71,22 +71,19 @@ export function downloadsPerReleaseChart(all: Dataset, theme: Theme): string {
 
   const slot = (box.right - box.left) / releases.length;
   const width = barWidth(slot);
+  const staggered = releases.length <= STAGGER_MAX;
   const columns = releases.flatMap((r, i) => {
     const x = box.left + i * slot + (slot - width) / 2;
-    return animated(
-      motion,
-      'rise',
-      stack(
-        x,
-        width,
-        yOf,
-        dataset.groups.map((g) => {
-          const value = finite(r.groups[g.name] ?? 0);
-          return { value, color: seriesColor(theme, g.color), title: `${r.tag}, ${g.label}: ${value}` };
-        }),
-      ),
-      staggerDelay(i, releases.length),
+    const column = stack(
+      x,
+      width,
+      yOf,
+      dataset.groups.map((g) => {
+        const value = finite(r.groups[g.name] ?? 0);
+        return { value, color: seriesColor(theme, g.color), title: `${r.tag}, ${g.label}: ${value}` };
+      }),
     );
+    return staggered ? animated(motion, 'rise', column, staggerDelay(i, releases.length)) : column;
   });
 
   // the latest release is labelled with its total, so the chart ends on a number
@@ -119,7 +116,7 @@ export function downloadsPerReleaseChart(all: Dataset, theme: Theme): string {
     ...heading(title, note, theme, keys, titled),
     ...valueAxis(ticks, yOf, box, theme),
     ...animated(motion, 'fade', markers, 'animation-delay:850ms'),
-    ...columns,
+    ...(staggered ? columns : animated(motion, 'rise', columns)),
     ...animated(motion, 'fade', totalLabel, 'animation-delay:850ms'),
     ...xLabels(tagLabels, box.bottom + 20, theme),
   ], motion ? ['rise', 'fade'] : []);
