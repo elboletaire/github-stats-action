@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { Dataset, MeasuredDay, ReleaseRow } from '@github-stats-action/core';
+import { buildNpmData, type Dataset, type MeasuredDay, type ReleaseRow } from '@github-stats-action/core';
 import { renderCharts } from '../src/index';
 import { niceTicks } from '../src/svg';
 
@@ -347,4 +347,67 @@ describe('chart options', () => {
     }
   });
 
+});
+
+describe('motion', () => {
+  const npm = () =>
+    buildNpmData(
+      Array.from({ length: 3 }, (_, i) => ({
+        label: `pkg-${i}`,
+        series: {
+          schema: 1 as const,
+          package: `pkg-${i}`,
+          days: Array.from({ length: 60 }, (_, k) => ({ date: new Date(Date.UTC(2026, 6, 1) + k * 86_400_000).toISOString().slice(0, 10), downloads: ((k * (i + 2)) % 11) + 1 })),
+        },
+      })),
+    )!;
+  const measured = (dataset: Dataset): Dataset => ({ ...dataset, measuredDaily: Array.from({ length: 20 }, (_, i) => day(i, { app: i % 3, cli: 10 + i })) });
+  /** The fixture with an npm series, and the same with measured days: together every chart and both downloads modes. */
+  const sets = async (charts: Partial<NonNullable<Dataset['charts']>> = {}): Promise<ReturnType<typeof renderCharts>[]> => {
+    const dataset = { ...(await fixture()), npm: npm(), charts: { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {}, ...charts } };
+    return [renderCharts(dataset), renderCharts(measured(dataset))];
+  };
+  /** The file minus its motion: the style, the animation groups, the path length and the line breaks between marks. */
+  const still = (svg: string): string =>
+    svg.replace(/<style>.*?<\/style>/, '').replace(/<g class="gs-\w+"(?: style="[^"]*")?>/g, '').replace(/<\/g>/g, '').replace(/ pathLength="1"/g, '').replace(/\n/g, '');
+
+  it('plays every chart once on load, with keyframes and a reduced-motion rule', async () => {
+    for (const files of await sets()) {
+      for (const { content, path } of files) {
+        expect(content, path).toMatch(/<style>[^<]*@keyframes gs-\w+/);
+        expect(content, path).toContain('@media (prefers-reduced-motion: reduce)');
+        expectWellFormed(content);
+      }
+    }
+  });
+
+  it('gives each chart its own effect, and the downloads chart one for each mode', async () => {
+    const [estimated, measuredFiles] = await sets();
+    expect(chart(estimated!, 'charts/stars-light.svg')).toContain('class="gs-draw"');
+    expect(chart(estimated!, 'charts/downloads-per-day-light.svg')).toContain('class="gs-wipe"');
+    expect(chart(measuredFiles!, 'charts/downloads-per-day-light.svg')).toContain('class="gs-rise"');
+    expect(chart(estimated!, 'charts/downloads-per-release-light.svg')).toContain('class="gs-rise"');
+    expect(chart(estimated!, 'charts/npm-downloads-light.svg')).toContain('class="gs-wipe"');
+  });
+
+  it('adds no style, class, animation or path length when charts.animate is false', async () => {
+    for (const files of await sets({ animate: false })) {
+      for (const { content, path } of files) expect(content, path).not.toMatch(/<style|class="|animation|pathLength/);
+    }
+  });
+
+  it('lets a chart switch its own motion off over the global setting', async () => {
+    const [files] = await sets({ stars: { animate: false } });
+    expect(chart(files!, 'charts/stars-light.svg')).not.toContain('<style');
+    expect(chart(files!, 'charts/downloads-per-release-light.svg')).toContain('<style');
+    const [mixed] = await sets({ animate: false, stars: { animate: true } });
+    expect(chart(mixed!, 'charts/stars-light.svg')).toContain('class="gs-draw"');
+    expect(chart(mixed!, 'charts/npm-downloads-light.svg')).not.toContain('<style');
+  });
+
+  it('only wraps the marks and adds the style, so the end state is the still chart', async () => {
+    const [moving] = await sets();
+    const [stillFiles] = await sets({ animate: false });
+    for (const { content, path } of moving!) expect(still(content), path).toBe(still(chart(stillFiles!, path)));
+  });
 });

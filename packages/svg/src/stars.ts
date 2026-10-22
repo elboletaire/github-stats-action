@@ -2,7 +2,7 @@
 // their dates, joined by a monotone curve with a dot on each, over a fade to the baseline.
 
 import type { Dataset, StarPoint } from '@github-stats-action/core';
-import { TYPE, monotonePath, sampleStars, type CurvePoint } from '@github-stats-action/core';
+import { TYPE, animates, monotonePath, sampleStars, type CurvePoint } from '@github-stats-action/core';
 import {
   areaGradient,
   compact,
@@ -32,6 +32,7 @@ import {
   type Box,
   type Theme,
 } from './svg';
+import { animated } from './motion';
 import { windowed, windowSet } from './window';
 
 const boxOf = (titled: boolean): Box => ({ left: PLOT_LEFT, right: WIDTH - PAD, top: plotTop(titled), bottom: 252 });
@@ -69,6 +70,7 @@ export function starsChart(all: Dataset, theme: Theme): string {
   const top = ticks.at(-1) ?? 1;
   const yOf = (v: number): number => box.bottom - (finite(v) / top) * (box.bottom - box.top);
   const color = seriesColor(theme, 0);
+  const motion = animates(dataset.charts, 'stars');
 
   const first = dayOf(head.date);
   const end = dayOf(last.date);
@@ -97,12 +99,13 @@ export function starsChart(all: Dataset, theme: Theme): string {
     ...heading(title, note, theme, [], titled),
     ...valueAxis(ticks, yOf, box, theme),
     ...xLabels(timeAxis(first, end, xOf), box.bottom + 20, theme),
-    `<path d="${line}L${px(lastX)} ${px(box.bottom)}L${px(xs[0]!)} ${px(box.bottom)}Z" fill="url(#stars-fade)"/>`,
-    `<path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`,
-    ...dots,
-    ...endLabel(lastX, yOf(last.stars), last, color, theme, box),
+    ...animated(motion, 'fade', [`<path d="${line}L${px(lastX)} ${px(box.bottom)}L${px(xs[0]!)} ${px(box.bottom)}Z" fill="url(#stars-fade)"/>`]),
+    ...animated(motion, 'draw', [
+      `<path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"${motion ? ' pathLength="1"' : ''}/>`,
+    ]),
+    ...animated(motion, 'fade', [...dots, ...endLabel(lastX, yOf(last.stars), last, color, theme, box)], 'animation-delay:800ms'),
     ...hover,
-  ]);
+  ], motion ? ['draw', 'fade'] : []);
 }
 
 /** The labels of a linear time axis: both ends, then each January (or month start under a year) clear of its neighbours. */

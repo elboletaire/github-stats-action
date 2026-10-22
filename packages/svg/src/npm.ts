@@ -2,6 +2,7 @@
 // stacked by package. One path per package keeps the file small enough for a README.
 
 import type { Dataset, NpmData } from '@github-stats-action/core';
+import { animates } from '@github-stats-action/core';
 import {
   barWidth,
   dayOf,
@@ -29,6 +30,7 @@ import {
   type Key,
   type Theme,
 } from './svg';
+import { animated, staggerDelay } from './motion';
 import { windowed } from './window';
 import { INK, TYPE } from '@github-stats-action/core/theme';
 
@@ -73,6 +75,7 @@ export function npmDownloadsChart(all: Dataset, theme: Theme): string {
   const npm = dataset.npm;
   if (!npm) throw new Error('npmDownloadsChart needs dataset.npm');
   const titled = showTitle(dataset, 'npm-downloads');
+  const motion = animates(dataset.charts, 'npm-downloads');
   const keys: Key[] = npm.packages.map((pkg) => ({ label: pkg.label, color: seriesColor(theme, pkg.color) }));
   // the legend wraps under the note; the plot starts below its last row
   const rows = keys.length > 1 ? legendRows(keys, WIDTH - 2 * PAD) : [];
@@ -114,7 +117,9 @@ export function npmDownloadsChart(all: Dataset, theme: Theme): string {
     for (const { index, d } of stackBars(x, width, yOf, sums.map((row) => row[w] ?? 0))) byPackage[index]!.push(d);
   }
   const bars = npm.packages.flatMap((pkg, p) =>
-    byPackage[p]!.length ? [`<path d="${byPackage[p]!.join('')}" fill="${seriesColor(theme, pkg.color)}"/>`] : [],
+    byPackage[p]!.length
+      ? animated(motion, 'wipe', [`<path d="${byPackage[p]!.join('')}" fill="${seriesColor(theme, pkg.color)}"/>`], staggerDelay(p, npm.packages.length))
+      : [],
   );
 
   const label = timeLabel(count * WEEK);
@@ -132,5 +137,5 @@ export function npmDownloadsChart(all: Dataset, theme: Theme): string {
     ...valueAxis(ticks, yOf, box, theme),
     ...xLabels(labels, box.bottom + 20, theme),
     ...bars,
-  ]);
+  ], motion ? ['wipe'] : []);
 }
