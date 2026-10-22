@@ -318,7 +318,8 @@ platforms:                  # label rules for asset names
   - { match: "acme-desktop-*-windows-x64-setup.exe", label: Windows installer }
 charts:                     # README SVG charts
   titles: true              # false hides every chart's title
-  stars: { from: 2024-01-01 }                # the window: a date, a year or a month
+  animate: true             # false keeps every chart still
+  stars: { from: 2024-01-01, animate: false }  # the window: a date, a year or a month; animate overrides the global one
   downloads-per-day: { range: 90d }          # or a length counted back from the latest day
   downloads-per-release: { last: 20 }        # the last N releases instead
   npm-downloads: { range: 1y }
@@ -336,6 +337,7 @@ npm:                        # optional npm packages, counted daily
 - `releases`: `true` by default. Release downloads show only when some release has an asset that counts (not ignored), so a repo without release assets gets no download views. `false` hides them even when assets count. The snapshots keep the counts either way, so turning it back on restores the history.
 - `npm`: npm package names, or `{ package, label }` (the label defaults to the name). Scoped names work. `downloads`, `downloads-week`, `downloads-total` and names ending in `-week` are reserved for the badges. Up to 8: each package takes one of the eight palette colours, and a ninth would repeat one in the stacked charts, where two touching segments of one colour can't be told apart. Absent means no npm requests at all.
 - `charts`: `titles` (default `true`) shows or hides the title of the README SVGs (a note that says what the data is stays: estimated or measured); a chart's own `title` (`stars`, `downloads-per-day`, `downloads-per-release`, `npm-downloads`) overrides it. The dashboard keeps its headings.
+  - `animate` (default `true`): charts animate once on load, on the README SVGs and on the dashboard's first draw, not on zoom or resize. `animate: false` under `charts` turns it off everywhere, and a chart's own `animate` overrides it. Viewers whose system asks for reduced motion never see the animation.
   - Each chart can cover a window, set per chart (there is no global default). `from` is the first day: `2024-06-01`, `2024-06` or `2024`, quoted or not (`from: 2024` and `from: "2024"` both work). `range` is a length counted back from the latest day, inclusive: `30d`, `6m`, `1y`. `from` and `range` are exclusive. A window longer than the history shows all of it; absent means all history.
   - `stars` samples the window (the count on its first day is where the curve starts, and the y axis keeps the real total). `downloads-per-day` and `npm-downloads` start their x axis at the window start, and the bars or areas of `downloads-per-day` are chosen on the whole history, so a short window still shows bars. `downloads-per-release` takes the releases published in the window, or with `last: N` the last N releases; epoch markers outside it are hidden.
   - The window ends on the data's latest day, never the clock, so re-rendering gives the same file. npm's window ends on npm's last stored day.
