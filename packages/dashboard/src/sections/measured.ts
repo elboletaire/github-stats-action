@@ -81,15 +81,15 @@ function drawMeasured(svg: SVGSVGElement, d: Dataset, series: MeasuredSeries, ha
     svgEl('text', { x: W - 2, y: M.t - 10, 'text-anchor': 'end' }, svg).textContent = 'Docker';
   }
 
-  // the bars grow in day order, the whole run within 400 ms
+  // the columns grow in day order, the whole run within 400 ms; a stack grows as one, from its baseline
   for (const [day, e] of entries) {
     const x = cx(day) - bw / 2;
-    const grow = { class: 'grow', ...introDelay((400 * day) / N) };
+    const column = svgEl('g', { class: 'grow', ...introDelay((400 * day) / N) }, svg);
     for (const seg of stackSegments(groups.map((g) => pos(e.groups[g.name])), y)) {
       const group = groups[seg.index];
       if (!group) continue;
-      if (seg.top) svgEl('path', { d: roundedTop(x, seg.y, bw, seg.height, 4), fill: colorVar(group), ...grow }, svg);
-      else svgEl('rect', { x, y: seg.y, width: bw, height: seg.height, fill: colorVar(group), ...grow }, svg);
+      if (seg.top) svgEl('path', { d: roundedTop(x, seg.y, bw, seg.height, 4), fill: colorVar(group) }, column);
+      else svgEl('rect', { x, y: seg.y, width: bw, height: seg.height, fill: colorVar(group) }, column);
     }
   }
 

@@ -110,6 +110,8 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
   syncPresets();
 
   // the chart: the window's lines, a crosshair and a tooltip per day
+  // the series wipe in one after another within 400 ms; a dot or label lands once its series' 1 s wipe is done
+  const wipeAt = (j: number): number => (400 * j) / series.length;
   const drawChart = (): void => {
     const W = widthOf(chart);
     const H = 280;
@@ -138,8 +140,7 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
     [...series.entries()].reverse().forEach(([j, s]) => {
       const top = tops[j]!;
       const base = bases[j]!;
-      // each series wipes in after the one before it
-      const wipe = { class: 'wipe', ...introDelay(150 * j) };
+      const wipe = { class: 'wipe', ...introDelay(wipeAt(j)) };
       const pts = top.slice(a, b + 1).map((v, k) => `${x(a + k).toFixed(1)},${y(v).toFixed(1)}`).join('L');
       const d = stacked
         ? `M${pts}L${baseEdge(x, y, base, a, b)}Z`
@@ -147,10 +148,10 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
       const fill: Attrs = stacked ? { fill: s.color, 'fill-opacity': MARK.areaStack } : { fill: fadeFill(chart, `${options.id}-fade-${j}`, s.color) };
       svgEl('path', { d, ...fill, ...wipe }, chart);
       svgEl('path', { d: `M${pts}`, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', ...wipe }, chart);
-      svgEl('circle', { cx: x(b), cy: y(top[b] ?? 0), r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'late' }, chart);
+      svgEl('circle', { cx: x(b), cy: y(top[b] ?? 0), r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'late', ...introDelay(wipeAt(j) + 1000) }, chart);
     });
     // end labels beside the dots, nudged apart when two lines end close together
-    const ends = series.map((s, j) => ({ s, y: y(tops[j]![b] ?? 0) })).sort((p, q) => p.y - q.y);
+    const ends = series.map((s, j) => ({ s, j, y: y(tops[j]![b] ?? 0) })).sort((p, q) => p.y - q.y);
     ends.forEach((e, k) => {
       const above = ends[k - 1];
       if (above && e.y - above.y < 13) e.y = above.y + 13;
@@ -159,7 +160,7 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
       const endX = x(b);
       // the label goes left of the line when it would still run past the right edge
       const left = endX + 10 + e.s.label.length * 6.5 > W - 2;
-      svgEl('text', { x: left ? endX - 10 : endX + 10, y: Math.min(H - m.b - 4, e.y + 4), class: 'ink', 'text-anchor': left ? 'end' : 'start' }, chart).textContent = e.s.label;
+      svgEl('text', { x: left ? endX - 10 : endX + 10, y: Math.min(H - m.b - 4, e.y + 4), class: 'ink late', 'text-anchor': left ? 'end' : 'start', ...introDelay(wipeAt(e.j) + 1000) }, chart).textContent = e.s.label;
     }
 
     const cross = svgEl('line', { y1: m.t, y2: y(0), class: 'base', visibility: 'hidden' }, chart);

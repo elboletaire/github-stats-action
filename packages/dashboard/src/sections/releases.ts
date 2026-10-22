@@ -70,13 +70,13 @@ function drawReleases(svg: SVGSVGElement, d: Dataset, animate: boolean): void {
   R.forEach((r, i) => {
     const x = M.l + slot * i + (slot - bw) / 2;
     const segments = stackSegments(groups.map((g) => r.groups[g.name] ?? 0), y);
-    // the columns grow left to right, the whole run within 400 ms
-    const grow = { class: 'grow', ...introDelay((400 * i) / R.length) };
+    // the columns grow left to right, the whole run within 400 ms; a stack grows as one, from its baseline
+    const column = svgEl('g', { class: 'grow', ...introDelay((400 * i) / R.length) }, svg);
     for (const seg of segments) {
       const group = groups[seg.index];
       if (!group) continue;
-      if (seg.top) svgEl('path', { d: roundedTop(x, seg.y, bw, seg.height, 4), fill: colorVar(group), ...grow }, svg);
-      else svgEl('rect', { x, y: seg.y, width: bw, height: seg.height, fill: colorVar(group), ...grow }, svg);
+      if (seg.top) svgEl('path', { d: roundedTop(x, seg.y, bw, seg.height, 4), fill: colorVar(group) }, column);
+      else svgEl('rect', { x, y: seg.y, width: bw, height: seg.height, fill: colorVar(group) }, column);
     }
     if (i % every === 0) {
       const label = flat

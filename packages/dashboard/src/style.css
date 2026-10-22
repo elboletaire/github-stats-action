@@ -393,7 +393,7 @@ svg .cap {
   fill: var(--muted);
 }
 
-/* The first-load intro: the svg has `intro` only while the first mount draws it (see intro.ts), and each element
+/* The first-load intro: the svg keeps `intro` from the first mount until its next redraw (see intro.ts), and each element
    carries the class of its effect. Nothing is hidden without the animation: the `backwards` fill starts each one
    at its `from` state only during its delay, and a reduced-motion reader gets the static chart. */
 @media (prefers-reduced-motion: no-preference) {
