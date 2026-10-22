@@ -1,7 +1,8 @@
 // Measured downloads per day: the change between consecutive snapshots, stacked by group, with Docker pulls on a right axis.
 
-import type { Dataset, MeasuredDay } from '@github-stats-action/core';
+import { animates, type Dataset, type MeasuredDay } from '@github-stats-action/core';
 import { dayAxis, longDate } from '../days';
+import { introDelay, playsIntro } from '../intro';
 import { esc, f0, sgn } from '../format';
 import { countedGroups } from '../model';
 import { colorVar } from '../palette';
@@ -51,13 +52,14 @@ export function measured(d: Dataset): Section {
     `<div class="scroll" data-table${entries.length && entries.length < TABLE_BELOW ? '' : ' hidden'}>${table}</div>`,
   );
   const svg = el.querySelector('svg') as SVGSVGElement;
-  return { el, redraw: () => { if (series) drawMeasured(svg, d, series, hasDocker); } };
+  const animate = animates(d.charts, 'downloads-per-day');
+  return { el, redraw: () => { if (series) drawMeasured(svg, d, series, hasDocker, animate); } };
 }
 
-function drawMeasured(svg: SVGSVGElement, d: Dataset, series: MeasuredSeries, hasDocker: boolean): void {
+function drawMeasured(svg: SVGSVGElement, d: Dataset, series: MeasuredSeries, hasDocker: boolean, animate: boolean): void {
   const groups = countedGroups(d);
   const W = widthOf(svg);
-  resetSvg(svg, W, H);
+  resetSvg(svg, W, H, playsIntro(animate));
   const N = series.last + 1;
   const pw = W - M.l - M.r;
   const sw = pw / N;
@@ -79,13 +81,15 @@ function drawMeasured(svg: SVGSVGElement, d: Dataset, series: MeasuredSeries, ha
     svgEl('text', { x: W - 2, y: M.t - 10, 'text-anchor': 'end' }, svg).textContent = 'Docker';
   }
 
+  // the bars grow in day order, the whole run within 400 ms
   for (const [day, e] of entries) {
     const x = cx(day) - bw / 2;
+    const grow = { class: 'grow', ...introDelay((400 * day) / N) };
     for (const seg of stackSegments(groups.map((g) => pos(e.groups[g.name])), y)) {
       const group = groups[seg.index];
       if (!group) continue;
-      if (seg.top) svgEl('path', { d: roundedTop(x, seg.y, bw, seg.height, 4), fill: colorVar(group) }, svg);
-      else svgEl('rect', { x, y: seg.y, width: bw, height: seg.height, fill: colorVar(group) }, svg);
+      if (seg.top) svgEl('path', { d: roundedTop(x, seg.y, bw, seg.height, 4), fill: colorVar(group), ...grow }, svg);
+      else svgEl('rect', { x, y: seg.y, width: bw, height: seg.height, fill: colorVar(group), ...grow }, svg);
     }
   }
 
@@ -102,11 +106,11 @@ function drawMeasured(svg: SVGSVGElement, d: Dataset, series: MeasuredSeries, ha
       line += `${open ? 'L' : 'M'}${cx(day).toFixed(1)},${yd(pos(e.docker)).toFixed(1)}`;
       open = true;
     }
-    svgEl('path', { d: line, fill: 'none', stroke: 'var(--muted)', 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+    svgEl('path', { d: line, fill: 'none', stroke: 'var(--muted)', 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', pathLength: 1, class: 'draw' }, svg);
     if (sw >= 8) {
       for (const [day, e] of entries) {
         if (e.docker === null) continue;
-        svgEl('circle', { cx: cx(day), cy: yd(pos(e.docker)), r: 4, fill: 'var(--muted)', stroke: 'var(--surface)', 'stroke-width': 2 }, svg);
+        svgEl('circle', { cx: cx(day), cy: yd(pos(e.docker)), r: 4, fill: 'var(--muted)', stroke: 'var(--surface)', 'stroke-width': 2, class: 'late' }, svg);
       }
     }
   }

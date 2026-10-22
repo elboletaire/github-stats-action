@@ -11,11 +11,12 @@ export function svgEl(tag: string, attrs: Attrs = {}, parent?: Element): SVGElem
   return el as SVGElement;
 }
 
-/** Empties the chart and sets its viewBox and size. */
-export function resetSvg(svg: SVGSVGElement, width: number, height: number): void {
+/** Empties the chart and sets its viewBox and size; `intro` plays the first-load animation (see style.css). */
+export function resetSvg(svg: SVGSVGElement, width: number, height: number, intro = false): void {
   svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
   svg.setAttribute('width', String(width));
   svg.setAttribute('height', String(height));
+  svg.classList.toggle('intro', intro);
   svg.replaceChildren();
 }
 

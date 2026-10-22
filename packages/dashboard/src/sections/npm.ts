@@ -1,7 +1,7 @@
 // npm downloads: the daily counts of the configured packages, stacked on a zoomable chart, with the
 // combined tiles and a table per package. Shown only when the dataset has npm figures.
 
-import type { Dataset } from '@github-stats-action/core';
+import { animates, type Dataset } from '@github-stats-action/core';
 import { esc, f0, sgn } from '../format';
 import { npmDaily } from '../model';
 import { colorVar } from '../palette';
@@ -47,6 +47,7 @@ export function npm(d: Dataset): Section | null {
     // beyond four packages the end labels pile up, so the legend names them alone
     directLabels: data.packages.length <= 4,
     id: 'npm',
+    animate: animates(d.charts, 'npm-downloads'),
     describe: (v) => `${f0(v)} downloads`,
   });
   return { el, redraw };

@@ -4,6 +4,7 @@
 
 import { MARK } from '@github-stats-action/core/theme';
 import { dayAxis, presetStart, clampView, zoomView, xTicks } from '../days';
+import { introDelay, playsIntro } from '../intro';
 import { esc, f0 } from '../format';
 import { niceMax, quarterMax, ticks } from '../scale';
 import { fadeFill, gridLines, hitRect, resetSvg, svgEl, widthOf, type Attrs } from '../svg';
@@ -39,6 +40,8 @@ export interface DailyOptions {
   directLabels: boolean;
   /** A prefix for the chart's gradient ids, unique on the page. */
   id: string;
+  /** Whether the chart's config animates it on load. */
+  animate: boolean;
   /** The tooltip text of one series' value on one day. */
   describe(value: number): string;
 }
@@ -116,7 +119,7 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
     const { a, b } = view;
     const L = Math.max(1, b - a);
     const pw = W - m.l - m.r;
-    resetSvg(chart, W, H);
+    resetSvg(chart, W, H, playsIntro(options.animate));
     chartGeo = { W, left: m.l, right: m.r };
     const mx = quarterMax(Math.max(1, ...tops.flatMap((t) => t.slice(a, b + 1))));
     const x = (i: number): number => m.l + (pw * (i - a)) / L;
@@ -135,14 +138,16 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
     [...series.entries()].reverse().forEach(([j, s]) => {
       const top = tops[j]!;
       const base = bases[j]!;
+      // each series wipes in after the one before it
+      const wipe = { class: 'wipe', ...introDelay(150 * j) };
       const pts = top.slice(a, b + 1).map((v, k) => `${x(a + k).toFixed(1)},${y(v).toFixed(1)}`).join('L');
       const d = stacked
         ? `M${pts}L${baseEdge(x, y, base, a, b)}Z`
         : `M${x(a)},${y(0)}L${pts}L${x(b)},${y(0)}Z`;
       const fill: Attrs = stacked ? { fill: s.color, 'fill-opacity': MARK.areaStack } : { fill: fadeFill(chart, `${options.id}-fade-${j}`, s.color) };
-      svgEl('path', { d, ...fill }, chart);
-      svgEl('path', { d: `M${pts}`, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, chart);
-      svgEl('circle', { cx: x(b), cy: y(top[b] ?? 0), r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2 }, chart);
+      svgEl('path', { d, ...fill, ...wipe }, chart);
+      svgEl('path', { d: `M${pts}`, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', ...wipe }, chart);
+      svgEl('circle', { cx: x(b), cy: y(top[b] ?? 0), r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'late' }, chart);
     });
     // end labels beside the dots, nudged apart when two lines end close together
     const ends = series.map((s, j) => ({ s, y: y(tops[j]![b] ?? 0) })).sort((p, q) => p.y - q.y);
@@ -188,7 +193,7 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
     const W = widthOf(strip);
     const H = 56;
     const m = { l: 44, r: 44, t: 4, b: 4 };
-    resetSvg(strip, W, H);
+    resetSvg(strip, W, H, playsIntro(options.animate));
     stripGeo = { W, left: m.l, right: m.r };
     const mx = niceMax(Math.max(1, ...tops.flat()));
     const y = (v: number): number => m.t + (H - m.t - m.b) * (1 - v / mx);
@@ -198,8 +203,8 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
       const d = stacked
         ? `M${pts}L${baseEdge(stripX, y, bases[j]!, 0, n - 1)}Z`
         : `M${stripX(0)},${y(0)}L${pts}L${stripX(n - 1)},${y(0)}Z`;
-      svgEl('path', { d, fill: s.color, 'fill-opacity': 0.16 }, strip);
-      svgEl('path', { d: `M${pts}`, fill: 'none', stroke: s.color, 'stroke-opacity': 0.7, 'stroke-width': 1, 'stroke-linejoin': 'round' }, strip);
+      svgEl('path', { d, fill: s.color, 'fill-opacity': 0.16, class: 'fade' }, strip);
+      svgEl('path', { d: `M${pts}`, fill: 'none', stroke: s.color, 'stroke-opacity': 0.7, 'stroke-width': 1, 'stroke-linejoin': 'round', class: 'fade' }, strip);
     });
     svgEl('line', { x1: m.l, x2: W - m.r, y1: y(0) + 0.5, y2: y(0) + 0.5, class: 'base' }, strip);
     // the days outside the window are veiled; the window has a hairline frame and two pill handles
