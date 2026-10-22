@@ -4,7 +4,7 @@ A GitHub Action that keeps the history GitHub throws away. GitHub shows only the
 
 ## Preview
 
-Live output of the action on two of the author's repos, refreshed daily: the flat SVGs, straight from their data branches. [manga-downloader](https://github.com/elboletaire/manga-downloader) has release downloads in two groups, a counter, epochs and a Docker Hub image; [password-strength-meter](https://github.com/elboletaire/password-strength-meter) has seven npm packages. The weekly and monthly download badges show up once the branches hold enough history.
+Live output of the action on two of the author's repos, refreshed daily: the flat SVGs, straight from their data branches. [manga-downloader](https://github.com/elboletaire/manga-downloader) has release downloads in two groups, a counter, epochs and a Docker Hub image; [password-strength-meter](https://github.com/elboletaire/password-strength-meter) has seven npm packages. The weekly and monthly release download badges show up once the branches hold enough history.
 
 | [Badge](#badges) | manga-downloader |
 |---|---|
@@ -17,7 +17,7 @@ Live output of the action on two of the author's repos, refreshed daily: the fla
 | [Badge](#badges) | password-strength-meter |
 |---|---|
 | `npm-downloads`, `-week`, `-total` | <img alt="npm downloads per month" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-downloads.svg"> <img alt="npm downloads per week" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-downloads-week.svg"> <img alt="npm downloads total" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-downloads-total.svg"> |
-| `npm-<package>`, `-week` | <img alt="password-strength-meter per month" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-password-strength-meter.svg"> <img alt="@passcore/core per week" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-passcore--core-week.svg"> |
+| `npm-<package>`, `-week` | <img alt="password-strength-meter per month" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-password-strength-meter.svg"> <img alt="password-strength-meter per week" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-password-strength-meter-week.svg"> |
 
 Each badge is also a `.json` shields.io endpoint, which renders the same and takes any shields style or logo:
 
