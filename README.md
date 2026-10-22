@@ -4,41 +4,52 @@ A GitHub Action that keeps the history GitHub throws away. GitHub shows only the
 
 ## Preview
 
-Live output of the action on two of the author's repos, refreshed daily: [manga-downloader](https://github.com/elboletaire/manga-downloader) (release downloads in two groups, a counter, epochs, Docker Hub) and [password-strength-meter](https://github.com/elboletaire/password-strength-meter) (seven npm packages). The period download badges show up once their data branches hold enough history.
+Live output of the action on two of the author's repos, refreshed daily: the flat SVGs, straight from their data branches. [manga-downloader](https://github.com/elboletaire/manga-downloader) has release downloads in two groups, a counter, epochs and a Docker Hub image; [password-strength-meter](https://github.com/elboletaire/password-strength-meter) has seven npm packages. The weekly and monthly download badges show up once the branches hold enough history.
 
-<img alt="Downloads" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/downloads.svg">
-<img alt="Desktop app downloads" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/downloads-app.svg">
-<img alt="CLI downloads" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/downloads-cli.svg">
-<img alt="Latest release downloads" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/release-latest.svg">
-<img alt="In-app updates" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/counter-updates.svg">
-<img alt="Docker pulls" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/docker-pulls.svg">
-<img alt="Stars" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/stars.svg">
-<img alt="Stars this week" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/stars-week.svg">
-<img alt="Stars this month" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/stars-month.svg">
+| [Badge](#badges) | manga-downloader |
+|---|---|
+| `downloads`, `downloads-<group>` | <img alt="Downloads" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/downloads.svg"> <img alt="Desktop app downloads" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/downloads-app.svg"> <img alt="CLI downloads" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/downloads-cli.svg"> |
+| `release-latest` | <img alt="Latest release downloads" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/release-latest.svg"> |
+| `counter-<name>` | <img alt="In-app updates" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/counter-updates.svg"> |
+| `docker-pulls` | <img alt="Docker pulls" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/docker-pulls.svg"> |
+| `stars`, `-week`, `-month` | <img alt="Stars" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/stars.svg"> <img alt="Stars this week" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/stars-week.svg"> <img alt="Stars this month" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/stars-month.svg"> |
 
-<img alt="npm downloads per month" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-downloads.svg">
-<img alt="npm downloads per week" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-downloads-week.svg">
-<img alt="npm downloads total" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-downloads-total.svg">
-<img alt="@passcore/core per month" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-passcore--core.svg">
-<img alt="@passcore/core per week" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-passcore--core-week.svg">
+| [Badge](#badges) | password-strength-meter |
+|---|---|
+| `npm-downloads`, `-week`, `-total` | <img alt="npm downloads per month" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-downloads.svg"> <img alt="npm downloads per week" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-downloads-week.svg"> <img alt="npm downloads total" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-downloads-total.svg"> |
+| `npm-<package>`, `-week` | <img alt="password-strength-meter per month" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-password-strength-meter.svg"> <img alt="@passcore/core per week" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-passcore--core-week.svg"> |
+
+Each badge is also a `.json` shields.io endpoint, which renders the same and takes any shields style or logo:
+
+<img alt="Docker pulls, with the Docker logo" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Felboletaire%2Fmanga-downloader%2Fstats-data%2Felboletaire%2Fmanga-downloader%2Fbadges%2Fdocker-pulls.json&logo=docker"> <img alt="npm downloads per month, with the npm logo" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Felboletaire%2Fpassword-strength-meter%2Fstats-data%2Felboletaire%2Fpassword-strength-meter%2Fbadges%2Fnpm-downloads.json&logo=npm"> <img alt="Downloads, for-the-badge style" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Felboletaire%2Fmanga-downloader%2Fstats-data%2Felboletaire%2Fmanga-downloader%2Fbadges%2Fdownloads.json&style=for-the-badge">
 
 <details>
 <summary>Charts</summary>
+
+Each chart is a light and a dark SVG; `<picture>` picks the one for the reader's theme. The key under `charts:` in the config names each one.
+
+`stars`, manga-downloader:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/stars-dark.svg">
   <img alt="Stars over time" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/stars-light.svg">
 </picture>
 
+`downloads-per-day`, manga-downloader:
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/downloads-per-day-dark.svg">
   <img alt="Downloads per day" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/downloads-per-day-light.svg">
 </picture>
 
+`downloads-per-release`, manga-downloader, with its epochs as markers:
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/downloads-per-release-dark.svg">
   <img alt="Downloads per release" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/downloads-per-release-light.svg">
 </picture>
+
+`npm-downloads`, password-strength-meter:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/charts/npm-downloads-dark.svg">
