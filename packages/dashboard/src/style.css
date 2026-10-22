@@ -417,27 +417,28 @@ svg .cap {
     to { clip-path: inset(0 0 0 0); }
   }
 
-  /* a line draws left to right (its path has pathLength 1), its area fades in, and the end dot and labels come last */
+  /* a line draws left to right (its path has pathLength 1), its area fades in, and the end dot and labels come last.
+     The timings match the README SVGs' (packages/svg/src/motion.ts), so every chart is done by about 1.15 s. */
   svg.intro .draw {
-    animation: intro-draw 1s ease-out backwards;
+    animation: intro-draw 0.8s ease-out backwards;
   }
 
   svg.intro .fade {
-    animation: intro-fade 0.7s ease-out 0.3s backwards;
+    animation: intro-fade 0.3s ease-out backwards;
   }
 
   svg.intro .wipe {
-    animation: intro-wipe 1s ease-out backwards;
+    animation: intro-wipe 0.6s ease-out backwards;
   }
 
   svg.intro .grow {
     transform-box: fill-box;
     transform-origin: 50% 100%;
-    animation: intro-grow 0.5s ease-out backwards;
+    animation: intro-grow 0.6s ease-out backwards;
   }
 
   svg.intro .late {
-    animation: intro-fade 0.4s ease-out 0.9s backwards;
+    animation: intro-fade 0.3s ease-out 0.85s backwards;
   }
 }
 

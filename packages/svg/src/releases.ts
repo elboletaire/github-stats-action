@@ -109,6 +109,7 @@ export function downloadsPerReleaseChart(all: Dataset, theme: Theme): string {
     ];
   });
 
+  const fading = markers.length > 0 || totalLabel.length > 0;
   const step = Math.max(1, Math.ceil(52 / slot));
   const tagLabels = releases.flatMap((r, i) => (i % step === 0 ? [{ x: box.left + i * slot + slot / 2, value: r.tag }] : []));
 
@@ -119,7 +120,7 @@ export function downloadsPerReleaseChart(all: Dataset, theme: Theme): string {
     ...(staggered ? columns : animated(motion, 'rise', columns)),
     ...animated(motion, 'fade', totalLabel, 'animation-delay:850ms'),
     ...xLabels(tagLabels, box.bottom + 20, theme),
-  ], motion ? ['rise', 'fade'] : []);
+  ], motion ? ['rise', ...(fading ? ['fade' as const] : [])] : []);
 }
 
 const labelY = (box: Box, tier: number): number => box.top - 12 - tier * TIER_HEIGHT;

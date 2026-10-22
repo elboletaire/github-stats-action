@@ -376,6 +376,9 @@ describe('motion', () => {
       for (const { content, path } of files) {
         expect(content, path).toMatch(/<style>[^<]*@keyframes gs-\w+/);
         expect(content, path).toContain('@media (prefers-reduced-motion: reduce)');
+        // the reduced-motion rule names only the chart's classes, and no animation group is left empty
+        expect(content, path).not.toMatch(/\*\{animation/);
+        expect(content, path).not.toMatch(/<g class="gs-\w+"[^>]*><\/g>/);
         expectWellFormed(content);
       }
     }

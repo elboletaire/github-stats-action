@@ -1,7 +1,7 @@
 // Periods: one row per epoch span, with totals, averages and medians per day, and a chart of the averages.
 
 import { animates, type Dataset } from '@github-stats-action/core';
-import { introDelay, playsIntro } from '../intro';
+import { introDelay, introStagger, playsIntro } from '../intro';
 import { esc, f0, f1, plural } from '../format';
 import { quarterMax, ticks } from '../scale';
 import { countedGroups, periodName, periodShort } from '../model';
@@ -86,8 +86,8 @@ function drawPeriods(svg: SVGSVGElement, d: Dataset, animate: boolean): void {
   P.forEach((p, i) => {
     const cx = m.l + slot * (i + 0.5);
     const bw = Math.min(36, (slot - 8) / Math.max(1, groups.length));
-    // the bars grow left to right, the whole run within 400 ms
-    const grow = { class: 'grow', ...introDelay((400 * i) / P.length) };
+    // the bars grow left to right, the whole run within 250 ms
+    const grow = { class: 'grow', ...introDelay(introStagger(i, P.length)) };
     groups.forEach((g, j) => {
       const v = p.avgPerDay[g.name] ?? 0;
       const x = cx - (groups.length * bw) / 2 + j * bw + 1;

@@ -2,7 +2,7 @@
 
 import { animates, type Dataset, type MeasuredDay } from '@github-stats-action/core';
 import { dayAxis, longDate } from '../days';
-import { introDelay, playsIntro } from '../intro';
+import { introDelay, introStagger, playsIntro } from '../intro';
 import { esc, f0, sgn } from '../format';
 import { countedGroups } from '../model';
 import { colorVar } from '../palette';
@@ -81,10 +81,10 @@ function drawMeasured(svg: SVGSVGElement, d: Dataset, series: MeasuredSeries, ha
     svgEl('text', { x: W - 2, y: M.t - 10, 'text-anchor': 'end' }, svg).textContent = 'Docker';
   }
 
-  // the columns grow in day order, the whole run within 400 ms; a stack grows as one, from its baseline
+  // the columns grow in day order, the whole run within 250 ms; a stack grows as one, from its baseline
   for (const [day, e] of entries) {
     const x = cx(day) - bw / 2;
-    const column = svgEl('g', { class: 'grow', ...introDelay((400 * day) / N) }, svg);
+    const column = svgEl('g', { class: 'grow', ...introDelay(introStagger(day, N)) }, svg);
     for (const seg of stackSegments(groups.map((g) => pos(e.groups[g.name])), y)) {
       const group = groups[seg.index];
       if (!group) continue;

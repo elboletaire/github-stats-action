@@ -17,3 +17,8 @@ export function finishLoad(): void {
 export function introDelay(ms: number): { style: string } {
   return { style: `animation-delay:${Math.round(ms)}ms` };
 }
+
+/** When item `i` of a run of `count` starts: the run starts one after another over 250 ms, as in the README SVGs (motion.ts). */
+export function introStagger(i: number, count: number): number {
+  return (250 * i) / Math.max(1, count);
+}

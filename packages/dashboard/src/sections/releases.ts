@@ -1,7 +1,7 @@
 // Downloads per release: one stacked column per release, with epoch markers and a table view.
 
 import { animates, type Dataset, type ReleaseRow } from '@github-stats-action/core';
-import { introDelay, playsIntro } from '../intro';
+import { introDelay, introStagger, playsIntro } from '../intro';
 import { esc, f0, f1, isoDay } from '../format';
 import { niceMax, ticks } from '../scale';
 import { countedGroups } from '../model';
@@ -70,8 +70,8 @@ function drawReleases(svg: SVGSVGElement, d: Dataset, animate: boolean): void {
   R.forEach((r, i) => {
     const x = M.l + slot * i + (slot - bw) / 2;
     const segments = stackSegments(groups.map((g) => r.groups[g.name] ?? 0), y);
-    // the columns grow left to right, the whole run within 400 ms; a stack grows as one, from its baseline
-    const column = svgEl('g', { class: 'grow', ...introDelay((400 * i) / R.length) }, svg);
+    // the columns grow left to right, the whole run within 250 ms; a stack grows as one, from its baseline
+    const column = svgEl('g', { class: 'grow', ...introDelay(introStagger(i, R.length)) }, svg);
     for (const seg of segments) {
       const group = groups[seg.index];
       if (!group) continue;

@@ -14,7 +14,10 @@ const RULES: Record<Effect, string> = {
 
 /** The `<style>` for the effects a chart uses: their classes and keyframes, and no motion under reduced motion. */
 export function motionCss(effects: Effect[]): string {
-  return [...new Set(effects)].map((effect) => RULES[effect]).join('') + '@media (prefers-reduced-motion: reduce){*{animation:none!important}}';
+  const classes = [...new Set(effects)];
+  // only the chart's own classes, so an inlined SVG keeps the page's other animations
+  const still = classes.map((effect) => `.gs-${effect}`).join(',');
+  return classes.map((effect) => RULES[effect]).join('') + `@media (prefers-reduced-motion: reduce){${still}{animation:none!important}}`;
 }
 
 /** Up to this many items of a run each rise on their own, staggered; past it the stagger is under a millisecond each, so the run rises as one group. */
@@ -26,8 +29,8 @@ export const staggerDelay = (i: number, count: number): string => {
   return ms ? `animation-delay:${ms}ms` : '';
 };
 
-/** `children` in a group that carries the effect's class and an optional inline delay; unchanged when the chart stays still. */
+/** `children` in a group that carries the effect's class and an optional inline delay; unchanged when the chart stays still or there is nothing to animate. */
 export function animated(on: boolean, effect: Effect, children: string[], delay = ''): string[] {
-  if (!on) return children;
+  if (!on || !children.length) return children;
   return [`<g class="gs-${effect}"${delay ? ` style="${delay}"` : ''}>${children.join('')}</g>`];
 }
