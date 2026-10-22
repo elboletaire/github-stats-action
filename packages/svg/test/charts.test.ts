@@ -1,8 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { Dataset, MeasuredDay, ReleaseRow } from '@github-stats-action/core';
+import { buildNpmData, type Dataset, type MeasuredDay, type ReleaseRow } from '@github-stats-action/core';
 import { renderCharts } from '../src/index';
+import { buckets } from '../src/motion';
 import { niceTicks } from '../src/svg';
 
 const fixture = async (): Promise<Dataset> =>
@@ -347,4 +348,132 @@ describe('chart options', () => {
     }
   });
 
+});
+
+describe('motion', () => {
+  const npm = () =>
+    buildNpmData(
+      Array.from({ length: 3 }, (_, i) => ({
+        label: `pkg-${i}`,
+        series: {
+          schema: 1 as const,
+          package: `pkg-${i}`,
+          days: Array.from({ length: 60 }, (_, k) => ({ date: new Date(Date.UTC(2026, 6, 1) + k * 86_400_000).toISOString().slice(0, 10), downloads: ((k * (i + 2)) % 11) + 1 })),
+        },
+      })),
+    )!;
+  const measured = (dataset: Dataset): Dataset => ({ ...dataset, measuredDaily: Array.from({ length: 20 }, (_, i) => day(i, { app: i % 3, cli: 10 + i })) });
+  /** The fixture with an npm series, and the same with measured days: together every chart and both downloads modes. */
+  const sets = async (charts: Partial<NonNullable<Dataset['charts']>> = {}): Promise<ReturnType<typeof renderCharts>[]> => {
+    const dataset = { ...(await fixture()), npm: npm(), charts: { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {}, ...charts } };
+    return [renderCharts(dataset), renderCharts(measured(dataset))];
+  };
+  /** The file minus its motion: the style, the animation groups, the path length and the line breaks between marks. */
+  const still = (svg: string): string =>
+    svg.replace(/<style>.*?<\/style>/, '').replace(/<g class="gs-\w+"(?: style="[^"]*")?>/g, '').replace(/<\/g>/g, '').replace(/ pathLength="1"/g, '').replace(/\n/g, '');
+
+  it('plays every chart once on load, with keyframes and a reduced-motion rule', async () => {
+    for (const files of await sets()) {
+      for (const { content, path } of files) {
+        expect(content, path).toMatch(/<style>[^<]*@keyframes gs-\w+/);
+        expect(content, path).toContain('@media (prefers-reduced-motion: reduce)');
+        // the reduced-motion rule names only the chart's classes, and no animation group is left empty
+        expect(content, path).not.toMatch(/\*\{animation/);
+        expect(content, path).not.toMatch(/<g class="gs-\w+"[^>]*><\/g>/);
+        expectWellFormed(content);
+      }
+    }
+  });
+
+  it('gives each chart its own effect, and the downloads chart one for each mode', async () => {
+    const [estimated, measuredFiles] = await sets();
+    expect(chart(estimated!, 'charts/stars-light.svg')).toContain('class="gs-draw"');
+    expect(chart(estimated!, 'charts/downloads-per-day-light.svg')).toContain('class="gs-wipe"');
+    expect(chart(measuredFiles!, 'charts/downloads-per-day-light.svg')).toContain('class="gs-rise"');
+    expect(chart(estimated!, 'charts/downloads-per-release-light.svg')).toContain('class="gs-rise"');
+    expect(chart(estimated!, 'charts/npm-downloads-light.svg')).toContain('class="gs-rise"');
+  });
+
+  it('pops each stars dot in as the line reaches it, and the end dot once the line is drawn', async () => {
+    const [files] = await sets();
+    const svg = chart(files!, 'charts/stars-light.svg');
+    // each dot's group, with its delay if it has one, and its x
+    const dots = [...svg.matchAll(/<g class="gs-pop"(?: style="animation-delay:(\d+)ms")?><circle cx="([\d.]+)"/g)].map((m) => ({ ms: m[1] === undefined ? 0 : Number(m[1]), x: Number(m[2]) }));
+    expect(dots.length).toBeGreaterThan(1);
+    // the first dot is reached at once, and later dots are reached later, further along the line
+    expect(dots[0]!.ms).toBe(0);
+    expect(svg).not.toContain('<g class="gs-pop" style="animation-delay:0ms">');
+    for (let i = 1; i < dots.length; i++) {
+      expect(dots[i]!.x).toBeGreaterThan(dots[i - 1]!.x);
+      expect(dots[i]!.ms).toBeGreaterThanOrEqual(dots[i - 1]!.ms);
+    }
+    expect(dots.at(-1)!.ms).toBeLessThan(1600);
+    expect(svg).toContain('<g class="gs-fade" style="animation-delay:1600ms"><circle');
+  });
+
+  it('adds no style, class, animation or path length when charts.animate is false', async () => {
+    for (const files of await sets({ animate: false })) {
+      for (const { content, path } of files) expect(content, path).not.toMatch(/<style|class="|animation|pathLength/);
+    }
+  });
+
+  it('lets a chart switch its own motion off over the global setting', async () => {
+    const [files] = await sets({ stars: { animate: false } });
+    expect(chart(files!, 'charts/stars-light.svg')).not.toContain('<style');
+    expect(chart(files!, 'charts/downloads-per-release-light.svg')).toContain('<style');
+    const [mixed] = await sets({ animate: false, stars: { animate: true } });
+    expect(chart(mixed!, 'charts/stars-light.svg')).toContain('class="gs-draw"');
+    expect(chart(mixed!, 'charts/npm-downloads-light.svg')).not.toContain('<style');
+  });
+
+  /** The filled paths of a chart, one entry per segment and sorted: a chart may join or split its paths and draw the same shapes. */
+  const shapes = (svg: string): string[] =>
+    [...svg.matchAll(/<path d="([^"]*)" fill="([^"]*)"\/>/g)].flatMap((m) => m[1]!.split(/(?=M)/).map((segment) => `${m[2]} ${segment}`)).sort();
+
+  /** The file minus its paths of bars and areas, so what is left around them (axes, labels, legend) is compared on its own. */
+  const bare = (svg: string): string => still(svg).replace(/<path d="[^"]*" fill="[^"]*"\/>/g, '');
+
+  it('only wraps the marks and adds the style, so the end state is the still chart', async () => {
+    const [moving] = await sets();
+    const [stillFiles] = await sets({ animate: false });
+    for (const { content, path } of moving!) {
+      if (path.includes('npm-downloads')) {
+        // the npm weeks are one path per package when still, and one per bucket and package when moving: the same shapes, and the same chart around them
+        expect(shapes(content), path).toEqual(shapes(chart(stillFiles!, path)));
+        expect(bare(content), path).toBe(bare(chart(stillFiles!, path)));
+      } else expect(still(content), path).toBe(still(chart(stillFiles!, path)));
+    }
+  });
+
+  it('cuts a long run into 60 even buckets of adjacent items', () => {
+    expect(buckets(60)).toHaveLength(60);
+    expect(buckets(61)).toHaveLength(60);
+    expect(buckets(61).flat()).toEqual(Array.from({ length: 61 }, (_, i) => i));
+    expect(Math.max(...buckets(61).map((b) => b.length))).toBe(2);
+    expect(buckets(1000)).toHaveLength(60);
+    expect(buckets(0)).toEqual([]);
+  });
+
+  it('rises each measured bar on its own up to 60 days, and in at most 60 buckets past that', async () => {
+    const dataset = await fixture();
+    const rises = (count: number): number => {
+      const measuredDaily = Array.from({ length: count }, (_, i) => day(i, { app: 1, cli: 2 }));
+      return chart(renderCharts({ ...dataset, measuredDaily }), 'charts/downloads-per-day-light.svg').match(/class="gs-rise"/g)?.length ?? 0;
+    };
+    expect(rises(60)).toBe(60);
+    expect(rises(61)).toBe(60);
+    expect(rises(121)).toBe(60);
+    expect(rises(1000)).toBe(60);
+  });
+
+  it('rises each release column on its own up to 60 releases, and in at most 60 buckets past that', async () => {
+    const dataset = await fixture();
+    const rises = (count: number): number => {
+      const releases = Array.from({ length: count }, (_, i) => release(`v${i}.0.0`, { app: 1, cli: 2 }));
+      return chart(renderCharts({ ...dataset, releases, epochs: [] }), 'charts/downloads-per-release-light.svg').match(/class="gs-rise"/g)?.length ?? 0;
+    };
+    expect(rises(60)).toBe(60);
+    expect(rises(61)).toBe(60);
+    expect(rises(1000)).toBe(60);
+  });
 });

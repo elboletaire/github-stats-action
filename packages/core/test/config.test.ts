@@ -2,7 +2,7 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ConfigError, DEFAULT_CONFIG, loadConfig, loadConfigFile, parseConfig } from '../src/config';
+import { ConfigError, DEFAULT_CONFIG, animates, loadConfig, loadConfigFile, parseConfig } from '../src/config';
 
 const FIXTURE = new URL('../../../fixtures/manga-downloader.stats.yml', import.meta.url);
 const EXAMPLE = new URL('../../../examples/stats.yml', import.meta.url);
@@ -142,6 +142,50 @@ charts:
       'downloads-per-release': {},
       'npm-downloads': {},
     });
+  });
+
+  it('reads the global animate switch and an animate per chart', () => {
+    const config = parseConfig(`
+charts:
+  animate: false
+  stars: { animate: true }
+`);
+    expect(config.charts).toEqual({
+      titles: true,
+      animate: false,
+      stars: { animate: true },
+      'downloads-per-day': {},
+      'downloads-per-release': {},
+      'npm-downloads': {},
+    });
+  });
+
+  it('leaves animate unset by default, so the helper supplies true', () => {
+    expect(parseConfig('').charts).not.toHaveProperty('animate');
+  });
+
+  it('rejects an animate that is not true or false', () => {
+    expect(() => parseConfig('charts: { animate: "no" }')).toThrow('charts.animate must be true or false');
+    expect(() => parseConfig('charts: { stars: { animate: 0 } }')).toThrow('charts.stars.animate must be true or false');
+  });
+
+  it('gives animates() the chart override, then the global switch, then true', () => {
+    const charts = parseConfig(`
+charts:
+  animate: false
+  stars: { animate: true }
+`).charts;
+    expect(animates(charts, 'stars')).toBe(true);
+    expect(animates(charts, 'downloads-per-day')).toBe(false);
+    expect(animates(parseConfig('').charts, 'stars')).toBe(true);
+    expect(animates(undefined, 'stars')).toBe(true);
+  });
+
+  it('applies only the global switch when no chart is named', () => {
+    const charts = parseConfig('charts: { animate: false, stars: { animate: true } }').charts;
+    expect(animates(charts)).toBe(false);
+    expect(animates(parseConfig('charts: { stars: { animate: false } }').charts)).toBe(true);
+    expect(animates(undefined)).toBe(true);
   });
 
   it('rejects the spacing option, which the stars chart no longer has', () => {

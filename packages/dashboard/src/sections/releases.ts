@@ -1,6 +1,7 @@
 // Downloads per release: one stacked column per release, with epoch markers and a table view.
 
-import type { Dataset, ReleaseRow } from '@github-stats-action/core';
+import { animates, type Dataset, type ReleaseRow } from '@github-stats-action/core';
+import { introDelay, introStagger, playsIntro } from '../intro';
 import { esc, f0, f1, isoDay } from '../format';
 import { niceMax, ticks } from '../scale';
 import { countedGroups } from '../model';
@@ -46,14 +47,15 @@ export function releases(d: Dataset): Section {
     countersNote(d) + '</details>',
   );
   const svg = el.querySelector('svg') as SVGSVGElement;
-  return { el, redraw: () => drawReleases(svg, d) };
+  const animate = animates(d.charts, 'downloads-per-release');
+  return { el, redraw: () => drawReleases(svg, d, animate) };
 }
 
-function drawReleases(svg: SVGSVGElement, d: Dataset): void {
+function drawReleases(svg: SVGSVGElement, d: Dataset, animate: boolean): void {
   const groups = countedGroups(d);
   const R = d.releases;
   const W = widthOf(svg, M.l + M.r + MIN_SLOT * R.length);
-  resetSvg(svg, W, H);
+  resetSvg(svg, W, H, playsIntro(animate));
   const mx = niceMax(Math.max(0, ...R.map((r) => groupTotal(r, groups))));
   const y = (v: number): number => M.t + (H - M.t - M.b) * (1 - v / mx);
   const slot = (W - M.l - M.r) / R.length;
@@ -68,11 +70,13 @@ function drawReleases(svg: SVGSVGElement, d: Dataset): void {
   R.forEach((r, i) => {
     const x = M.l + slot * i + (slot - bw) / 2;
     const segments = stackSegments(groups.map((g) => r.groups[g.name] ?? 0), y);
+    // the columns grow left to right, the whole run within 500 ms; a stack grows as one, from its baseline
+    const column = svgEl('g', { class: 'grow', ...introDelay(introStagger(i, R.length)) }, svg);
     for (const seg of segments) {
       const group = groups[seg.index];
       if (!group) continue;
-      if (seg.top) svgEl('path', { d: roundedTop(x, seg.y, bw, seg.height, 4), fill: colorVar(group) }, svg);
-      else svgEl('rect', { x, y: seg.y, width: bw, height: seg.height, fill: colorVar(group) }, svg);
+      if (seg.top) svgEl('path', { d: roundedTop(x, seg.y, bw, seg.height, 4), fill: colorVar(group) }, column);
+      else svgEl('rect', { x, y: seg.y, width: bw, height: seg.height, fill: colorVar(group) }, column);
     }
     if (i % every === 0) {
       const label = flat
@@ -101,12 +105,12 @@ function drawReleases(svg: SVGSVGElement, d: Dataset): void {
     )[0];
     const capY = M.t - 12 - (spot?.tier ?? 0) * TIER_H;
     if (i > 0) {
-      svgEl('line', { x1: x, x2: x, y1: capY, y2: y(0), class: 'sep' }, svg);
-      svgEl('circle', { cx: x, cy: capY, r: 2.5, class: 'cap' }, svg);
+      svgEl('line', { x1: x, x2: x, y1: capY, y2: y(0), class: 'sep late' }, svg);
+      svgEl('circle', { cx: x, cy: capY, r: 2.5, class: 'cap late' }, svg);
     }
     if (!spot) return;
     placed.push({ from: spot.from, to: spot.to, tier: spot.tier });
-    svgEl('text', { x: spot.x, y: capY + 4, class: 'ink', 'text-anchor': spot.anchor }, svg).textContent = label;
+    svgEl('text', { x: spot.x, y: capY + 4, class: 'ink late', 'text-anchor': spot.anchor }, svg).textContent = label;
   });
 }
 

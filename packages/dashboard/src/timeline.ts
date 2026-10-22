@@ -5,6 +5,7 @@ import { quarterMax, ticks } from './scale';
 import { type DayAxis, xTicks } from './days';
 import { showTip, tipOn } from './tooltip';
 import { fadeFill, gridLines, resetSvg, svgEl, widthOf } from './svg';
+import { playsIntro } from './intro';
 
 export interface TimelineSeries {
   label: string;
@@ -24,6 +25,8 @@ export interface TimelineOptions {
   unit: { one: string; other: string };
   /** Labels the first day's month and year, and leaves out a tick that would run into it. */
   startLabel?: boolean;
+  /** Whether the chart's config animates it on load. */
+  animate: boolean;
 }
 
 const HEIGHT = 240;
@@ -35,7 +38,7 @@ export function drawTimeline(svg: SVGSVGElement, o: TimelineOptions): void {
   const W = widthOf(svg);
   const H = HEIGHT;
   const m = { l: 44, r: 16, t: 16, b: 28 };
-  resetSvg(svg, W, H);
+  resetSvg(svg, W, H, playsIntro(o.animate));
   const first = o.xs[0] ?? 0;
   const last = Math.max(first + 1, o.xs[o.xs.length - 1] ?? first + 1);
   const pw = W - m.l - m.r;
@@ -74,16 +77,16 @@ export function drawTimeline(svg: SVGSVGElement, o: TimelineOptions): void {
         const [x1] = pts[pts.length - 1]!.split(',');
         return `M${x0},${y(0).toFixed(1)}L${run}L${x1},${y(0).toFixed(1)}Z`;
       }).join('');
-      svgEl('path', { d: area, fill: fadeFill(svg, `${o.id}-fade-${j}`, s.color) }, svg);
+      svgEl('path', { d: area, fill: fadeFill(svg, `${o.id}-fade-${j}`, s.color), class: 'fade' }, svg);
     }
-    svgEl('path', { d, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+    svgEl('path', { d, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', pathLength: 1, class: 'draw' }, svg);
     const lastK = s.values.length - 1;
     const lastV = s.values[lastK];
     if (single && lastV != null) {
       const ex = x(o.xs[lastK] ?? last);
       const ey = y(lastV);
-      svgEl('circle', { cx: ex, cy: ey, r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2 }, svg);
-      svgEl('text', { x: ex - 8, y: Math.max(m.t + 10, ey - 10), 'text-anchor': 'end', class: 'strong' }, svg).textContent = f0(lastV);
+      svgEl('circle', { cx: ex, cy: ey, r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'late' }, svg);
+      svgEl('text', { x: ex - 8, y: Math.max(m.t + 10, ey - 10), 'text-anchor': 'end', class: 'strong late' }, svg).textContent = f0(lastV);
     }
   });
 

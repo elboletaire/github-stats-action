@@ -1,6 +1,6 @@
 // Traffic: views and clones per day, with referrers and popular paths. Shown only when the dataset has traffic.
 
-import type { Dataset, TrafficDay } from '@github-stats-action/core';
+import { animates, type Dataset, type TrafficDay } from '@github-stats-action/core';
 import { dayAxis } from '../days';
 import { esc, f0, isoDay } from '../format';
 import { drawTimeline } from '../timeline';
@@ -20,6 +20,7 @@ export function traffic(d: Dataset): Section | null {
   const dates = [...new Set(all.map((x) => x.date))].sort();
   const axis = dayAxis(first ?? '1970-01-01');
   const xs = dates.map((date) => axis.indexOf(Date.parse(`${date}T00:00:00Z`)));
+  const animate = animates(d.charts);
 
   const daily = `<thead><tr><th>Day</th><th>Views</th><th>Unique visitors</th><th>Clones</th><th>Unique cloners</th></tr></thead><tbody>` +
     dates.map((date) => {
@@ -52,6 +53,7 @@ export function traffic(d: Dataset): Section | null {
         id: 'traffic',
         xs,
         axis,
+        animate,
         unit: { one: 'per day', other: 'per day' },
         series: [
           { label: 'Views', color: VIEWS, values: dates.map((date) => views.get(date)?.count ?? null) },

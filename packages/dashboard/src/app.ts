@@ -2,6 +2,7 @@
 
 import type { Dataset } from '@github-stats-action/core';
 import { esc, isoDay } from './format';
+import { finishLoad } from './intro';
 import { countedGroups } from './model';
 import { estimated } from './sections/estimated';
 import { kpis } from './sections/kpis';
@@ -44,6 +45,8 @@ export function mount(root: HTMLElement, d: Dataset, choice?: RepoChoice): void 
   root.replaceChildren(header(d, choice), ...shown.map((s) => s.el), footer(d));
   current = shown;
   for (const s of shown) s.redraw?.();
+  // the intro plays on the first mount only; the repo switcher and resizes redraw without it
+  finishLoad();
 }
 
 /** Redraws the mounted charts for the current width. */

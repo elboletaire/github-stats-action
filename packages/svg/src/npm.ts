@@ -2,6 +2,7 @@
 // stacked by package. One path per package keeps the file small enough for a README.
 
 import type { Dataset, NpmData } from '@github-stats-action/core';
+import { animates } from '@github-stats-action/core';
 import {
   barWidth,
   dayOf,
@@ -29,6 +30,7 @@ import {
   type Key,
   type Theme,
 } from './svg';
+import { animated, buckets, staggerDelay } from './motion';
 import { windowed } from './window';
 import { INK, TYPE } from '@github-stats-action/core/theme';
 
@@ -73,6 +75,7 @@ export function npmDownloadsChart(all: Dataset, theme: Theme): string {
   const npm = dataset.npm;
   if (!npm) throw new Error('npmDownloadsChart needs dataset.npm');
   const titled = showTitle(dataset, 'npm-downloads');
+  const motion = animates(dataset.charts, 'npm-downloads');
   const keys: Key[] = npm.packages.map((pkg) => ({ label: pkg.label, color: seriesColor(theme, pkg.color) }));
   // the legend wraps under the note; the plot starts below its last row
   const rows = keys.length > 1 ? legendRows(keys, WIDTH - 2 * PAD) : [];
@@ -108,14 +111,26 @@ export function npmDownloadsChart(all: Dataset, theme: Theme): string {
 
   const slot = (box.right - box.left) / count;
   const width = barWidth(slot);
-  const byPackage: string[][] = npm.packages.map(() => []);
+  // the segments of each week, bottom to top: when still, one path per package over all weeks; when moving, one group per bucket of weeks, with one path per package
+  const weeks: { index: number; d: string }[][] = Array.from({ length: count }, () => []);
   for (let w = 0; w < count; w++) {
     const x = box.left + w * slot + (slot - width) / 2;
-    for (const { index, d } of stackBars(x, width, yOf, sums.map((row) => row[w] ?? 0))) byPackage[index]!.push(d);
+    weeks[w] = stackBars(x, width, yOf, sums.map((row) => row[w] ?? 0));
   }
-  const bars = npm.packages.flatMap((pkg, p) =>
-    byPackage[p]!.length ? [`<path d="${byPackage[p]!.join('')}" fill="${seriesColor(theme, pkg.color)}"/>`] : [],
-  );
+  const pathOf = (p: number, segments: { index: number; d: string }[]): string => {
+    const d = segments.filter((s) => s.index === p).map((s) => s.d).join('');
+    return d ? `<path d="${d}" fill="${seriesColor(theme, npm.packages[p]!.color)}"/>` : '';
+  };
+  const bars = motion
+    ? buckets(count).flatMap((bucket) =>
+        animated(
+          true,
+          'rise',
+          npm.packages.map((_, p) => pathOf(p, bucket.flatMap((w) => weeks[w]!))).filter(Boolean),
+          staggerDelay(bucket[0]!, count),
+        ),
+      )
+    : npm.packages.map((_, p) => pathOf(p, weeks.flat())).filter(Boolean);
 
   const label = timeLabel(count * WEEK);
   const picks = sample(count);
@@ -132,5 +147,5 @@ export function npmDownloadsChart(all: Dataset, theme: Theme): string {
     ...valueAxis(ticks, yOf, box, theme),
     ...xLabels(labels, box.bottom + 20, theme),
     ...bars,
-  ]);
+  ], motion ? ['rise'] : []);
 }

@@ -1,6 +1,7 @@
 // Periods: one row per epoch span, with totals, averages and medians per day, and a chart of the averages.
 
-import type { Dataset } from '@github-stats-action/core';
+import { animates, type Dataset } from '@github-stats-action/core';
+import { introDelay, introStagger, playsIntro } from '../intro';
 import { esc, f0, f1, plural } from '../format';
 import { quarterMax, ticks } from '../scale';
 import { countedGroups, periodName, periodShort } from '../model';
@@ -53,12 +54,13 @@ export function periods(d: Dataset): Section {
   );
   const svg = el.querySelector('svg') as SVGSVGElement;
   const box = el.querySelector('.scroll') as HTMLElement;
+  const animate = animates(d.charts);
   box.addEventListener('scroll', () => fadeEdge(box));
   return {
     el,
     redraw: () => {
       fadeEdge(box);
-      drawPeriods(svg, d);
+      drawPeriods(svg, d, animate);
     },
   };
 }
@@ -68,13 +70,13 @@ function fadeEdge(box: HTMLElement): void {
   box.classList.toggle('more', box.scrollWidth - box.clientWidth - box.scrollLeft > 1);
 }
 
-function drawPeriods(svg: SVGSVGElement, d: Dataset): void {
+function drawPeriods(svg: SVGSVGElement, d: Dataset, animate: boolean): void {
   const groups = countedGroups(d);
   const P = d.periods;
   const W = widthOf(svg);
   const H = 230;
   const m = { l: 44, r: 16, t: 26, b: 58 };
-  resetSvg(svg, W, H);
+  resetSvg(svg, W, H, playsIntro(animate));
   const mx = quarterMax(Math.max(0, ...P.flatMap((p) => groups.map((g) => p.avgPerDay[g.name] ?? 0))));
   const y = (v: number): number => m.t + (H - m.t - m.b) * (1 - v / mx);
   const slot = (W - m.l - m.r) / Math.max(1, P.length);
@@ -84,12 +86,14 @@ function drawPeriods(svg: SVGSVGElement, d: Dataset): void {
   P.forEach((p, i) => {
     const cx = m.l + slot * (i + 0.5);
     const bw = Math.min(36, (slot - 8) / Math.max(1, groups.length));
+    // the bars grow left to right, the whole run within 500 ms
+    const grow = { class: 'grow', ...introDelay(introStagger(i, P.length)) };
     groups.forEach((g, j) => {
       const v = p.avgPerDay[g.name] ?? 0;
       const x = cx - (groups.length * bw) / 2 + j * bw + 1;
       const h = y(0) - y(v);
       if (h <= 0) return;
-      const bar = svgEl('path', { d: roundedTop(x, y(v), bw - 2, h, 4), fill: colorVar(g) }, svg);
+      const bar = svgEl('path', { d: roundedTop(x, y(v), bw - 2, h, 4), fill: colorVar(g), ...grow }, svg);
       svgEl('text', { x: x + (bw - 2) / 2, y: y(v) - 6, 'text-anchor': 'middle', class: 'ink' }, svg).textContent = f1(v);
       tipOn(bar, (ev) => showTip(
         `<b>${esc(periodName(p, d.epochs))}</b><br>${esc(g.label)}: ${f1(v)}/day avg (est.)<br>${f0(p.groups[g.name] ?? 0)} downloads over ${p.days.toFixed(1)} ${p.days === 1 ? 'day' : 'days'}`,

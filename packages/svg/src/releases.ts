@@ -2,7 +2,7 @@
 // capped with a dot, their label beside the cap, placed so the labels never overlap.
 
 import type { Dataset } from '@github-stats-action/core';
-import { TYPE } from '@github-stats-action/core';
+import { TYPE, animates } from '@github-stats-action/core';
 import {
   barWidth,
   compact,
@@ -30,6 +30,7 @@ import {
   type Key,
   type Theme,
 } from './svg';
+import { LATE_MS, animated, animatedRun } from './motion';
 import { windowed } from './window';
 
 /** The plot starts lower when there are epoch labels to make room for above it. */
@@ -52,6 +53,7 @@ export function downloadsPerReleaseChart(all: Dataset, theme: Theme): string {
   const note = 'One column per release, stacked by group';
   const { releases } = dataset;
   const c = ink(theme);
+  const motion = animates(dataset.charts, 'downloads-per-release');
   const titled = showTitle(dataset, 'downloads-per-release');
   const box = plotBox(
     dataset.epochs.some((_, e) => releases.some((r) => r.epoch === e)),
@@ -69,9 +71,9 @@ export function downloadsPerReleaseChart(all: Dataset, theme: Theme): string {
 
   const slot = (box.right - box.left) / releases.length;
   const width = barWidth(slot);
-  const columns = releases.flatMap((r, i) => {
+  const columns = releases.map((r, i) => {
     const x = box.left + i * slot + (slot - width) / 2;
-    return stack(
+    const column = stack(
       x,
       width,
       yOf,
@@ -80,6 +82,7 @@ export function downloadsPerReleaseChart(all: Dataset, theme: Theme): string {
         return { value, color: seriesColor(theme, g.color), title: `${r.tag}, ${g.label}: ${value}` };
       }),
     );
+    return column;
   });
 
   // the latest release is labelled with its total, so the chart ends on a number
@@ -105,17 +108,18 @@ export function downloadsPerReleaseChart(all: Dataset, theme: Theme): string {
     ];
   });
 
+  const fading = markers.length > 0 || totalLabel.length > 0;
   const step = Math.max(1, Math.ceil(52 / slot));
   const tagLabels = releases.flatMap((r, i) => (i % step === 0 ? [{ x: box.left + i * slot + slot / 2, value: r.tag }] : []));
 
   return svgDocument(theme, title, `${title}: ${plural(releases.length, 'release')}, stacked by group.`, [
     ...heading(title, note, theme, keys, titled),
     ...valueAxis(ticks, yOf, box, theme),
-    ...markers,
-    ...columns,
-    ...totalLabel,
+    ...animated(motion, 'fade', markers, `animation-delay:${LATE_MS}ms`),
+    ...animatedRun(motion, 'rise', columns),
+    ...animated(motion, 'fade', totalLabel, `animation-delay:${LATE_MS}ms`),
     ...xLabels(tagLabels, box.bottom + 20, theme),
-  ]);
+  ], motion ? ['rise', ...(fading ? ['fade' as const] : [])] : []);
 }
 
 const labelY = (box: Box, tier: number): number => box.top - 12 - tier * TIER_HEIGHT;

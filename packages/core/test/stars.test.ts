@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { StarPoint } from '../src/types';
-import { monotoneCurve, monotonePath, sampleStars, STAR_SAMPLES } from '../src/stars';
+import { drawShares, monotoneCurve, monotonePath, sampleStars, STAR_SAMPLES } from '../src/stars';
 
 const DAY = 86_400_000;
 const dateOf = (i: number, from = '2024-01-01'): string => new Date(Date.parse(from) + i * DAY).toISOString().slice(0, 10);
@@ -180,5 +180,28 @@ describe('monotoneCurve', () => {
 
   it('writes the path as a move and one cubic per segment, one decimal', () => {
     expect(monotonePath([[0, 0], [30, 10]])).toBe('M0.0 0.0C10.0 3.3 20.0 6.7 30.0 10.0');
+  });
+});
+
+describe('drawShares', () => {
+  it('spreads evenly spaced points on a straight line evenly along the draw', () => {
+    expect(drawShares([[0, 0], [5, 0], [10, 0]])).toEqual([0, 0.5, 1]);
+  });
+
+  it('gives a single point no share to wait for', () => {
+    expect(drawShares([[3, 4]])).toEqual([0]);
+  });
+
+  it('gives all zeros for identical points, with no NaN', () => {
+    expect(drawShares([[2, 2], [2, 2], [2, 2]])).toEqual([0, 0, 0]);
+  });
+
+  it('gives a steep segment more than its share of the width', () => {
+    // the last segment spans half the width but climbs 90 units, so it takes most of the draw
+    const shares = drawShares([[0, 0], [10, 0], [20, 90]]);
+    const steep = shares[2]! - shares[1]!;
+    expect(steep).toBeGreaterThan(0.5);
+    expect(steep).toBeCloseTo(Math.hypot(10, 90) / (10 + Math.hypot(10, 90)), 5);
+    expect(shares[2]).toBe(1);
   });
 });

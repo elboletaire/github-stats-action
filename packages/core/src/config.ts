@@ -42,6 +42,8 @@ export interface NpmRule {
 /** Options of one README chart; `title` overrides `charts.titles` for that chart. */
 export interface ChartConfig {
   title?: boolean;
+  /** Animates the chart once on load; overrides `charts.animate` for this chart. */
+  animate?: boolean;
   /** The window's first day, YYYY-MM-DD. Exclusive with `range` and `last`. */
   from?: string;
   /** The window's length counted back from the latest day: `30d`, `6m` or `1y`. */
@@ -53,6 +55,8 @@ export interface ChartConfig {
 export interface ChartsConfig {
   /** Shows the visible title of the README charts; the dashboard keeps its headings. */
   titles: boolean;
+  /** Animates every chart once on load, on the README SVGs and the dashboard's first draw; default true. */
+  animate?: boolean;
   stars: ChartConfig;
   'downloads-per-day': ChartConfig;
   'downloads-per-release': ChartConfig;
@@ -60,7 +64,7 @@ export interface ChartsConfig {
 }
 
 /** The charts the README SVGs are made of, by config key (the file name is the key). */
-export type ChartName = Exclude<keyof ChartsConfig, 'titles'>;
+export type ChartName = Exclude<keyof ChartsConfig, 'titles' | 'animate'>;
 
 export interface StatsConfig {
   /** Shows release downloads in every output; false hides them even when the assets have counts. */
@@ -238,9 +242,10 @@ function parseRange(value: unknown, path: string): string {
   throw new ConfigError(`${path} must be a length such as 30d, 6m or 1y`);
 }
 
-/** A chart's options: its title, and the window it covers (`from` or `range`, or `last` for releases). */
+/** A chart's options: its title and animation, and the window it covers (`from` or `range`, or `last` for releases). */
 function parseChart(sub: Obj, chart: ChartName, path: string): ChartConfig {
   const title = optionalBoolean(sub, 'title', path);
+  const animate = optionalBoolean(sub, 'animate', path);
   const hasFrom = sub.from !== undefined;
   const hasRange = sub.range !== undefined;
   const hasLast = sub.last !== undefined;
@@ -252,6 +257,7 @@ function parseChart(sub: Obj, chart: ChartName, path: string): ChartConfig {
   }
   return {
     ...(title === undefined ? {} : { title }),
+    ...(animate === undefined ? {} : { animate }),
     ...(hasFrom ? { from: parseFrom(sub.from, `${path}.from`) } : {}),
     ...(hasRange ? { range: parseRange(sub.range, `${path}.range`) } : {}),
     ...(hasLast ? { last: sub.last as number } : {}),
@@ -260,14 +266,16 @@ function parseChart(sub: Obj, chart: ChartName, path: string): ChartConfig {
 
 function parseCharts(value: unknown): ChartsConfig {
   const obj = expectObject(value, 'charts');
-  checkKeys(obj, ['titles', 'stars', 'downloads-per-day', 'downloads-per-release', 'npm-downloads'], 'charts');
+  checkKeys(obj, ['titles', 'animate', 'stars', 'downloads-per-day', 'downloads-per-release', 'npm-downloads'], 'charts');
   const section = (chart: ChartName): ChartConfig => {
     const sub = obj[chart] === undefined ? {} : expectObject(obj[chart], `charts.${chart}`);
-    checkKeys(sub, ['title', 'from', 'range', 'last'], `charts.${chart}`);
+    checkKeys(sub, ['title', 'animate', 'from', 'range', 'last'], `charts.${chart}`);
     return parseChart(sub, chart, `charts.${chart}`);
   };
+  const animate = optionalBoolean(obj, 'animate', 'charts');
   return {
     titles: optionalBoolean(obj, 'titles', 'charts') ?? true,
+    ...(animate === undefined ? {} : { animate }),
     stars: section('stars'),
     'downloads-per-day': section('downloads-per-day'),
     'downloads-per-release': section('downloads-per-release'),
@@ -309,6 +317,14 @@ function parseNpm(value: unknown): NpmRule[] {
   }
   unique(rules.map((r) => npmSlug(r.package)), 'npm package');
   return rules;
+}
+
+/**
+ * Whether a chart animates on load: its own `animate`, else the global one, else yes. Without a
+ * chart name (the dashboard's sections with no README chart) only the global one applies.
+ */
+export function animates(charts: ChartsConfig | undefined, name?: ChartName): boolean {
+  return (name ? charts?.[name]?.animate : undefined) ?? charts?.animate ?? true;
 }
 
 /** Parses and validates the YAML text; an empty document gives the defaults. */
