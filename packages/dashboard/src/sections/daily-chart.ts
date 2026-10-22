@@ -109,9 +109,10 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
   };
   syncPresets();
 
-  // the chart: the window's lines, a crosshair and a tooltip per day
-  // the series wipe in one after another within 400 ms; a dot or label lands once its series' 1 s wipe is done
+  // the series wipe in one after another within 400 ms; a dot or label lands once its series' wipe (1 s, as in style.css) is done
   const wipeAt = (j: number): number => (400 * j) / series.length;
+
+  // the chart: the window's lines, a crosshair and a tooltip per day
   const drawChart = (): void => {
     const W = widthOf(chart);
     const H = 280;
