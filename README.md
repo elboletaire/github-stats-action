@@ -2,6 +2,51 @@
 
 A GitHub Action that keeps the history GitHub throws away. GitHub shows only the current download count of each release asset and 14 days of traffic, so nothing else survives unless it's copied. Every run stores a snapshot of release downloads, stars, Docker Hub pulls and (opt-in) traffic on an orphan `stats-data` branch, then rebuilds from all of them a dashboard, SVG charts and badges.
 
+## Preview
+
+Live output of the action on two of the author's repos, refreshed daily: [manga-downloader](https://github.com/elboletaire/manga-downloader) (release downloads in two groups, a counter, epochs, Docker Hub) and [password-strength-meter](https://github.com/elboletaire/password-strength-meter) (seven npm packages). The period download badges show up once their data branches hold enough history.
+
+<img alt="Downloads" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/downloads.svg">
+<img alt="Desktop app downloads" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/downloads-app.svg">
+<img alt="CLI downloads" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/downloads-cli.svg">
+<img alt="Latest release downloads" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/release-latest.svg">
+<img alt="In-app updates" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/counter-updates.svg">
+<img alt="Docker pulls" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/docker-pulls.svg">
+<img alt="Stars" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/stars.svg">
+<img alt="Stars this week" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/stars-week.svg">
+<img alt="Stars this month" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/badges/stars-month.svg">
+
+<img alt="npm downloads per month" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-downloads.svg">
+<img alt="npm downloads per week" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-downloads-week.svg">
+<img alt="npm downloads total" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-downloads-total.svg">
+<img alt="@passcore/core per month" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-passcore--core.svg">
+<img alt="@passcore/core per week" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/badges/npm-passcore--core-week.svg">
+
+<details>
+<summary>Charts</summary>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/stars-dark.svg">
+  <img alt="Stars over time" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/stars-light.svg">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/downloads-per-day-dark.svg">
+  <img alt="Downloads per day" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/downloads-per-day-light.svg">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/downloads-per-release-dark.svg">
+  <img alt="Downloads per release" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/downloads-per-release-light.svg">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/charts/npm-downloads-dark.svg">
+  <img alt="npm downloads per week" src="https://raw.githubusercontent.com/elboletaire/password-strength-meter/stats-data/elboletaire/password-strength-meter/charts/npm-downloads-light.svg">
+</picture>
+
+</details>
+
 ## Quick start
 
 1. Add `.github/workflows/stats.yml` (see [examples/workflow.yml](examples/workflow.yml)):
