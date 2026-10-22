@@ -13,6 +13,9 @@ export function finishLoad(): void {
   loading = false;
 }
 
+/** How long the sweep over a chart's areas and lines takes, in ms, as in style.css: a dot at the right edge lands when it ends. */
+export const WIPE_MS = 1200;
+
 /** How long a line takes to draw, in ms: its dots land as it reaches them, the end label once it is done (as in style.css). */
 export const DRAW_MS = 1600;
 

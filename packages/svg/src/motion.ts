@@ -2,12 +2,12 @@
 // A chart plays once, about two seconds in all. Base styles are the end state and animations fill backwards only,
 // so a renderer without CSS animation shows the full chart. Reduced motion turns every animation off.
 
-/** A column grows up from the baseline, a band is wiped in from the left, a line is drawn, an element fades in or pops in. */
+/** A column grows up from the baseline, an area is wiped in from the left, a line is drawn, an element fades in or pops in. */
 export type Effect = 'rise' | 'wipe' | 'draw' | 'fade' | 'pop';
 
 const RULES: Record<Effect, string> = {
   rise: '.gs-rise{animation:gs-rise 1.1s ease-out backwards;transform-box:fill-box;transform-origin:bottom}@keyframes gs-rise{from{transform:scaleY(0)}to{transform:scaleY(1)}}',
-  wipe: '.gs-wipe{animation:gs-wipe 1.2s ease-out backwards}@keyframes gs-wipe{from{clip-path:inset(-9px 100% -9px 0)}to{clip-path:inset(-9px -9px -9px -9px)}}',
+  wipe: '.gs-wipe{animation:gs-wipe 1.2s linear backwards}@keyframes gs-wipe{from{clip-path:inset(-9px 100% -9px 0)}to{clip-path:inset(-9px -9px -9px -9px)}}',
   draw: '.gs-draw{animation:gs-draw 1.6s linear backwards}@keyframes gs-draw{from{stroke-dasharray:1;stroke-dashoffset:1}to{stroke-dasharray:1;stroke-dashoffset:0}}',
   fade: '.gs-fade{animation:gs-fade .5s ease-out backwards}@keyframes gs-fade{from{opacity:0}to{opacity:1}}',
   pop: '.gs-pop{animation:gs-pop .25s ease-out backwards;transform-box:fill-box;transform-origin:center}@keyframes gs-pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}',
@@ -40,4 +40,18 @@ export const staggerDelay = (i: number, count: number): string => {
 export function animated(on: boolean, effect: Effect, children: string[], delay = ''): string[] {
   if (!on || !children.length) return children;
   return [`<g class="gs-${effect}"${delay ? ` style="${delay}"` : ''}>${children.join('')}</g>`];
+}
+
+/** Adjacent indices of a run of `count` items: one bucket each up to `STAGGER_MAX`, and `STAGGER_MAX` even buckets past it. */
+export function buckets(count: number): number[][] {
+  const groups = Math.min(count, STAGGER_MAX);
+  const out: number[][] = Array.from({ length: groups }, () => []);
+  for (let i = 0; i < count; i++) out[Math.floor((i * groups) / count)]!.push(i);
+  return out;
+}
+
+/** A run of items, each its own markup, rising in `buckets` order: a bucket is one group that starts when its first item does. Unchanged when the chart stays still. */
+export function animatedRun(on: boolean, effect: Effect, items: string[][]): string[] {
+  if (!on) return items.flat();
+  return buckets(items.length).flatMap((bucket) => animated(on, effect, bucket.flatMap((i) => items[i]!), staggerDelay(bucket[0]!, items.length)));
 }

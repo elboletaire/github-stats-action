@@ -4,7 +4,7 @@
 
 import { MARK } from '@github-stats-action/core/theme';
 import { dayAxis, presetStart, clampView, zoomView, xTicks } from '../days';
-import { introDelay, introStagger, playsIntro } from '../intro';
+import { WIPE_MS, introDelay, playsIntro } from '../intro';
 import { esc, f0 } from '../format';
 import { niceMax, quarterMax, ticks } from '../scale';
 import { fadeFill, gridLines, hitRect, resetSvg, svgEl, widthOf, type Attrs } from '../svg';
@@ -109,9 +109,6 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
   };
   syncPresets();
 
-  // the series wipe in one after another within 500 ms; a dot or label lands once its series' wipe (1.2 s, as in style.css) is done
-  const wipeAt = (j: number): number => introStagger(j, series.length);
-
   // the chart: the window's lines, a crosshair and a tooltip per day
   const drawChart = (): void => {
     const W = widthOf(chart);
@@ -137,19 +134,21 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
       svgEl('line', { x1: x(i), x2: x(i), y1: y(0), y2: y(0) + 4, class: 'axis' }, chart);
     }
 
+    // one sweep over every series, so the areas and lines wipe in together across the plot: a series is revealed at its own x
+    const sweep = series.length ? svgEl('g', { class: 'wipe' }, chart) : chart;
     // the first series is drawn last, so it sits on top when overlapping
     [...series.entries()].reverse().forEach(([j, s]) => {
       const top = tops[j]!;
       const base = bases[j]!;
-      const wipe = { class: 'wipe', ...introDelay(wipeAt(j)) };
       const pts = top.slice(a, b + 1).map((v, k) => `${x(a + k).toFixed(1)},${y(v).toFixed(1)}`).join('L');
       const d = stacked
         ? `M${pts}L${baseEdge(x, y, base, a, b)}Z`
         : `M${x(a)},${y(0)}L${pts}L${x(b)},${y(0)}Z`;
       const fill: Attrs = stacked ? { fill: s.color, 'fill-opacity': MARK.areaStack } : { fill: fadeFill(chart, `${options.id}-fade-${j}`, s.color) };
-      svgEl('path', { d, ...fill, ...wipe }, chart);
-      svgEl('path', { d: `M${pts}`, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', ...wipe }, chart);
-      svgEl('circle', { cx: x(b), cy: y(top[b] ?? 0), r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'late', ...introDelay(wipeAt(j) + 1200) }, chart);
+      svgEl('path', { d, ...fill }, sweep);
+      svgEl('path', { d: `M${pts}`, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, sweep);
+      // the window's right edge is where the sweep ends, so the dot lands then
+      svgEl('circle', { cx: x(b), cy: y(top[b] ?? 0), r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'late', ...introDelay(WIPE_MS) }, chart);
     });
     // end labels beside the dots, nudged apart when two lines end close together
     const ends = series.map((s, j) => ({ s, j, y: y(tops[j]![b] ?? 0) })).sort((p, q) => p.y - q.y);
@@ -161,7 +160,7 @@ export function wireDailyChart(el: HTMLElement, options: DailyOptions): () => vo
       const endX = x(b);
       // the label goes left of the line when it would still run past the right edge
       const left = endX + 10 + e.s.label.length * 6.5 > W - 2;
-      svgEl('text', { x: left ? endX - 10 : endX + 10, y: Math.min(H - m.b - 4, e.y + 4), class: 'ink late', 'text-anchor': left ? 'end' : 'start', ...introDelay(wipeAt(e.j) + 1200) }, chart).textContent = e.s.label;
+      svgEl('text', { x: left ? endX - 10 : endX + 10, y: Math.min(H - m.b - 4, e.y + 4), class: 'ink late', 'text-anchor': left ? 'end' : 'start', ...introDelay(WIPE_MS) }, chart).textContent = e.s.label;
     }
 
     const cross = svgEl('line', { y1: m.t, y2: y(0), class: 'base', visibility: 'hidden' }, chart);

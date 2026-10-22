@@ -137,7 +137,8 @@ describe('npm window', () => {
     const base = await fixture();
     const dataset = { ...base, npm: npmData().npm, charts: { ...CHARTS, 'npm-downloads': { range: '1y' as const } } };
     const svg = chart(renderCharts(dataset), 'charts/npm-downloads-light.svg');
-    const bars = svg.match(/<path d="(M[^"]*)" fill="[^"]*"\/>/)?.[1] ?? '';
+    // the bars' paths hold one segment per week (moving) or all of a package's weeks (still): either way, the weeks are the M's
+    const bars = [...svg.matchAll(/<path d="(M[^"]*)" fill="[^"]*"\/>/g)].map((m) => m[1]).join('');
     // 2025-10-18 to 2026-10-17 is 365 days: 52 whole weeks and a first one of a single day
     expect(bars.match(/M/g)).toHaveLength(53);
     const labels = xLabels(svg);

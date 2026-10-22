@@ -422,9 +422,9 @@ svg .cap {
     to { clip-path: inset(0 0 0 0); }
   }
 
-  /* a line draws left to right at a constant speed (its path has pathLength 1), its area fades in, its dots pop in as
-     the line reaches them, and the end dot and labels come last. The timings match the README SVGs' (packages/svg/src/motion.ts),
-     so every chart is done by about 2.1 s. */
+  /* a line draws left to right at a constant speed (its path has pathLength 1), its areas sweep in at the same speed,
+     its dots pop in as the line reaches them, and the end dot and labels come last. The timings match the README SVGs'
+     (packages/svg/src/motion.ts), so every chart is done by about 2.1 s. */
   svg.intro .draw {
     animation: intro-draw 1.6s linear backwards;
   }
@@ -440,7 +440,7 @@ svg .cap {
   }
 
   svg.intro .wipe {
-    animation: intro-wipe 1.2s ease-out backwards;
+    animation: intro-wipe 1.2s linear backwards;
   }
 
   svg.intro .grow {

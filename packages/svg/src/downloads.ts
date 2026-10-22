@@ -31,7 +31,7 @@ import {
   type Segment,
   type Theme,
 } from './svg';
-import { STAGGER_MAX, animated, staggerDelay } from './motion';
+import { animated, animatedRun } from './motion';
 import { windowed, windowSet } from './window';
 
 /** Measured bars need at least this many snapshot days; before that the estimate is shown. */
@@ -78,16 +78,14 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, tit
 
   const slot = (box.right - box.left) / days.length;
   const width = barWidth(slot);
-  const staggered = days.length <= STAGGER_MAX;
-  const bars = days.flatMap((d, i) => {
+  const columns = days.map((d, i) => {
     const x = box.left + i * slot + (slot - width) / 2;
     const span = d.days > 1 ? ` (${d.days} days)` : '';
     const segments: Segment[] = dataset.groups.map((g) => {
       const value = finite(d.groups[g.name] ?? 0);
       return { value, color: seriesColor(theme, g.color), title: `${d.date}, ${g.label}: ${value}${span}` };
     });
-    const column = stack(x, width, yOf, segments);
-    return staggered ? animated(motion, 'rise', column, staggerDelay(i, days.length)) : column;
+    return stack(x, width, yOf, segments);
   });
 
   // the labels follow the window's length, like the estimate's: days, months or years
@@ -104,7 +102,7 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, tit
     ...heading(title, note, theme, keys, titled, MEASURED_HINT),
     ...valueAxis(ticks, yOf, box, theme),
     ...xLabels(labels, box.bottom + 20, theme),
-    ...(staggered ? bars : animated(motion, 'rise', bars)),
+    ...animatedRun(motion, 'rise', columns),
   ], motion ? ['rise'] : []);
 }
 
@@ -136,7 +134,7 @@ function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: strin
     const id = `day-fade-${k}`;
     if (!stacked) defs.push(areaGradient(id, color));
     const fill = stacked ? `${color}" fill-opacity="${MARK.areaStack}` : `url(#${id})`;
-    areas.push(...animated(motion, 'wipe', [areaShape(xOf, yOf, upper, base, color, fill)], staggerDelay(k, dataset.groups.length)));
+    areas.push(areaShape(xOf, yOf, upper, base, color, fill));
   });
 
   const marks = sample(count);
@@ -146,7 +144,7 @@ function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: strin
   const body =
     count === 0
       ? [emptyNote(empty, box, theme)]
-      : [...(defs.length ? [`<defs>${defs.join('')}</defs>`] : []), ...valueAxis(ticks, yOf, box, theme), ...xLabels(labels, box.bottom + 20, theme), ...areas];
+      : [...(defs.length ? [`<defs>${defs.join('')}</defs>`] : []), ...valueAxis(ticks, yOf, box, theme), ...xLabels(labels, box.bottom + 20, theme), ...animated(motion, 'wipe', areas)];
 
   return svgDocument(theme, title, `${title}: estimated per day by group.`, [...heading(title, note, theme, keys, titled, ESTIMATED_HINT), ...body], motion && areas.length ? ['wipe'] : []);
 }

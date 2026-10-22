@@ -30,7 +30,7 @@ import {
   type Key,
   type Theme,
 } from './svg';
-import { LATE_MS, STAGGER_MAX, animated, staggerDelay } from './motion';
+import { LATE_MS, animated, animatedRun } from './motion';
 import { windowed } from './window';
 
 /** The plot starts lower when there are epoch labels to make room for above it. */
@@ -71,8 +71,7 @@ export function downloadsPerReleaseChart(all: Dataset, theme: Theme): string {
 
   const slot = (box.right - box.left) / releases.length;
   const width = barWidth(slot);
-  const staggered = releases.length <= STAGGER_MAX;
-  const columns = releases.flatMap((r, i) => {
+  const columns = releases.map((r, i) => {
     const x = box.left + i * slot + (slot - width) / 2;
     const column = stack(
       x,
@@ -83,7 +82,7 @@ export function downloadsPerReleaseChart(all: Dataset, theme: Theme): string {
         return { value, color: seriesColor(theme, g.color), title: `${r.tag}, ${g.label}: ${value}` };
       }),
     );
-    return staggered ? animated(motion, 'rise', column, staggerDelay(i, releases.length)) : column;
+    return column;
   });
 
   // the latest release is labelled with its total, so the chart ends on a number
@@ -117,7 +116,7 @@ export function downloadsPerReleaseChart(all: Dataset, theme: Theme): string {
     ...heading(title, note, theme, keys, titled),
     ...valueAxis(ticks, yOf, box, theme),
     ...animated(motion, 'fade', markers, `animation-delay:${LATE_MS}ms`),
-    ...(staggered ? columns : animated(motion, 'rise', columns)),
+    ...animatedRun(motion, 'rise', columns),
     ...animated(motion, 'fade', totalLabel, `animation-delay:${LATE_MS}ms`),
     ...xLabels(tagLabels, box.bottom + 20, theme),
   ], motion ? ['rise', ...(fading ? ['fade' as const] : [])] : []);

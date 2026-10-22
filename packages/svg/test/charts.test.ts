@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { buildNpmData, type Dataset, type MeasuredDay, type ReleaseRow } from '@github-stats-action/core';
 import { renderCharts } from '../src/index';
+import { buckets } from '../src/motion';
 import { niceTicks } from '../src/svg';
 
 const fixture = async (): Promise<Dataset> =>
@@ -390,7 +391,7 @@ describe('motion', () => {
     expect(chart(estimated!, 'charts/downloads-per-day-light.svg')).toContain('class="gs-wipe"');
     expect(chart(measuredFiles!, 'charts/downloads-per-day-light.svg')).toContain('class="gs-rise"');
     expect(chart(estimated!, 'charts/downloads-per-release-light.svg')).toContain('class="gs-rise"');
-    expect(chart(estimated!, 'charts/npm-downloads-light.svg')).toContain('class="gs-wipe"');
+    expect(chart(estimated!, 'charts/npm-downloads-light.svg')).toContain('class="gs-rise"');
   });
 
   it('pops each stars dot in as the line reaches it, and the end dot once the line is drawn', async () => {
@@ -425,29 +426,54 @@ describe('motion', () => {
     expect(chart(mixed!, 'charts/npm-downloads-light.svg')).not.toContain('<style');
   });
 
+  /** The filled paths of a chart, one entry per segment and sorted: a chart may join or split its paths and draw the same shapes. */
+  const shapes = (svg: string): string[] =>
+    [...svg.matchAll(/<path d="([^"]*)" fill="([^"]*)"\/>/g)].flatMap((m) => m[1]!.split(/(?=M)/).map((segment) => `${m[2]} ${segment}`)).sort();
+
+  /** The file minus its paths of bars and areas, so what is left around them (axes, labels, legend) is compared on its own. */
+  const bare = (svg: string): string => still(svg).replace(/<path d="[^"]*" fill="[^"]*"\/>/g, '');
+
   it('only wraps the marks and adds the style, so the end state is the still chart', async () => {
     const [moving] = await sets();
     const [stillFiles] = await sets({ animate: false });
-    for (const { content, path } of moving!) expect(still(content), path).toBe(still(chart(stillFiles!, path)));
+    for (const { content, path } of moving!) {
+      if (path.includes('npm-downloads')) {
+        // the npm weeks are one path per package when still, and one per bucket and package when moving: the same shapes, and the same chart around them
+        expect(shapes(content), path).toEqual(shapes(chart(stillFiles!, path)));
+        expect(bare(content), path).toBe(bare(chart(stillFiles!, path)));
+      } else expect(still(content), path).toBe(still(chart(stillFiles!, path)));
+    }
   });
 
-  it('rises each measured bar on its own up to 60 days, and the whole run as one group past that', async () => {
+  it('cuts a long run into 60 even buckets of adjacent items', () => {
+    expect(buckets(60)).toHaveLength(60);
+    expect(buckets(61)).toHaveLength(60);
+    expect(buckets(61).flat()).toEqual(Array.from({ length: 61 }, (_, i) => i));
+    expect(Math.max(...buckets(61).map((b) => b.length))).toBe(2);
+    expect(buckets(1000)).toHaveLength(60);
+    expect(buckets(0)).toEqual([]);
+  });
+
+  it('rises each measured bar on its own up to 60 days, and in at most 60 buckets past that', async () => {
     const dataset = await fixture();
     const rises = (count: number): number => {
       const measuredDaily = Array.from({ length: count }, (_, i) => day(i, { app: 1, cli: 2 }));
       return chart(renderCharts({ ...dataset, measuredDaily }), 'charts/downloads-per-day-light.svg').match(/class="gs-rise"/g)?.length ?? 0;
     };
     expect(rises(60)).toBe(60);
-    expect(rises(61)).toBe(1);
+    expect(rises(61)).toBe(60);
+    expect(rises(121)).toBe(60);
+    expect(rises(1000)).toBe(60);
   });
 
-  it('rises each release column on its own up to 60 releases, and the whole run as one group past that', async () => {
+  it('rises each release column on its own up to 60 releases, and in at most 60 buckets past that', async () => {
     const dataset = await fixture();
     const rises = (count: number): number => {
       const releases = Array.from({ length: count }, (_, i) => release(`v${i}.0.0`, { app: 1, cli: 2 }));
       return chart(renderCharts({ ...dataset, releases, epochs: [] }), 'charts/downloads-per-release-light.svg').match(/class="gs-rise"/g)?.length ?? 0;
     };
     expect(rises(60)).toBe(60);
-    expect(rises(61)).toBe(1);
+    expect(rises(61)).toBe(60);
+    expect(rises(1000)).toBe(60);
   });
 });
