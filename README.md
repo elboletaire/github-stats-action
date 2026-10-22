@@ -318,8 +318,8 @@ platforms:                  # label rules for asset names
   - { match: "acme-desktop-*-windows-x64-setup.exe", label: Windows installer }
 charts:                     # README SVG charts
   titles: true              # false hides every chart's title
-  animate: true             # false keeps every chart still
-  stars: { from: 2024-01-01, animate: false }  # the window: a date, a year or a month; animate overrides the global one
+  animate: true             # false keeps every chart still; a chart's own animate wins
+  stars: { from: 2024-01-01, animate: false }  # the window: a date, a year or a month
   downloads-per-day: { range: 90d }          # or a length counted back from the latest day
   downloads-per-release: { last: 20 }        # the last N releases instead
   npm-downloads: { range: 1y }
