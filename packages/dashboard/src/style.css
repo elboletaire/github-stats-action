@@ -393,6 +393,54 @@ svg .cap {
   fill: var(--muted);
 }
 
+/* The first-load intro: the svg keeps `intro` from the first mount until its next redraw (see intro.ts), and each element
+   carries the class of its effect. Nothing is hidden without the animation: the `backwards` fill starts each one
+   at its `from` state only during its delay, and a reduced-motion reader gets the static chart. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes intro-draw {
+    from { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+    to { stroke-dasharray: 1 1; stroke-dashoffset: 0; }
+  }
+
+  @keyframes intro-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes intro-grow {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+
+  @keyframes intro-wipe {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+  }
+
+  /* a line draws left to right (its path has pathLength 1), its area fades in, and the end dot and labels come last */
+  svg.intro .draw {
+    animation: intro-draw 1s ease-out backwards;
+  }
+
+  svg.intro .fade {
+    animation: intro-fade 0.7s ease-out 0.3s backwards;
+  }
+
+  svg.intro .wipe {
+    animation: intro-wipe 1s ease-out backwards;
+  }
+
+  svg.intro .grow {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: intro-grow 0.5s ease-out backwards;
+  }
+
+  svg.intro .late {
+    animation: intro-fade 0.4s ease-out 0.9s backwards;
+  }
+}
+
 [data-strip] {
   touch-action: none;
   user-select: none;

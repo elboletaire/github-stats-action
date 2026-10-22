@@ -1,7 +1,7 @@
 // Stars over time: the cumulative count as a daily line or as about 30 sampled points, both on a linear time
 // axis from the first star, and a table of each month's last value.
 
-import type { Dataset } from '@github-stats-action/core';
+import { animates, type Dataset } from '@github-stats-action/core';
 import { sampleStars } from '@github-stats-action/core/stars';
 import { dayAxis } from '../days';
 import { esc, f0 } from '../format';
@@ -48,6 +48,7 @@ export function stars(d: Dataset): Section {
   const xs = points.map((p) => axis.indexOf(Date.parse(`${p.date}T00:00:00Z`)));
   const values = points.map((p) => p.stars);
   const color = colorVar({ color: 0 });
+  const animate = animates(d.charts, 'stars');
   const samples = sampleStars(points);
   const sampledXs = samples.map((p) => axis.indexOf(Date.parse(`${p.date}T00:00:00Z`)));
 
@@ -71,9 +72,9 @@ export function stars(d: Dataset): Section {
   const draw = (): void => {
     noteEl.textContent = notes[view];
     if (view === 'sampled') {
-      drawSampled(svg, { id: 'stars', axis, samples, xs: sampledXs, color });
+      drawSampled(svg, { id: 'stars', axis, samples, xs: sampledXs, color, animate });
     } else {
-      drawTimeline(svg, { id: 'stars', xs, axis, series: [{ label: 'Stars', color, values }], unit: { one: 'star', other: 'stars' }, startLabel: true });
+      drawTimeline(svg, { id: 'stars', xs, axis, series: [{ label: 'Stars', color, values }], unit: { one: 'star', other: 'stars' }, startLabel: true, animate });
     }
   };
   const buttons = VIEWS.map(([key, label]) => {

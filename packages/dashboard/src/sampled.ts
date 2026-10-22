@@ -8,6 +8,7 @@ import { esc, f0 } from './format';
 import { fadeFill, gridLines, resetSvg, svgEl, widthOf } from './svg';
 import { quarterMax, ticks } from './scale';
 import { showTip, tipOn } from './tooltip';
+import { playsIntro } from './intro';
 
 const HEIGHT = 240;
 /** The least gap between the start label and the next tick, in px. */
@@ -21,6 +22,8 @@ export interface SampledOptions {
   /** Ascending day indices of the samples, counted by `axis`. */
   xs: readonly number[];
   color: string;
+  /** Whether the chart's config animates it on load. */
+  animate: boolean;
 }
 
 /** Draws the samples into `svg` for the container's current width. */
@@ -28,7 +31,7 @@ export function drawSampled(svg: SVGSVGElement, o: SampledOptions): void {
   const W = widthOf(svg);
   const H = HEIGHT;
   const m = { l: 44, r: 16, t: 16, b: 28 };
-  resetSvg(svg, W, H);
+  resetSvg(svg, W, H, playsIntro(o.animate));
   const { axis, samples, xs, color } = o;
   const n = samples.length;
   if (n === 0) return;
@@ -51,14 +54,14 @@ export function drawSampled(svg: SVGSVGElement, o: SampledOptions): void {
   const points: CurvePoint[] = samples.map((p, i) => [x(xs[i]!), y(p.stars)]);
   const line = monotonePath(points);
   const endX = x(xs[n - 1]!);
-  svgEl('path', { d: `${line}L${endX.toFixed(1)},${base.toFixed(1)}L${x(first).toFixed(1)},${base.toFixed(1)}Z`, fill: fadeFill(svg, `${o.id}-fade`, color) }, svg);
-  svgEl('path', { d: line, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+  svgEl('path', { d: `${line}L${endX.toFixed(1)},${base.toFixed(1)}L${x(first).toFixed(1)},${base.toFixed(1)}Z`, fill: fadeFill(svg, `${o.id}-fade`, color), class: 'fade' }, svg);
+  svgEl('path', { d: line, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', pathLength: 1, class: 'draw' }, svg);
   samples.slice(0, -1).forEach((p, i) => {
-    svgEl('circle', { cx: x(xs[i]!), cy: y(p.stars), r: 3, fill: color, stroke: 'var(--surface)', 'stroke-width': 2 }, svg);
+    svgEl('circle', { cx: x(xs[i]!), cy: y(p.stars), r: 3, fill: color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'late' }, svg);
   });
   const endY = y(samples[n - 1]!.stars);
-  svgEl('circle', { cx: endX, cy: endY, r: 4, fill: color, stroke: 'var(--surface)', 'stroke-width': 2 }, svg);
-  svgEl('text', { x: endX - 8, y: Math.max(m.t + 10, endY - 10), 'text-anchor': 'end', class: 'strong' }, svg).textContent = f0(samples[n - 1]!.stars);
+  svgEl('circle', { cx: endX, cy: endY, r: 4, fill: color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'late' }, svg);
+  svgEl('text', { x: endX - 8, y: Math.max(m.t + 10, endY - 10), 'text-anchor': 'end', class: 'strong late' }, svg).textContent = f0(samples[n - 1]!.stars);
 
   const cross = svgEl('line', { y1: m.t, y2: base, class: 'base', visibility: 'hidden' }, svg);
   const dot = svgEl('circle', { r: 4, fill: color, stroke: 'var(--surface)', 'stroke-width': 2, visibility: 'hidden' }, svg);

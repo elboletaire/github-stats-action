@@ -1,6 +1,6 @@
 // Estimated downloads per day: a zoomable line chart over an overview strip, with presets and a table view.
 
-import type { Dataset } from '@github-stats-action/core';
+import { animates, type Dataset } from '@github-stats-action/core';
 import { dayAxis } from '../days';
 import { esc, f1 } from '../format';
 import { countedGroups } from '../model';
@@ -33,6 +33,7 @@ export function estimated(d: Dataset): Section {
     stacked: false,
     directLabels: true,
     id: 'estimated',
+    animate: animates(d.charts, 'downloads-per-day'),
     describe: (v) => `${f1(v)}/day (est.)`,
   });
   return { el, redraw };
