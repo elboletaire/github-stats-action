@@ -2,7 +2,7 @@
 // estimated per-day series by group as stacked areas. The note says which one it is.
 
 import type { Dataset } from '@github-stats-action/core';
-import { MARK } from '@github-stats-action/core';
+import { MARK, animates } from '@github-stats-action/core';
 import {
   areaGradient,
   barWidth,
@@ -31,6 +31,7 @@ import {
   type Segment,
   type Theme,
 } from './svg';
+import { STAGGER_MAX, animated, staggerDelay } from './motion';
 import { windowed, windowSet } from './window';
 
 /** Measured bars need at least this many snapshot days; before that the estimate is shown. */
@@ -69,6 +70,7 @@ function emptyChart(theme: Theme, keys: Key[], note: string, hint: string, box: 
 
 function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, titled: boolean): string {
   const days = dataset.measuredDaily;
+  const motion = animates(dataset.charts, 'downloads-per-day');
   const totals = days.map((d) => dataset.groups.reduce((sum, g) => sum + finite(d.groups[g.name] ?? 0), 0));
   const ticks = niceTicks(Math.max(0, ...totals));
   const top = ticks.at(-1) ?? 1;
@@ -76,6 +78,7 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, tit
 
   const slot = (box.right - box.left) / days.length;
   const width = barWidth(slot);
+  const staggered = days.length <= STAGGER_MAX;
   const bars = days.flatMap((d, i) => {
     const x = box.left + i * slot + (slot - width) / 2;
     const span = d.days > 1 ? ` (${d.days} days)` : '';
@@ -83,7 +86,8 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, tit
       const value = finite(d.groups[g.name] ?? 0);
       return { value, color: seriesColor(theme, g.color), title: `${d.date}, ${g.label}: ${value}${span}` };
     });
-    return stack(x, width, yOf, segments);
+    const column = stack(x, width, yOf, segments);
+    return staggered ? animated(motion, 'rise', column, staggerDelay(i, days.length)) : column;
   });
 
   // the labels follow the window's length, like the estimate's: days, months or years
@@ -100,12 +104,13 @@ function measuredBars(dataset: Dataset, theme: Theme, keys: Key[], box: Box, tit
     ...heading(title, note, theme, keys, titled, MEASURED_HINT),
     ...valueAxis(ticks, yOf, box, theme),
     ...xLabels(labels, box.bottom + 20, theme),
-    ...bars,
-  ]);
+    ...(staggered ? bars : animated(motion, 'rise', bars)),
+  ], motion ? ['rise'] : []);
 }
 
 function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: string, box: Box, titled: boolean, empty: string): string {
   const { estimatedDaily } = dataset;
+  const motion = animates(dataset.charts, 'downloads-per-day');
   const count = Math.max(0, ...dataset.groups.map((g) => estimatedDaily.groups[g.name]?.length ?? 0));
   const start = dayOf(estimatedDaily.start);
   const valueOf = (name: string, i: number): number => finite(estimatedDaily.groups[name]?.[i] ?? 0);
@@ -130,7 +135,8 @@ function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: strin
     const color = seriesColor(theme, g.color);
     const id = `day-fade-${k}`;
     if (!stacked) defs.push(areaGradient(id, color));
-    areas.push(areaShape(xOf, yOf, upper, base, color, stacked ? `${color}" fill-opacity="${MARK.areaStack}` : `url(#${id})`));
+    const fill = stacked ? `${color}" fill-opacity="${MARK.areaStack}` : `url(#${id})`;
+    areas.push(...animated(motion, 'wipe', [areaShape(xOf, yOf, upper, base, color, fill)], staggerDelay(k, dataset.groups.length)));
   });
 
   const marks = sample(count);
@@ -142,7 +148,7 @@ function estimatedAreas(dataset: Dataset, theme: Theme, keys: Key[], note: strin
       ? [emptyNote(empty, box, theme)]
       : [...(defs.length ? [`<defs>${defs.join('')}</defs>`] : []), ...valueAxis(ticks, yOf, box, theme), ...xLabels(labels, box.bottom + 20, theme), ...areas];
 
-  return svgDocument(theme, title, `${title}: estimated per day by group.`, [...heading(title, note, theme, keys, titled, ESTIMATED_HINT), ...body]);
+  return svgDocument(theme, title, `${title}: estimated per day by group.`, [...heading(title, note, theme, keys, titled, ESTIMATED_HINT), ...body], motion ? ['wipe'] : []);
 }
 
 // The band between `base` and `upper`, filled with `fill` (a colour or a gradient reference), with a 2px line
