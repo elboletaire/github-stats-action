@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildNpmData, type Dataset, type MeasuredDay, type ReleaseRow } from '@github-stats-action/core';
+import { buildNpmData, seriesColor, type Dataset, type MeasuredDay, type ReleaseRow } from '@github-stats-action/core';
 import { renderCharts } from '../src/index';
 import { buckets } from '../src/motion';
 import { niceTicks } from '../src/svg';
@@ -297,6 +297,33 @@ describe('chart options', () => {
     expect(svg.match(/<circle [^>]*r="4"[^>]*><title>/g)).toHaveLength(1);
   });
 
+  it('draws the stars in the configured colour of each mode, on the line, dots and area', async () => {
+    const dataset = { ...(await fixture()), charts: { titles: true, stars: { color: { light: '#9a6700', dark: '#e3b341' } }, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {} } };
+    const files = renderCharts(dataset);
+    const light = chart(files, 'charts/stars-light.svg');
+    const dark = chart(files, 'charts/stars-dark.svg');
+    expect(light).toContain('stroke="#9a6700"');
+    expect(light).toContain('stop-color="#9a6700"');
+    expect(light).toContain('fill="#9a6700"');
+    expect(light).not.toContain(seriesColor('light', 0));
+    expect(dark).toContain('stroke="#e3b341"');
+    expect(dark).toContain('stop-color="#e3b341"');
+    expect(dark).not.toContain(seriesColor('dark', 0));
+  });
+
+  it('keeps the palette colour when no stars colour is set', async () => {
+    const files = renderCharts(await fixture());
+    expect(chart(files, 'charts/stars-light.svg')).toContain(`stroke="${seriesColor('light', 0)}"`);
+    expect(chart(files, 'charts/stars-dark.svg')).toContain(`stroke="${seriesColor('dark', 0)}"`);
+  });
+
+  it('keeps anything but a hex colour out of the markup', async () => {
+    const dataset = { ...(await fixture()), charts: { titles: true, stars: { color: { light: '"><script>', dark: '#e3b341' } }, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {} } } as Dataset;
+    const svg = chart(renderCharts(dataset), 'charts/stars-light.svg');
+    expect(svg).not.toContain('<script>');
+    expect(svg).toContain(`stroke="${seriesColor('light', 0)}"`);
+  });
+
   it('keeps the whole curve on the plot when the count dips', async () => {
     const dataset = { ...(await fixture()), stars: [
       { date: '2024-01-01', stars: 1 },
@@ -475,5 +502,34 @@ describe('motion', () => {
     expect(rises(60)).toBe(60);
     expect(rises(61)).toBe(60);
     expect(rises(1000)).toBe(60);
+  });
+});
+
+describe('stars height', () => {
+  const withStars = async (stars: { height?: number }, extra: Partial<NonNullable<Dataset['charts']>> = {}): Promise<Dataset> => ({
+    ...(await fixture()),
+    charts: { titles: true, stars, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {}, ...extra },
+  });
+
+  it('draws the stars chart at its height, with the plot bottom and the x labels moved down', async () => {
+    const svg = chart(renderCharts(await withStars({ height: 400 })), 'charts/stars-light.svg');
+    expect(svg).toMatch(/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" width="800" height="400" viewBox="0 0 800 400"/);
+    expect(svg).toContain('<rect x="0.5" y="0.5" width="799" height="399"');
+    // the plot ends 48 above the foot, so the curve's fade closes at 352, and the x labels sit 20 below that
+    expect(svg).toMatch(/L[\d.]+ 352\.0Z/);
+    expect(svg).toContain('y="372.0"');
+    expectWellFormed(svg);
+  });
+
+  it('keeps the other charts at 300', async () => {
+    const files = renderCharts(await withStars({ height: 400 }));
+    expect(chart(files, 'charts/downloads-per-day-light.svg')).toMatch(/^<svg [^>]*height="300" viewBox="0 0 800 300"/);
+  });
+
+  it('gives the empty stars chart the same height', async () => {
+    const data = await withStars({ height: 250 });
+    const svg = chart(renderCharts({ ...data, stars: [], totals: { ...data.totals, stars: 0 } }), 'charts/stars-light.svg');
+    expect(svg).toContain('No stars yet');
+    expect(svg).toMatch(/^<svg [^>]*height="250" viewBox="0 0 800 250"/);
   });
 });

@@ -111,14 +111,15 @@ export function svgText(o: TextOptions): string {
 
 // The whole file: fixed viewBox, a rounded card with a hairline ring, and the title and description
 // for screen readers. Figures are tabular so ticks and labels line up. Effects add the <style> for the motion.
-export function svgDocument(theme: Theme, title: string, desc: string, body: string[], effects: Effect[] = []): string {
+// The height defaults to HEIGHT; only the stars chart sets its own.
+export function svgDocument(theme: Theme, title: string, desc: string, body: string[], effects: Effect[] = [], height = HEIGHT): string {
   const c = INK[theme];
   return [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-labelledby="title desc">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${height}" viewBox="0 0 ${WIDTH} ${height}" role="img" aria-labelledby="title desc">`,
     `<title id="title">${esc(title)}</title>`,
     `<desc id="desc">${esc(desc)}</desc>`,
     ...(effects.length ? [`<style>${motionCss(effects)}</style>`] : []),
-    `<rect x="0.5" y="0.5" width="${WIDTH - 1}" height="${HEIGHT - 1}" rx="${MARK.radius}" fill="${c.surface}" stroke="${c.border}"/>`,
+    `<rect x="0.5" y="0.5" width="${WIDTH - 1}" height="${height - 1}" rx="${MARK.radius}" fill="${c.surface}" stroke="${c.border}"/>`,
     `<g font-family='${FONT.sans}' font-size="${TYPE.xs}" fill="${c.secondary}" style="font-variant-numeric:tabular-nums">`,
     ...body,
     '</g>',

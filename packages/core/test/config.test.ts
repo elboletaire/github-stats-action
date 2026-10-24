@@ -205,6 +205,70 @@ charts:
     expect(() => parseConfig('charts: { pie: {} }')).toThrow('charts.pie is not a known key');
     expect(() => parseConfig('charts: { stars: { colour: red } }')).toThrow('charts.stars.colour is not a known key');
   });
+
+  it('reads the stars height and start-at-zero, and leaves both out by default', () => {
+    expect(parseConfig('charts: { stars: { height: 400, start-at-zero: true } }').charts.stars).toEqual({ height: 400, startAtZero: true });
+    expect(parseConfig('charts: { stars: { height: 200 } }').charts.stars).toEqual({ height: 200 });
+    expect(parseConfig('charts: { stars: { height: 600 } }').charts.stars).toEqual({ height: 600 });
+    expect(parseConfig('charts: { stars: { start-at-zero: false } }').charts.stars).toEqual({ startAtZero: false });
+    expect(parseConfig('').charts.stars).not.toHaveProperty('height');
+    expect(parseConfig('').charts.stars).not.toHaveProperty('startAtZero');
+  });
+
+  it.each([
+    ['a height below 200', 'charts: { stars: { height: 199 } }', 'charts.stars.height must be a whole number from 200 to 600'],
+    ['a height above 600', 'charts: { stars: { height: 601 } }', 'charts.stars.height must be a whole number from 200 to 600'],
+    ['a height that is not whole', 'charts: { stars: { height: 300.5 } }', 'charts.stars.height must be a whole number from 200 to 600'],
+    ['a height in text', 'charts: { stars: { height: "tall" } }', 'charts.stars.height must be a whole number from 200 to 600'],
+    ['a height on another chart', 'charts: { downloads-per-day: { height: 300 } }', 'charts.downloads-per-day.height is only for stars'],
+    ['start-at-zero on another chart', 'charts: { npm-downloads: { start-at-zero: true } }', 'charts.npm-downloads.start-at-zero is only for stars'],
+    ['a start-at-zero that is not true or false', 'charts: { stars: { start-at-zero: "yes" } }', 'charts.stars.start-at-zero must be true or false'],
+    ['a camelCase startAtZero key', 'charts: { stars: { startAtZero: true } }', 'charts.stars.startAtZero is not a known key'],
+  ])('rejects %s', (_, text, message) => {
+    expect(() => parseConfig(text)).toThrow(message);
+  });
+});
+
+describe('stars colour', () => {
+  it('fills both modes from one string, lowercased', () => {
+    expect(parseConfig('charts: { stars: { color: "#E3B341" } }').charts.stars).toEqual({ color: { light: '#e3b341', dark: '#e3b341' } });
+  });
+
+  it('reads a light and a dark colour as an object', () => {
+    expect(parseConfig('charts: { stars: { color: { light: "#9a6700", dark: "#E3B341" } } }').charts.stars).toEqual({
+      color: { light: '#9a6700', dark: '#e3b341' },
+    });
+  });
+
+  it('accepts the short hex form', () => {
+    expect(parseConfig('charts: { stars: { color: "#fa0" } }').charts.stars).toEqual({ color: { light: '#fa0', dark: '#fa0' } });
+  });
+
+  it('leaves the colour out when none is set', () => {
+    expect(parseConfig('charts: { stars: { title: false } }').charts.stars).not.toHaveProperty('color');
+  });
+
+  it('hints at quoting when the hex is unquoted, which YAML reads as a comment', () => {
+    expect(() => parseConfig('charts:\n  stars:\n    color: #e3b341\n')).toThrow(
+      'charts.stars.color must be a hex colour such as "#e3b341" (quote it: a bare # starts a YAML comment)',
+    );
+  });
+
+  it.each([
+    ['a colour name', 'charts: { stars: { color: red } }', 'charts.stars.color must be a hex colour such as #e3b341'],
+    ['a hex without the hash', 'charts: { stars: { color: "e3b341" } }', 'charts.stars.color must be a hex colour'],
+    ['a hex of the wrong length', 'charts: { stars: { color: "#e3b34" } }', 'charts.stars.color must be a hex colour'],
+    ['a value with markup in it', 'charts: { stars: { color: "#e3b341<b>" } }', 'charts.stars.color must be a hex colour'],
+    ['a number', 'charts: { stars: { color: 123456 } }', 'charts.stars.color must be a hex colour'],
+    ['a dark colour that is not hex', 'charts: { stars: { color: { light: "#9a6700", dark: navy } } }', 'charts.stars.color.dark must be a hex colour such as #e3b341'],
+    ['a light colour that is not hex', 'charts: { stars: { color: { light: "blue", dark: "#e3b341" } } }', 'charts.stars.color.light must be a hex colour such as #e3b341'],
+    ['a missing dark colour', 'charts: { stars: { color: { light: "#9a6700" } } }', 'charts.stars.color.dark must be a hex colour such as #e3b341'],
+    ['a missing light colour', 'charts: { stars: { color: { dark: "#e3b341" } } }', 'charts.stars.color.light must be a hex colour such as #e3b341'],
+    ['an extra key next to light and dark', 'charts: { stars: { color: { light: "#9a6700", dark: "#e3b341", mid: "#000" } } }', 'charts.stars.color.mid is not a known key'],
+    ['a colour on a chart other than stars', 'charts: { downloads-per-day: { color: "#e3b341" } }', 'charts.downloads-per-day.color is only for stars'],
+  ])('rejects %s', (_, text, message) => {
+    expect(() => parseConfig(text)).toThrow(message);
+  });
 });
 
 describe('npm', () => {

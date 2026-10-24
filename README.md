@@ -342,7 +342,7 @@ npm:                        # optional npm packages, counted daily
   - `stars` samples the window (the count on its first day is where the curve starts, and the y axis keeps the real total). `downloads-per-day` and `npm-downloads` start their x axis at the window start, and the bars or areas of `downloads-per-day` are chosen on the whole history, so a short window still shows bars. `downloads-per-release` takes the releases published in the window, or with `last: N` the last N releases; epoch markers outside it are hidden.
   - The window ends on the data's latest day, never the clock, so re-rendering gives the same file. npm's window ends on npm's last stored day.
   - `last` is for `downloads-per-release` only.
-  - The dashboard isn't windowed: it has its own zoom.
+  - The dashboard isn't windowed: it has its own zoom. `height`, `start-at-zero` and `color` are for `stars` only, and an error on another chart; the dashboard ignores them. `height` (pixels, 200 to 600, default 300) grows the plot and moves the x labels down with it; the title stays put. `start-at-zero` (default `false`) needs a window: the first segment starts at zero and takes in the stars from before the window. It's cosmetic: the later points and the y axis keep the real totals, and the first dot's tooltip keeps the real count. `color` is a quoted hex colour (`"#e3b341"`, or `"#fa0"`) for both modes, or `{ light: "#9a6700", dark: "#e3b341" }` for one per mode; absent means the palette's first colour.
 - `docker`: `namespace/name`.
 
 Globs: `*` matches any run of characters, everything else is literal.

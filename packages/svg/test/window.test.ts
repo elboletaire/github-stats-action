@@ -31,6 +31,10 @@ function xLabels(svg: string): { x: number; anchor: string; value: string }[] {
   }));
 }
 
+/** The stars' dots: the centre, and the tooltip text. */
+const starDots = (svg: string): { cx: string; cy: string; title: string }[] =>
+  [...svg.matchAll(/<circle cx="([\d.]+)" cy="([\d.]+)" r="3"[^>]*><title>([^<]*)<\/title>/g)].map((m) => ({ cx: m[1]!, cy: m[2]!, title: m[3]! }));
+
 const segments = (svg: string): number => svg.match(/<path d="[^"]*" fill="[^"]*"><title>/g)?.length ?? 0;
 
 const measured = (groups: Record<string, number>, days: number, end: string): MeasuredDay[] =>
@@ -68,6 +72,50 @@ describe('stars window', () => {
     const whole = chart(renderCharts(await fixture()), 'charts/stars-light.svg');
     const longer = chart(renderCharts(await withCharts({ stars: { from: '2010-01-01' } })), 'charts/stars-light.svg');
     expect(longer).toBe(whole);
+  });
+
+  it('starts the curve at zero with start-at-zero, and keeps the real totals after the first point', async () => {
+    const plain = starDots(chart(renderCharts(await withCharts({ stars: { from: '2026-01-01' } })), 'charts/stars-light.svg'));
+    const zeroed = chart(renderCharts(await withCharts({ stars: { from: '2026-01-01', startAtZero: true } })), 'charts/stars-light.svg');
+    const dots = starDots(zeroed);
+    // the first dot sits on the baseline, its tooltip keeps the 4 stars from before the window; the y axis is unchanged
+    expect(dots[0]).toEqual({ cx: plain[0]!.cx, cy: '252.0', title: '2026-01-01: 4 stars before the window' });
+    expect(zeroed).toContain('<title>2026-01-01: 4 stars before the window</title></rect>');
+    expect(dots.slice(1)).toEqual(plain.slice(1));
+    expect(zeroed).not.toBe(chart(renderCharts(await withCharts({ stars: { from: '2026-01-01' } })), 'charts/stars-light.svg'));
+  });
+
+  it('leaves a window that reaches back past the history unchanged with start-at-zero', async () => {
+    const whole = chart(renderCharts(await withCharts({ stars: {} })), 'charts/stars-light.svg');
+    const reaching = chart(renderCharts(await withCharts({ stars: { from: '2010-01-01', startAtZero: true } })), 'charts/stars-light.svg');
+    expect(reaching).toBe(whole);
+    expect(starDots(reaching)[0]!.title).not.toContain('before the window');
+  });
+
+  it('does not zero a window with one star day, where there is no segment to start', async () => {
+    const data = await withCharts({ stars: {} });
+    const lastDay = data.stars.at(-1)!.date;
+    const plain = chart(renderCharts({ ...data, charts: { ...CHARTS, stars: { from: lastDay } } }), 'charts/stars-light.svg');
+    const zeroed = chart(renderCharts({ ...data, charts: { ...CHARTS, stars: { from: lastDay, startAtZero: true } } }), 'charts/stars-light.svg');
+    expect(zeroed).toBe(plain);
+    expect(zeroed).not.toContain('before the window');
+  });
+
+  it('combines start-at-zero, height and colour on one chart', async () => {
+    const data = await withCharts({ stars: { from: '2026-01-01', startAtZero: true, height: 400, color: { light: '#e3b341', dark: '#9a6700' } } });
+    const light = chart(renderCharts(data), 'charts/stars-light.svg');
+    const dark = chart(renderCharts(data), 'charts/stars-dark.svg');
+    expect(light).toMatch(/^<svg [^>]*width="800" height="400" viewBox="0 0 800 400"/);
+    // the first dot sits on the baseline (400 less the 48 foot) in its configured colour, and its tooltip keeps the real count
+    expect(light).toMatch(/<circle cx="60\.0" cy="352\.0" r="3" fill="#e3b341"[^>]*><title>2026-01-01: 4 stars before the window<\/title>/);
+    expect(light).toContain('stop-color="#e3b341"');
+    expect(dark).toContain('stop-color="#9a6700"');
+    expect(dark).toMatch(/<circle cx="60\.0" cy="352\.0" r="3" fill="#9a6700"/);
+  });
+
+  it('draws the same chart with start-at-zero and no window', async () => {
+    const plain = chart(renderCharts(await withCharts({ stars: {} })), 'charts/stars-light.svg');
+    expect(chart(renderCharts(await withCharts({ stars: { startAtZero: true } })), 'charts/stars-light.svg')).toBe(plain);
   });
 });
 

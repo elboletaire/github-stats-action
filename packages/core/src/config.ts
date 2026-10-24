@@ -50,6 +50,12 @@ export interface ChartConfig {
   range?: string;
   /** Downloads per release only: the last N releases. */
   last?: number;
+  /** Stars only: the chart's height in pixels, from 200 to 600; default 300. */
+  height?: number;
+  /** Stars only, with a window: the curve starts at zero, so its first segment takes in the stars from before the window. */
+  startAtZero?: boolean;
+  /** Stars only: the line, dots and area per mode; a plain string in the config fills both. */
+  color?: { light: string; dark: string };
 }
 
 export interface ChartsConfig {
@@ -101,10 +107,16 @@ export const DEFAULT_CONFIG: StatsConfig = {
 /** One colour per package in the npm chart and the dashboard, so the list is capped at the palette's slots. */
 const NPM_MAX_PACKAGES = 8;
 
+/** The stars chart's height in pixels; the default is the SVG's 300. */
+const STARS_HEIGHT_MIN = 200;
+const STARS_HEIGHT_MAX = 600;
+
 /** Names the dataset uses for its own buckets, so a group can't take them. */
 const RESERVED_GROUPS = new Set(['other', 'ignored']);
 const NAME_RE = /^[A-Za-z0-9_-]+$/;
 const DOCKER_RE = /^[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*$/;
+/** `#rgb` or `#rrggbb`. Colours end up in SVG attributes, so nothing else may get through. */
+export const HEX_COLOUR_RE = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 
 type Obj = Record<string, unknown>;
 
@@ -137,6 +149,27 @@ function checkKeys(obj: Obj, allowed: string[], path: string): void {
   for (const key of Object.keys(obj)) {
     if (!allowed.includes(key)) throw new ConfigError(`${path}.${key} is not a known key`);
   }
+}
+
+function expectHex(value: unknown, path: string): string {
+  // an unquoted `#` starts a YAML comment, so the value reads as null
+  if (value === null) {
+    throw new ConfigError(`${path} must be a hex colour such as "#e3b341" (quote it: a bare # starts a YAML comment)`);
+  }
+  if (typeof value !== 'string' || !HEX_COLOUR_RE.test(value)) {
+    throw new ConfigError(`${path} must be a hex colour such as #e3b341`);
+  }
+  return value.toLowerCase();
+}
+
+/** One colour for both modes, or a `light` and a `dark` one. */
+function parseColor(value: unknown, path: string): { light: string; dark: string } {
+  if (!isObject(value)) {
+    const color = expectHex(value, path);
+    return { light: color, dark: color };
+  }
+  checkKeys(value, ['light', 'dark'], path);
+  return { light: expectHex(value.light, `${path}.light`), dark: expectHex(value.dark, `${path}.dark`) };
 }
 
 function checkName(name: string, path: string): void {
@@ -246,21 +279,33 @@ function parseRange(value: unknown, path: string): string {
 function parseChart(sub: Obj, chart: ChartName, path: string): ChartConfig {
   const title = optionalBoolean(sub, 'title', path);
   const animate = optionalBoolean(sub, 'animate', path);
+  const startAtZero = optionalBoolean(sub, 'start-at-zero', path);
   const hasFrom = sub.from !== undefined;
   const hasRange = sub.range !== undefined;
   const hasLast = sub.last !== undefined;
+  const hasHeight = sub.height !== undefined;
+  const hasColor = sub.color !== undefined;
   if (hasFrom && hasRange) throw new ConfigError(`${path}: from and range can't both be set`);
   if (hasLast && chart !== 'downloads-per-release') throw new ConfigError(`${path}.last is only for downloads-per-release`);
   if (hasLast && (hasFrom || hasRange)) throw new ConfigError(`${path}: last can't be combined with from or range`);
   if (hasLast && (!Number.isInteger(sub.last) || (sub.last as number) < 1)) {
     throw new ConfigError(`${path}.last must be a whole number above zero`);
   }
+  if (hasHeight && chart !== 'stars') throw new ConfigError(`${path}.height is only for stars`);
+  if (hasHeight && (!Number.isInteger(sub.height) || (sub.height as number) < STARS_HEIGHT_MIN || (sub.height as number) > STARS_HEIGHT_MAX)) {
+    throw new ConfigError(`${path}.height must be a whole number from ${STARS_HEIGHT_MIN} to ${STARS_HEIGHT_MAX}`);
+  }
+  if (startAtZero !== undefined && chart !== 'stars') throw new ConfigError(`${path}.start-at-zero is only for stars`);
+  if (hasColor && chart !== 'stars') throw new ConfigError(`${path}.color is only for stars`);
   return {
     ...(title === undefined ? {} : { title }),
     ...(animate === undefined ? {} : { animate }),
+    ...(hasHeight ? { height: sub.height as number } : {}),
+    ...(startAtZero === undefined ? {} : { startAtZero }),
     ...(hasFrom ? { from: parseFrom(sub.from, `${path}.from`) } : {}),
     ...(hasRange ? { range: parseRange(sub.range, `${path}.range`) } : {}),
     ...(hasLast ? { last: sub.last as number } : {}),
+    ...(hasColor ? { color: parseColor(sub.color, `${path}.color`) } : {}),
   };
 }
 
@@ -269,7 +314,7 @@ function parseCharts(value: unknown): ChartsConfig {
   checkKeys(obj, ['titles', 'animate', 'stars', 'downloads-per-day', 'downloads-per-release', 'npm-downloads'], 'charts');
   const section = (chart: ChartName): ChartConfig => {
     const sub = obj[chart] === undefined ? {} : expectObject(obj[chart], `charts.${chart}`);
-    checkKeys(sub, ['title', 'animate', 'from', 'range', 'last'], `charts.${chart}`);
+    checkKeys(sub, ['title', 'animate', 'from', 'range', 'last', 'height', 'start-at-zero', 'color'], `charts.${chart}`);
     return parseChart(sub, chart, `charts.${chart}`);
   };
   const animate = optionalBoolean(obj, 'animate', 'charts');

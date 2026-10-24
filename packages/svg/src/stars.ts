@@ -2,7 +2,7 @@
 // their dates, joined by a monotone curve with a dot on each, over a fade to the baseline.
 
 import type { Dataset, StarPoint } from '@github-stats-action/core';
-import { TYPE, animates, drawShares, monotonePath, sampleStars, type CurvePoint } from '@github-stats-action/core';
+import { HEX_COLOUR_RE, TYPE, animates, drawShares, monotonePath, sampleStars, type CurvePoint } from '@github-stats-action/core';
 import {
   areaGradient,
   compact,
@@ -13,6 +13,7 @@ import {
   esc,
   finite,
   heading,
+  HEIGHT,
   ink,
   monthLabel,
   niceTicks,
@@ -33,9 +34,12 @@ import {
   type Theme,
 } from './svg';
 import { DRAW_MS, LATE_MS, animated } from './motion';
-import { windowed, windowSet } from './window';
+import { windowed, windowOf, windowSet } from './window';
 
-const boxOf = (titled: boolean): Box => ({ left: PLOT_LEFT, right: WIDTH - PAD, top: plotTop(titled), bottom: 252 });
+/** The plot's bottom sits this far above the chart's foot, where the x labels go. */
+const PLOT_FOOT = 48;
+
+const boxOf = (titled: boolean, height: number): Box => ({ left: PLOT_LEFT, right: WIDTH - PAD, top: plotTop(titled), bottom: height - PLOT_FOOT });
 
 /** The least gap between two axis labels, so they never run into each other. */
 const LABEL_GAP = 44;
@@ -55,13 +59,14 @@ export function starsChart(all: Dataset, theme: Theme): string {
   const title = 'Stars over time';
   const note = 'Cumulative stargazers';
   const titled = showTitle(dataset, 'stars');
-  const box = boxOf(titled);
+  const height = dataset.charts?.stars.height ?? HEIGHT;
+  const box = boxOf(titled, height);
   const [head] = dataset.stars;
   const last = dataset.stars.at(-1);
 
   if (!head || !last) {
     const message = all.totals.stars === 0 ? 'No stars yet' : windowSet(all, 'stars') ? 'No stars in this window' : 'No stargazer history';
-    return svgDocument(theme, title, `${title}: ${message}.`, [...heading(title, note, theme, [], titled), emptyNote(message, box, theme)]);
+    return svgDocument(theme, title, `${title}: ${message}.`, [...heading(title, note, theme, [], titled), emptyNote(message, box, theme)], [], height);
   }
 
   // the peak, not the last count: a dip (stars removed) must stay on the plot
@@ -69,7 +74,9 @@ export function starsChart(all: Dataset, theme: Theme): string {
   const ticks = niceTicks(peak);
   const top = ticks.at(-1) ?? 1;
   const yOf = (v: number): number => box.bottom - (finite(v) / top) * (box.bottom - box.top);
-  const color = seriesColor(theme, 0);
+  // the config parser checks the colour; this check keeps any other value out of the markup
+  const configured = dataset.charts?.stars.color?.[theme];
+  const color = configured && HEX_COLOUR_RE.test(configured) ? configured : seriesColor(theme, 0);
   const motion = animates(dataset.charts, 'stars');
 
   const first = dayOf(head.date);
@@ -79,23 +86,30 @@ export function starsChart(all: Dataset, theme: Theme): string {
     span > 0 ? box.left + ((finite(day) - first) / span) * (box.right - box.left) : (box.left + box.right) / 2;
 
   const samples = sampleStars(dataset.stars);
+  // with a window that cuts off history, the first point is drawn at zero and its tooltip keeps the real count;
+  // one point has no segment to start, so it stays where it is
+  const chartWindow = windowOf(all, 'stars');
+  const cutOff = chartWindow !== undefined && all.stars[0] !== undefined && chartWindow.start > all.stars[0].date;
+  const startsAtZero = cutOff && samples.length > 1 && dataset.charts?.stars.startAtZero === true;
+  const plotted = samples.map((p, i) => (i === 0 && startsAtZero ? { ...p, stars: 0 } : p));
+  const tip = (p: StarPoint, i: number): string =>
+    `${p.date}: ${plural(p.stars, 'star')}${i === 0 && startsAtZero ? ' before the window' : ''}`;
   const xs = samples.map((p) => xOf(dayOf(p.date)));
-  const points: CurvePoint[] = samples.map((p, i) => [xs[i]!, yOf(p.stars)]);
+  const points: CurvePoint[] = plotted.map((p, i) => [xs[i]!, yOf(p.stars)]);
   const line = monotonePath(points);
   const lastX = xs[xs.length - 1]!;
   // each dot pops in as the drawn line reaches it: its share of the line's length, of the draw
   const shares = drawShares(points);
   const dots = samples.slice(0, -1).map((p, i) => {
-    const tip = `${p.date}: ${plural(p.stars, 'star')}`;
     const reached = Math.round(DRAW_MS * shares[i]!);
-    const dot = `<circle cx="${px(xs[i]!)}" cy="${px(yOf(p.stars))}" r="3" fill="${color}" stroke="${ink(theme).surface}" stroke-width="2"><title>${esc(tip)}</title></circle>`;
+    const dot = `<circle cx="${px(xs[i]!)}" cy="${px(yOf(plotted[i]!.stars))}" r="3" fill="${color}" stroke="${ink(theme).surface}" stroke-width="2"><title>${esc(tip(p, i))}</title></circle>`;
     return animated(motion, 'pop', [dot], reached ? `animation-delay:${reached}ms` : '');
   });
   const hover = samples.map((p, i) => {
     // each sample owns the plot up to the midpoints with its neighbours, so a tooltip is never far from a point
     const left = i === 0 ? box.left : (xs[i - 1]! + xs[i]!) / 2;
     const right = i === samples.length - 1 ? box.right : (xs[i]! + xs[i + 1]!) / 2;
-    return `<rect x="${px(left)}" y="${box.top}" width="${px(right - left)}" height="${box.bottom - box.top}" fill-opacity="0"><title>${esc(p.date)}: ${plural(p.stars, 'star')}</title></rect>`;
+    return `<rect x="${px(left)}" y="${box.top}" width="${px(right - left)}" height="${box.bottom - box.top}" fill-opacity="0"><title>${esc(tip(p, i))}</title></rect>`;
   });
 
   return svgDocument(theme, title, `${title}: ${last.stars} stargazers on ${last.date}.`, [
@@ -110,7 +124,7 @@ export function starsChart(all: Dataset, theme: Theme): string {
     ...dots.flat(),
     ...animated(motion, 'fade', endLabel(lastX, yOf(last.stars), last, color, theme, box), `animation-delay:${LATE_MS}ms`),
     ...hover,
-  ], motion ? ['draw', 'fade', 'pop'] : []);
+  ], motion ? ['draw', 'fade', 'pop'] : [], height);
 }
 
 /** The labels of a linear time axis: both ends, then each January (or month start under a year) clear of its neighbours. */
