@@ -1,8 +1,8 @@
 import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
-import { ConfigError, DEFAULT_CONFIG, animates, loadConfig, loadConfigFile, parseConfig } from '../src/config';
+import { describe, expect, expectTypeOf, it } from 'vitest';
+import { ConfigError, DEFAULT_CONFIG, animates, loadConfig, loadConfigFile, parseConfig, type ChartName } from '../src/config';
 
 const FIXTURE = new URL('../../../fixtures/manga-downloader.stats.yml', import.meta.url);
 const EXAMPLE = new URL('../../../examples/stats.yml', import.meta.url);
@@ -364,5 +364,54 @@ describe('chart windows', () => {
     ['an unknown key next to the window', 'charts: { stars: { from: 2024, every: 2 } }', 'charts.stars.every is not a known key'],
   ])('rejects %s', (_, text, message) => {
     expect(() => parseConfig(text)).toThrow(message);
+  });
+});
+
+describe('chart variants', () => {
+  it('reads a variant of each chart as its own options, in config order', () => {
+    const config = parseConfig(`
+charts:
+  stars: { from: 2024-01-01, title: false, height: 400, start-at-zero: true }
+  stars@full: { title: false, height: 400 }
+  downloads-per-day: { range: 90d }
+  downloads-per-day@year: { range: 1y }
+  downloads-per-release@recent: { last: 5 }
+  npm-downloads@year: { range: 1y }
+`);
+    expect(config.charts.variants).toEqual([
+      { chart: 'stars', name: 'full', options: { title: false, height: 400 } },
+      { chart: 'downloads-per-day', name: 'year', options: { range: '1y' } },
+      { chart: 'downloads-per-release', name: 'recent', options: { last: 5 } },
+      { chart: 'npm-downloads', name: 'year', options: { range: '1y' } },
+    ]);
+  });
+
+  it('keeps the base charts as they are, and leaves variants out when none are set', () => {
+    const config = parseConfig('charts: { stars: { height: 400 }, stars@full: { title: false } }');
+    expect(config.charts.stars).toEqual({ height: 400 });
+    expect(parseConfig('charts: { stars: {} }').charts).not.toHaveProperty('variants');
+  });
+
+  it('applies each base chart\'s rules to its variants', () => {
+    expect(() => parseConfig('charts: { stars@x: { last: 5 } }')).toThrow('charts.stars@x.last is only for downloads-per-release');
+    expect(() => parseConfig('charts: { downloads-per-day@x: { height: 300 } }')).toThrow('charts.downloads-per-day@x.height is only for stars');
+    expect(() => parseConfig('charts: { npm-downloads@x: { color: "#fff" } }')).toThrow('charts.npm-downloads@x.color is only for stars');
+    expect(() => parseConfig('charts: { downloads-per-release@x: { from: 2024, range: 1y } }')).toThrow("charts.downloads-per-release@x: from and range can't both be set");
+    expect(() => parseConfig('charts: { stars@x: { every: 2 } }')).toThrow('charts.stars@x.every is not a known key');
+  });
+
+  it.each([
+    ['an unknown base chart', 'charts: { foo@bar: {} }', 'charts.foo@bar: unknown chart "foo"'],
+    ['a second @ in the key', 'charts: { stars@a@b: {} }', 'charts.stars@a@b: variant names are lowercase words joined by -'],
+    ['a name with a capital', 'charts: { stars@Full: {} }', 'charts.stars@Full: variant names are lowercase words joined by -'],
+    ['a name with an underscore', 'charts: { stars@full_size: {} }', 'charts.stars@full_size: variant names are lowercase words joined by -'],
+    ['a name with a double dash', 'charts: { stars@full--size: {} }', 'charts.stars@full--size: variant names are lowercase words joined by -'],
+    ['an empty name', 'charts: { stars@: {} }', 'charts.stars@: variant names are lowercase words joined by -'],
+  ])('rejects %s', (_, text, message) => {
+    expect(() => parseConfig(text)).toThrow(message);
+  });
+
+  it('leaves ChartName to the four base charts', () => {
+    expectTypeOf<ChartName>().toEqualTypeOf<'stars' | 'downloads-per-day' | 'downloads-per-release' | 'npm-downloads'>();
   });
 });

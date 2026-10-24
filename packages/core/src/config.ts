@@ -58,6 +58,13 @@ export interface ChartConfig {
   color?: { light: string; dark: string };
 }
 
+/** A named variant of a README chart, `<chart>@<name>` in the config: its own options, standalone. */
+export interface ChartVariant {
+  chart: ChartName;
+  name: string;
+  options: ChartConfig;
+}
+
 export interface ChartsConfig {
   /** Shows the visible title of the README charts; the dashboard keeps its headings. */
   titles: boolean;
@@ -67,10 +74,18 @@ export interface ChartsConfig {
   'downloads-per-day': ChartConfig;
   'downloads-per-release': ChartConfig;
   'npm-downloads': ChartConfig;
+  /** Named variants of the charts above, in config order; absent when none are set. */
+  variants?: ChartVariant[];
 }
 
 /** The charts the README SVGs are made of, by config key (the file name is the key). */
-export type ChartName = Exclude<keyof ChartsConfig, 'titles' | 'animate'>;
+export type ChartName = Exclude<keyof ChartsConfig, 'titles' | 'animate' | 'variants'>;
+
+const CHART_NAMES: ChartName[] = ['stars', 'downloads-per-day', 'downloads-per-release', 'npm-downloads'];
+/** The options a chart section takes; a variant takes the same ones. */
+const CHART_KEYS = ['title', 'animate', 'from', 'range', 'last', 'height', 'start-at-zero', 'color'];
+/** A variant's name: lowercase words joined by `-`, so it reads well in a file name. */
+const VARIANT_NAME_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 export interface StatsConfig {
   /** Shows release downloads in every output; false hides them even when the assets have counts. */
@@ -309,15 +324,30 @@ function parseChart(sub: Obj, chart: ChartName, path: string): ChartConfig {
   };
 }
 
+/** `<chart>@<name>` keys: each variant is parsed as its base chart, so the base's rules apply to it. */
+function parseVariant(key: string, obj: Obj): ChartVariant {
+  const path = `charts.${key}`;
+  const at = key.indexOf('@');
+  const chart = key.slice(0, at);
+  const name = key.slice(at + 1);
+  if (!CHART_NAMES.includes(chart as ChartName)) throw new ConfigError(`${path}: unknown chart "${chart}"`);
+  if (!VARIANT_NAME_RE.test(name)) throw new ConfigError(`${path}: variant names are lowercase words joined by -`);
+  const sub = expectObject(obj[key], path);
+  checkKeys(sub, CHART_KEYS, path);
+  return { chart: chart as ChartName, name, options: parseChart(sub, chart as ChartName, path) };
+}
+
 function parseCharts(value: unknown): ChartsConfig {
   const obj = expectObject(value, 'charts');
-  checkKeys(obj, ['titles', 'animate', 'stars', 'downloads-per-day', 'downloads-per-release', 'npm-downloads'], 'charts');
+  const variantKeys = Object.keys(obj).filter((key) => key.includes('@'));
+  checkKeys(obj, ['titles', 'animate', ...CHART_NAMES, ...variantKeys], 'charts');
   const section = (chart: ChartName): ChartConfig => {
     const sub = obj[chart] === undefined ? {} : expectObject(obj[chart], `charts.${chart}`);
-    checkKeys(sub, ['title', 'animate', 'from', 'range', 'last', 'height', 'start-at-zero', 'color'], `charts.${chart}`);
+    checkKeys(sub, CHART_KEYS, `charts.${chart}`);
     return parseChart(sub, chart, `charts.${chart}`);
   };
   const animate = optionalBoolean(obj, 'animate', 'charts');
+  const variants = variantKeys.map((key) => parseVariant(key, obj));
   return {
     titles: optionalBoolean(obj, 'titles', 'charts') ?? true,
     ...(animate === undefined ? {} : { animate }),
@@ -325,6 +355,7 @@ function parseCharts(value: unknown): ChartsConfig {
     'downloads-per-day': section('downloads-per-day'),
     'downloads-per-release': section('downloads-per-release'),
     'npm-downloads': section('npm-downloads'),
+    ...(variants.length > 0 ? { variants } : {}),
   };
 }
 

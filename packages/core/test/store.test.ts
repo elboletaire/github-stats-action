@@ -120,6 +120,20 @@ describe('pruneDerived', () => {
     expect(await readdir(join(dir, 'badges')).then((names) => names.sort())).toEqual(['logo.svg', 'stars-weekly.svg']);
   });
 
+  it('removes the files of a dropped chart variant, and keeps the user files next to them', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'stats-prune-'));
+    await writeOutputFiles(dir, [
+      { path: 'charts/stars-light.svg', content: '<svg/>' },
+      { path: 'charts/stars-full-light.svg', content: '<svg/>' },
+      { path: 'charts/stars-full-dark.svg', content: '<svg/>' },
+      { path: 'charts/downloads-per-release-recent-dark.svg', content: '<svg/>' },
+      { path: 'charts/logo.svg', content: '<svg/>' },
+      { path: 'charts/stars-full.svg', content: '<svg/>' },
+    ]);
+    await pruneDerived(dir, [{ path: 'charts/stars-light.svg', content: '' }]);
+    expect((await readdir(join(dir, 'charts'))).sort()).toEqual(['logo.svg', 'stars-full.svg', 'stars-light.svg']);
+  });
+
   it('does nothing when the derived folders do not exist yet', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'stats-prune-'));
     await expect(pruneDerived(dir, [])).resolves.toBeUndefined();

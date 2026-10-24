@@ -160,7 +160,7 @@ export async function writeDerived(dir: string, dataset: Dataset, csv: string): 
  * (a logo, a hand-made chart) and is never removed.
  */
 const GENERATED =
-  /^(charts\/(stars|downloads-per-day|downloads-per-release|npm-downloads)-(light|dark)\.svg|badges\/(downloads|release-latest|stars|stars-(week|month)|docker-pulls|docker-pulls-month|npm-downloads|downloads-[A-Za-z0-9_-]+|npm-[A-Za-z0-9._~-]+|counter-[A-Za-z0-9_-]+)\.(json|svg))$/;
+  /^(charts\/(stars|downloads-per-day|downloads-per-release|npm-downloads)(-[a-z0-9]+(-[a-z0-9]+)*)?-(light|dark)\.svg|badges\/(downloads|release-latest|stars|stars-(week|month)|docker-pulls|docker-pulls-month|npm-downloads|downloads-[A-Za-z0-9_-]+|npm-[A-Za-z0-9._~-]+|counter-[A-Za-z0-9_-]+)\.(json|svg))$/;
 
 /**
  * Removes the generated files of `charts/` and `badges/` that `files` no longer produces, e.g. the download

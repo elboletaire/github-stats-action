@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildNpmData, seriesColor, type Dataset, type MeasuredDay, type ReleaseRow } from '@github-stats-action/core';
+import { buildNpmData, seriesColor, type ChartVariant, type Dataset, type MeasuredDay, type ReleaseRow } from '@github-stats-action/core';
 import { renderCharts } from '../src/index';
 import { buckets } from '../src/motion';
 import { niceTicks } from '../src/svg';
@@ -531,5 +531,70 @@ describe('stars height', () => {
     const svg = chart(renderCharts({ ...data, stars: [], totals: { ...data.totals, stars: 0 } }), 'charts/stars-light.svg');
     expect(svg).toContain('No stars yet');
     expect(svg).toMatch(/^<svg [^>]*height="250" viewBox="0 0 800 250"/);
+  });
+});
+
+describe('chart variants', () => {
+  const CHARTS = { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {} };
+  const VARIANTS: ChartVariant[] = [
+    { chart: 'stars', name: 'full', options: { title: false, height: 400 } },
+    { chart: 'downloads-per-day', name: 'year', options: { range: '1y' } },
+    { chart: 'downloads-per-release', name: 'recent', options: { last: 5 } },
+    { chart: 'npm-downloads', name: 'year', options: { range: '1y' } },
+  ];
+  const withVariants = async (variants: ChartVariant[] = VARIANTS): Promise<Dataset> => ({ ...(await fixture()), charts: { ...CHARTS, variants } });
+  const npm = () =>
+    buildNpmData([
+      {
+        label: 'pkg-0',
+        series: {
+          schema: 1 as const,
+          package: 'pkg-0',
+          days: Array.from({ length: 60 }, (_, k) => ({ date: new Date(Date.UTC(2026, 6, 1) + k * 86_400_000).toISOString().slice(0, 10), downloads: (k % 7) + 1 })),
+        },
+      },
+    ])!;
+
+  it('writes a light and a dark file for each variant, right after its base chart', async () => {
+    const paths = renderCharts(await withVariants()).map((f) => f.path);
+    expect(paths.slice(0, 8)).toEqual([
+      'charts/stars-light.svg',
+      'charts/stars-dark.svg',
+      'charts/stars-full-light.svg',
+      'charts/stars-full-dark.svg',
+      'charts/downloads-per-day-light.svg',
+      'charts/downloads-per-day-dark.svg',
+      'charts/downloads-per-day-year-light.svg',
+      'charts/downloads-per-day-year-dark.svg',
+    ]);
+    expect(paths).toContain('charts/downloads-per-release-recent-dark.svg');
+    expect(paths).not.toContain('charts/npm-downloads-year-light.svg');
+  });
+
+  it('draws a variant with its own options and leaves its base as it was', async () => {
+    const plain = renderCharts(await fixture());
+    const files = renderCharts(await withVariants());
+    const full = chart(files, 'charts/stars-full-light.svg');
+    expect(full).toMatch(/^<svg [^>]*height="400" viewBox="0 0 800 400"/);
+    // the accessible title stays in the file; only the visible one goes
+    expect(full.replace(/<(title|desc) id="[^"]*">[^<]*<\/\1>/g, '')).not.toContain('>Stars over time<');
+    expect(chart(files, 'charts/stars-light.svg')).toBe(chart(plain, 'charts/stars-light.svg'));
+    expect(chart(files, 'charts/stars-light.svg')).toContain('>Stars over time<');
+  });
+
+  it('draws a variant of a download chart from its own window', async () => {
+    const files = renderCharts(await withVariants());
+    expect(chart(files, 'charts/downloads-per-day-year-light.svg')).not.toBe(chart(files, 'charts/downloads-per-day-light.svg'));
+    expect(chart(files, 'charts/downloads-per-release-recent-light.svg')).not.toBe(chart(files, 'charts/downloads-per-release-light.svg'));
+  });
+
+  it('follows the base chart availability: download variants need release downloads, npm variants need npm', async () => {
+    const noDownloads = renderCharts({ ...(await withVariants()), releaseDownloads: false });
+    expect(noDownloads.map((f) => f.path).some((path) => path.includes('downloads-per-'))).toBe(false);
+    expect(noDownloads.map((f) => f.path)).toContain('charts/stars-full-light.svg');
+
+    const withNpm = renderCharts({ ...(await withVariants()), npm: npm() });
+    expect(withNpm.map((f) => f.path)).toContain('charts/npm-downloads-year-dark.svg');
+    expect(renderCharts(await withVariants()).map((f) => f.path)).not.toContain('charts/npm-downloads-year-dark.svg');
   });
 });
