@@ -271,6 +271,38 @@ describe('stars colour', () => {
   });
 });
 
+describe('badge colours', () => {
+  it('is absent when not configured, so the defaults apply', () => {
+    expect(parseConfig('').badges).toBeUndefined();
+  });
+
+  it('keeps a six-digit colour lowercase, without the hash', () => {
+    expect(parseConfig('badges:\n  downloads: { color: "#4CB70E" }\n').badges).toEqual({ downloads: { color: '4cb70e' } });
+  });
+
+  it('expands #rgb to six digits', () => {
+    expect(parseConfig('badges:\n  stars: { color: "#FA0" }\n').badges).toEqual({ stars: { color: 'ffaa00' } });
+  });
+
+  it('takes any badge name, since the names come from the data', () => {
+    expect(parseConfig('badges:\n  counter-updates: { color: "#fff" }\n').badges).toEqual({ 'counter-updates': { color: 'ffffff' } });
+  });
+
+  it.each([
+    ['a colour name', 'badges: { downloads: { color: green } }', 'badges.downloads.color must be a hex colour such as #e3b341'],
+    ['a bare hex that YAML reads as a comment', 'badges:\n  downloads:\n    color: #4cb70e\n', 'badges.downloads.color must be a hex colour'],
+    ['a hex of the wrong length', 'badges: { downloads: { color: "#4cb70" } }', 'badges.downloads.color must be a hex colour'],
+    ['a light and dark pair', 'badges: { downloads: { color: { light: "#9a6700", dark: "#e3b341" } } }', 'badges.downloads.color must be a hex colour'],
+    ['a missing colour', 'badges: { downloads: {} }', 'badges.downloads.color must be a hex colour'],
+    ['an entry that is not a mapping', 'badges: { downloads: "#4cb70e" }', 'badges.downloads must be a mapping'],
+    ['an unknown key in an entry', 'badges: { downloads: { color: "#4cb70e", label: x } }', 'badges.downloads.label is not a known key'],
+    ['a badges list', 'badges: [ "#4cb70e" ]', 'badges must be a mapping'],
+  ])('rejects %s', (_, text, message) => {
+    expect(() => parseConfig(text)).toThrow(ConfigError);
+    expect(() => parseConfig(text)).toThrow(message);
+  });
+});
+
 describe('npm', () => {
   it('is absent when not configured, so no npm work runs', () => {
     expect(parseConfig('').npm).toBeUndefined();

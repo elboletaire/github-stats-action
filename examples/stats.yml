@@ -10,4 +10,6 @@ epochs:                     # dashboard periods and chart markers
   - { version: v2.0.0, label: Desktop app }
 platforms:                  # label rules for asset names
   - { match: "acme-desktop-*-windows-x64-setup.exe", label: Windows installer }
+badges:                     # badge colours by name; the period badges follow their base
+  downloads: { color: "#4cb70e" }
 docker: acme/acme           # optional Docker Hub image

@@ -278,6 +278,13 @@ Each badge is written as `badges/<name>.json` (shields.io endpoint) and `badges/
 | `npm-<package>`, `npm-<package>-week` | one package over the last 30 / 7 days | the package has stored days |
 | `counter-<name>` | downloads of a counter's assets | a counter is configured |
 
+A badge's colour is set under `badges` in the config, by its name, e.g. green downloads. A period badge takes its base badge's colour unless it has its own entry (see [Config](#config)):
+
+```yaml
+badges:
+  downloads: { color: "#4cb70e" }   # downloads, downloads-week and downloads-month
+```
+
 Each `.json` file is a shields.io endpoint, so it works in any shields.io badge:
 
 ```md
@@ -316,6 +323,8 @@ epochs:                     # dashboard periods and chart markers
   - { version: v2.0.0, label: Desktop app }
 platforms:                  # label rules for asset names
   - { match: "acme-desktop-*-windows-x64-setup.exe", label: Windows installer }
+badges:                     # badge colours by name; the period badges follow their base
+  downloads: { color: "#4cb70e" }
 charts:                                        # README SVG charts; animate also covers the dashboard
   titles: true                                 # false hides every chart's title
   animate: true                                # false keeps every chart still; a chart's own animate wins
@@ -344,6 +353,7 @@ npm:                        # optional npm packages, counted daily
   - `last` is for `downloads-per-release` only.
   - Variants: `<chart>@<name>` renders another version of a chart with its own options, e.g. `stars@full: { title: false, height: 400 }`. The name is lowercase words joined by `-`. A variant is standalone: it takes none of its base's options, only `titles` and `animate`. Its files are `charts/<chart>-<name>-light.svg` and `-dark.svg`, and it's available when its base is (download charts need release downloads, npm needs `npm`). The `charts/<chart>-*-(light|dark).svg` files are the action's: a variant removed from the config has its files pruned, so don't name your own files that way.
   - The dashboard isn't windowed: it has its own zoom. `height`, `start-at-zero` and `color` are for `stars` only, and an error on another chart; the dashboard ignores them. `height` (pixels, 200 to 600, default 300) grows the plot and moves the x labels down with it; the title stays put. `start-at-zero` (default `false`) needs a window: the first segment starts at zero and takes in the stars from before the window. It's cosmetic: the later points and the y axis keep the real totals, and the first dot's tooltip keeps the real count. `color` is a quoted hex colour (`"#e3b341"`, or `"#fa0"`) for both modes, or `{ light: "#9a6700", dark: "#e3b341" }` for one per mode; absent means the palette's first colour.
+- `badges`: a map from a badge's name (as in the table above, e.g. `downloads`, `downloads-cli`, `stars-week`) to `{ color }`, one quoted hex colour in the form of `charts.stars.color` (`"#4cb70e"` or `"#fa0"`). A period badge takes its base badge's colour unless it has its own entry. Badge names come from the data, so a name that matches no badge is a warning, not an error. Absent means the default colours.
 - `docker`: `namespace/name`.
 
 Globs: `*` matches any run of characters, everything else is literal.

@@ -17,6 +17,7 @@ import {
   type StatsConfig,
 } from '@github-stats-action/core';
 import { renderCharts } from '@github-stats-action/svg';
+import { warnUnknownBadges } from './run';
 
 export interface RenderOptions {
   /** Folder holding `<owner>/<repo>/` (a data branch checkout, or an exported copy). */
@@ -51,7 +52,8 @@ export async function renderData(options: RenderOptions): Promise<RenderResult> 
   const dir = repoDir(options.outDir, repo);
   await mkdir(dir, { recursive: true });
   await writeDerived(dir, dataset, csv);
-  const files = [...renderCharts(dataset), ...renderBadges(dataset)];
+  const files = [...renderCharts(dataset), ...renderBadges(dataset, options.config.badges)];
+  warnUnknownBadges(dataset, options.config, options.log);
   await writeOutputFiles(dir, files);
   await pruneDerived(dir, files);
   await writeOutputFiles(options.outDir, dashboardFiles([dataset], { mode: 'standalone' }));

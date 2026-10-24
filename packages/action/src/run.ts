@@ -2,7 +2,7 @@
 // Everything is fetched before anything is written, so a failed run leaves the branch as it was.
 
 import { join } from 'node:path';
-import { renderBadges } from '@github-stats-action/badges';
+import { renderBadges, unknownBadges } from '@github-stats-action/badges';
 import { dashboardFiles } from '@github-stats-action/dashboard';
 import {
   createClient,
@@ -74,12 +74,19 @@ export function summaryLine(dataset: Dataset): string {
   return `${dataset.repo}: ${parts.join(', ')}`;
 }
 
+/** Warns about each configured badge name no badge of the dataset could take, once per run. */
+export function warnUnknownBadges(dataset: Dataset, config: StatsConfig, log: Logger): void {
+  for (const name of unknownBadges(dataset, config.badges)) {
+    log.warning(`badges.${name} is configured but no badge has that name`);
+  }
+}
+
 /** Rebuilds the derived files, charts, badges and dashboard from the stored snapshots of `repo`. */
 export async function writeDerivedOutputs(dataDir: string, repo: string, config: StatsConfig, now: Date): Promise<Dataset> {
   const dir = repoDir(dataDir, repo);
   const { dataset, csv } = await deriveRepo(dir, repo, config, now);
   await writeDerived(dir, dataset, csv);
-  const files = [...renderCharts(dataset), ...renderBadges(dataset)];
+  const files = [...renderCharts(dataset), ...renderBadges(dataset, config.badges)];
   await writeOutputFiles(dir, files);
   await pruneDerived(dir, files);
   await writeOutputFiles(dataDir, dashboardFiles(await readDatasets(dataDir), { mode: 'standalone' }));
@@ -141,6 +148,7 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
   }
 
   const dataset = await writeDerivedOutputs(options.dataDir, repo, config, now);
+  warnUnknownBadges(dataset, config, log);
 
   if (options.pages) await writePagesSite(options.pages, repo, dataset);
 
