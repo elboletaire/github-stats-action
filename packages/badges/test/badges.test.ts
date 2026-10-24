@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { addDays, buildNpmData, type Dataset, type MeasuredDay, pruneDerived, writeOutputFiles } from '@github-stats-action/core';
 import { describe, expect, it } from 'vitest';
-import { buildBadges, endpointJson, renderBadges } from '../src/badges';
+import { buildBadges, COLORS, endpointJson, renderBadges, unknownBadges } from '../src/badges';
 import { flatSvg } from '../src/svg';
 
 const fixture: Dataset = JSON.parse(readFileSync(join(import.meta.dirname, '../../../fixtures/dataset.json'), 'utf8'));
@@ -155,6 +155,54 @@ describe('endpointJson', () => {
   it('is the shields.io endpoint shape', () => {
     const json = JSON.parse(endpointJson({ name: 'stars', label: 'stars', message: '1.2k', color: 'yellow' }));
     expect(json).toEqual({ schemaVersion: 1, label: 'stars', message: '1.2k', color: 'yellow' });
+  });
+});
+
+describe('badge colours', () => {
+  const measured = dataset({ measuredDaily: consecutive(40), stars: [] });
+  const colour = (badges: ReturnType<typeof buildBadges>, name: string) => badges.find((b) => b.name === name)?.color;
+
+  it('keeps the default colours without a configuration', () => {
+    expect(colour(buildBadges(measured), 'downloads')).toBe(COLORS.total);
+    expect(colour(buildBadges(measured), 'downloads-week')).toBe(COLORS.total);
+  });
+
+  it('applies a configured colour to its badge only', () => {
+    const badges = buildBadges(measured, { downloads: { color: '4cb70e' } });
+    expect(colour(badges, 'downloads')).toBe('4cb70e');
+    expect(colour(badges, 'downloads-app')).toBe(COLORS.group);
+    expect(colour(badges, 'stars')).toBe(COLORS.stars);
+  });
+
+  it('gives a period badge its base badge colour', () => {
+    const badges = buildBadges(measured, { downloads: { color: '4cb70e' } });
+    expect(colour(badges, 'downloads-week')).toBe('4cb70e');
+    expect(colour(badges, 'downloads-month')).toBe('4cb70e');
+  });
+
+  it('lets a period badge with its own entry keep it over its base', () => {
+    const badges = buildBadges(measured, { downloads: { color: '4cb70e' }, 'downloads-week': { color: 'ff0000' } });
+    expect(colour(badges, 'downloads-week')).toBe('ff0000');
+    expect(colour(badges, 'downloads-month')).toBe('4cb70e');
+  });
+
+  it('does not colour a counter named like a period from its base', () => {
+    const counters = [{ ...fixture.counters[0]!, name: 'x-week', label: 'x' }];
+    const badges = buildBadges(dataset({ counters, measuredDaily: [], stars: [] }), { 'counter-x': { color: 'ff0000' } });
+    expect(colour(badges, 'counter-x-week')).toBe(COLORS.counter);
+    expect(unknownBadges(dataset({ counters, measuredDaily: [], stars: [] }), { 'counter-x': { color: 'ff0000' } })).toEqual(['counter-x']);
+  });
+
+  it('knows the period badges the history is too short for, so they are not reported', () => {
+    const short = dataset({ measuredDaily: [], stars: [] });
+    expect(message(buildBadges(short), 'downloads-week')).toBeUndefined();
+    const configured = { 'downloads-week': { color: '000000' }, 'stars-month': { color: '000000' }, nope: { color: '000000' } };
+    expect(unknownBadges(short, configured)).toEqual(['nope']);
+  });
+
+  it('reports the configured names that no badge could take', () => {
+    const configured = { downloads: { color: '4cb70e' }, 'downloads-cli': { color: 'ff0000' }, nope: { color: '000000' } };
+    expect(unknownBadges(measured, configured)).toEqual(['nope']);
   });
 });
 

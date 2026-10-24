@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   loadConfig,
   mergeTrafficDays,
+  parseConfig,
   repoDir,
   toTrafficResponse,
   writeStargazers,
@@ -95,6 +96,23 @@ describe('render from a data folder', () => {
     await expect(
       renderData({ dataRoot: data, outDir: data, config: await loadConfig(CONFIG), log }),
     ).rejects.toThrow('no snapshots under');
+  });
+});
+
+describe('badge colours from the config', () => {
+  it('colours the badge it names, and warns about a name no badge has', async () => {
+    const data = await mkdtemp(join(tmpdir(), 'render-data-'));
+    const out = await mkdtemp(join(tmpdir(), 'render-out-'));
+    await fixtureData(data);
+    const warning = vi.fn();
+    const config = parseConfig(`${(await readFile(CONFIG, 'utf8'))}\nbadges:\n  downloads: { color: "#4cb70e" }\n  nope: { color: "#000" }\n`);
+
+    await renderData({ dataRoot: data, outDir: out, config, log: { info: vi.fn(), warning } });
+
+    const badge = JSON.parse(await readFile(join(out, REPO, 'badges', 'downloads.json'), 'utf8')) as { color: string };
+    expect(badge.color).toBe('4cb70e');
+    expect(warning).toHaveBeenCalledTimes(1);
+    expect(warning).toHaveBeenCalledWith(expect.stringContaining('badges.nope'));
   });
 });
 

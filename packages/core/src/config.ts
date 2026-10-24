@@ -87,6 +87,12 @@ const CHART_KEYS = ['title', 'animate', 'from', 'range', 'last', 'height', 'star
 /** A variant's name: lowercase words joined by `-`, so it reads well in a file name. */
 const VARIANT_NAME_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
+/** One badge's options, under its name in `badges`. */
+export interface BadgeConfig {
+  /** 6 hex digits without the '#', as `Badge.color` takes them. */
+  color: string;
+}
+
 export interface StatsConfig {
   /** Shows release downloads in every output; false hides them even when the assets have counts. */
   releases: boolean;
@@ -100,6 +106,8 @@ export interface StatsConfig {
   docker?: string;
   /** npm packages to count daily; absent means no npm work at all. */
   npm?: NpmRule[];
+  /** Badge colours by badge name; absent means the defaults. */
+  badges?: Record<string, BadgeConfig>;
 }
 
 export class ConfigError extends Error {
@@ -185,6 +193,20 @@ function parseColor(value: unknown, path: string): { light: string; dark: string
   }
   checkKeys(value, ['light', 'dark'], path);
   return { light: expectHex(value.light, `${path}.light`), dark: expectHex(value.dark, `${path}.dark`) };
+}
+
+/** Each badge's colour, expanded from `#rgb` to 6 hex digits. Badge names can't be checked here: they come from the data. */
+function parseBadges(value: unknown): Record<string, BadgeConfig> {
+  const obj = expectObject(value, 'badges');
+  return Object.fromEntries(
+    Object.entries(obj).map(([name, item]) => {
+      const path = `badges.${name}`;
+      const sub = expectObject(item, path);
+      checkKeys(sub, ['color'], path);
+      const hex = expectHex(sub.color, `${path}.color`).slice(1);
+      return [name, { color: hex.length === 3 ? [...hex].map((c) => c + c).join('') : hex }];
+    }),
+  );
 }
 
 function checkName(name: string, path: string): void {
@@ -413,7 +435,7 @@ export function parseConfig(text: string): StatsConfig {
   }
   if (doc === null || doc === undefined) return structuredClone(DEFAULT_CONFIG);
   const root = expectObject(doc, 'the file');
-  checkKeys(root, ['releases', 'groups', 'ignore', 'counters', 'epochs', 'platforms', 'charts', 'docker', 'npm'], 'top level');
+  checkKeys(root, ['releases', 'groups', 'ignore', 'counters', 'epochs', 'platforms', 'charts', 'docker', 'npm', 'badges'], 'top level');
 
   const config: StatsConfig = {
     releases: optionalBoolean(root, 'releases', 'top level') ?? true,
@@ -430,6 +452,7 @@ export function parseConfig(text: string): StatsConfig {
     config.docker = docker;
   }
   if (root.npm !== undefined) config.npm = parseNpm(root.npm);
+  if (root.badges !== undefined) config.badges = parseBadges(root.badges);
   return config;
 }
 
