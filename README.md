@@ -110,6 +110,7 @@ Use `@v1` (the latest 1.x release, moved by the release workflow) or pin a full 
 | `pages` | `false` | Write the static site to `pages-dir`, for the Pages actions. |
 | `pages-dir` | `_site` | Where the Pages site goes. |
 | `pages-traffic` | `false` | Include traffic in the Pages site. |
+| `cloudflare-token` | unset | Token with *Account Analytics: Read* for the `cloudflare` source, see [Cloudflare Analytics Engine](#cloudflare-analytics-engine). |
 | `dry-run` | `false` | Collect and build, but don't commit or push. |
 
 Outputs: `pages-dir` (absolute, empty when `pages` is off), `dataset` (absolute path of the repo's `dataset.json`) and `summary` (one line of totals).
@@ -174,6 +175,56 @@ npm:
 [![npm downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FOWNER%2FREPO%2Fstats-data%2FOWNER%2FREPO%2Fbadges%2Fnpm-downloads.json)](https://www.npmjs.com/org/acme)
 ```
 
+## Cloudflare Analytics Engine
+
+A Cloudflare Worker that writes one Analytics Engine data point per check (an update check, say) can feed this action. Analytics Engine keeps raw points for about 3 months, so the action stores their daily aggregates on the data branch, and the history outlives that window. Only daily counts are stored: no IPs, hashes or per-install data.
+
+Describe the dataset in `.github/stats.yml`. `day` and each dimension's `column` name a `blob1` to `blob20` column, and `users` is `index1`, the daily user hash:
+
+```yaml
+cloudflare:
+  account-id: 0123456789abcdef0123456789abcdef
+  dataset: acme_checks
+  label: Update checks          # what an event is called in charts and tables
+  users: index1                 # the daily user hash, counted as distinct values
+  day: blob5                    # optional; default: the UTC day of the point's timestamp
+  primary: { client: gui }      # optional; the headline users only count these rows
+  note: The CLI only checks on --version; users are approximate daily counts.
+  dimensions:
+    client:  { column: blob1, label: App vs CLI }
+    version: { column: blob2, label: Version, kind: semver, released: true }
+    os:      { column: blob3, label: OS }
+counters:
+  - { name: updates, label: In-app updates, assets: "acme-*-SHA256SUMS.txt", from: v1.19.0, per-user: true }
+```
+
+The token is a secret passed as the `cloudflare-token` input. The CLI reads `CLOUDFLARE_API_TOKEN` instead:
+
+```yaml
+      - uses: elboletaire/github-stats-action@v1
+        with:
+          cloudflare-token: ${{ secrets.CLOUDFLARE_TOKEN }}
+```
+
+- **First run:** backfills the last 90 days. **Later runs:** fetch from 3 days before the last stored day, so late points overwrite the stored values. Only complete UTC days are stored; today never is.
+- **`released: true`** on one `kind: semver` dimension counts a row only when its version is a published, non-prerelease GitHub release (tag without a leading `v`) and its timestamp is at or after that release's publish time. Test builds of unreleased versions drop out.
+- **`per-user`** on a counter gives its increase over the last 30 days, divided by the mean daily users over the same days. It needs `cloudflare`, at least 14 stored days in the window, and a snapshot from before the window; otherwise it is left out.
+- **Stored as** `<owner>/<repo>/cloudflare/<dataset>.json`, one line per day. Like `npm/`, these files are never rebuilt or pruned.
+- **Failures** (a request error, no token) are warnings: the run goes on and the stored days stay.
+
+What you get:
+
+- **Dashboard:** a Usage section after npm, with the 7-day average of daily users, a zoomable daily chart, and a share table per dimension for the last 30 days.
+- **Chart:** `charts/cloudflare-users-light.svg` / `-dark.svg`, daily users with the events as a faint second line. Limit it with `charts: { cloudflare-users: { range: 90d } }`.
+- **Badges:** `users-daily` (the 7-day average of daily users) and `users-daily-latest` (the latest day), see [Badges](#badges).
+- **CSV:** `cf_users` (approximate) and `cf_events` columns in `daily.csv`.
+
+Caveats:
+
+- Every users figure is approximate. The hash changes daily, so one install that checks on several days counts on each; the 7-day figure is an average of daily counts, not distinct users over the week.
+- Events are the sum of Analytics Engine's sample intervals, so they are estimates when the dataset is sampled.
+- Analytics Engine counts checks, not downloads or installs. Counters still count release assets.
+
 ## Pages (optional)
 
 A repo has one Pages site. If the repo already serves a website from Pages, keep `pages` off and read the dashboard from the data branch instead (see [Reading the dashboard](#reading-the-dashboard)).
@@ -230,6 +281,7 @@ dashboard/index.html              self-contained dashboard, all repos on the bra
   snapshots/YYYY-MM-DD.json       raw snapshot of the day (UTC); a rerun the same day overwrites it
   stargazers.json                 star timestamps, no logins
   npm/<slug>.json                 daily npm counts per package, sorted (npm: in the config); slug: `@scope/name` becomes `scope--name`
+  cloudflare/<dataset>.json       daily Analytics Engine aggregates, sorted (cloudflare: in the config)
   traffic/views.json              daily series, merged by date           (traffic: true)
   traffic/clones.json             same                                   (traffic: true)
   traffic/referrers/YYYY-MM-DD.json   GitHub's 14-day aggregate that day  (traffic: true)
@@ -240,7 +292,7 @@ dashboard/index.html              self-contained dashboard, all repos on the bra
   badges/*.json, badges/*.svg     derived: shields.io endpoint JSON and flat SVG badges
 ```
 
-Everything except `snapshots/`, `stargazers.json`, `npm/` and `traffic/` is rebuilt on every run, so the snapshots and the stored counts are the only source of truth. Generated charts and badges that a run no longer produces are deleted; folders and files the action doesn't generate (a hand-made `charts/logo.svg`) are left alone. Don't name your own files in `charts/` or `badges/` with the generated prefixes (`downloads-*`, `npm-*`, `counter-*`): a file that looks generated is pruned.
+Everything except `snapshots/`, `stargazers.json`, `npm/`, `cloudflare/` and `traffic/` is rebuilt on every run, so the snapshots and the stored counts are the only source of truth. Generated charts and badges that a run no longer produces are deleted; folders and files the action doesn't generate (a hand-made `charts/logo.svg`) are left alone. Don't name your own files in `charts/` or `badges/` with the generated prefixes (`downloads-*`, `npm-*`, `counter-*`): a file that looks generated is pruned.
 
 ## Reading the dashboard
 
@@ -283,6 +335,8 @@ Each badge is written as `badges/<name>.json` (shields.io endpoint) and `badges/
 | `npm-downloads-week` | the same over the last 7 days | as above |
 | `npm-downloads-total` | npm downloads over every stored day, e.g. `113k total` | as above |
 | `npm-<package>`, `npm-<package>-week` | one package over the last 30 / 7 days | the package has stored days |
+| `users-daily` | the 7-day average of daily users (approximate), labelled `daily users` | a `cloudflare` dataset has stored days |
+| `users-daily-latest` | daily users on the latest stored day (approximate) | as above |
 | `counter-<name>` | downloads of a counter's assets | a counter is configured |
 
 A badge's colour is set under `badges` in the config, by its name, e.g. green downloads. A period badge takes its base badge's colour unless it has its own entry (see [Config](#config)):
@@ -347,7 +401,7 @@ npm:                        # optional npm packages, counted daily
 
 - `groups`: `name` (letters, digits, `-`, `_`; `other` and `ignored` are reserved, and so are `week`, `month`, or a name ending in `-week`, `_week`, `-month` or `_month`, which the period badges use), `label` (defaults to the name), `assets` (a glob). The first matching group wins, so list the more specific glob first. Without `groups`, every asset counts as `downloads`.
 - `ignore`: globs on asset names.
-- `counters`: `name`, `label`, `assets`, and `from`, an optional quoted semver; releases before it aren't counted. A counter's assets still count as downloads unless `ignore` also names them.
+- `counters`: `name`, `label`, `assets`, and `from`, an optional quoted semver; releases before it aren't counted. A counter's assets still count as downloads unless `ignore` also names them. `per-user: true` adds a per-daily-user figure and needs `cloudflare`.
 - `epochs`: `version` as a quoted semver (`"v1.11.0"`, so YAML doesn't read `1.11` as a number), `label` defaults to the version. Optional.
 - `platforms`: `match` and `label`. Without a matching rule, the asset name minus the tag, repo name and archive suffixes is used.
 - `releases`: `true` by default. Release downloads show only when some release has an asset that counts (not ignored), so a repo without release assets gets no download views. `false` hides them even when assets count. The snapshots keep the counts either way, so turning it back on restores the history.
@@ -361,6 +415,7 @@ npm:                        # optional npm packages, counted daily
   - Variants: `<chart>@<name>` renders another version of a chart with its own options, e.g. `stars@full: { title: false, height: 400 }`. The name is lowercase words joined by `-`. A variant is standalone: it takes none of its base's options, only `titles` and `animate`. Its files are `charts/<chart>-<name>-light.svg` and `-dark.svg`, and it's available when its base is (download charts need release downloads, npm needs `npm`). The `charts/<chart>-*-(light|dark).svg` files are the action's: a variant removed from the config has its files pruned, so don't name your own files that way.
   - The dashboard isn't windowed: it has its own zoom. `height`, `start-at-zero` and `color` are for `stars` only, and an error on another chart; the dashboard ignores them. `height` (pixels, 200 to 600, default 300) grows the plot and moves the x labels down with it; the title stays put. `start-at-zero` (default `false`) needs a window: the first segment starts at zero and takes in the stars from before the window. It's cosmetic: the later points and the y axis keep the real totals, and the first dot's tooltip keeps the real count. `color` is a quoted hex colour (`"#e3b341"`, or `"#fa0"`) for both modes, or `{ light: "#9a6700", dark: "#e3b341" }` for one per mode; absent means the palette's first colour.
 - `badges`: a map from a badge's name (as in the table above, e.g. `downloads`, `downloads-cli`, `stars-week`) to `{ color }`, one quoted hex colour in the form of `charts.stars.color` (`"#4cb70e"` or `"#fa0"`). A period badge takes its base badge's colour unless it has its own entry. Badge names come from the data, so a name that matches no badge is a warning, not an error. Absent means the default colours.
+- `cloudflare`: an Analytics Engine dataset, see [Cloudflare Analytics Engine](#cloudflare-analytics-engine). Absent means no Cloudflare requests.
 - `docker`: `namespace/name`.
 
 Globs: `*` matches any run of characters, everything else is literal.

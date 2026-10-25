@@ -14,6 +14,7 @@ import { releases } from './sections/releases';
 import { snapshots } from './sections/snapshots';
 import { stars } from './sections/stars';
 import { traffic } from './sections/traffic';
+import { usage } from './sections/usage';
 import type { Section } from './sections/common';
 import { versions } from './sections/versions';
 
@@ -37,6 +38,7 @@ export function mount(root: HTMLElement, d: Dataset, choice?: RepoChoice): void 
     d.releaseDownloads ? measured(d) : null,
     d.releaseDownloads ? platforms(d) : null,
     npm(d),
+    usage(d),
     stars(d),
     traffic(d),
     snapshots(d),
@@ -64,10 +66,16 @@ export function joinWords(words: readonly string[]): string {
 export function subtitle(d: Dataset): string {
   if (d.releaseDownloads) {
     const labels = countedGroups(d).map((g) => g.label).join(' and ');
-    return `GitHub release downloads for ${esc(d.repo)}${labels ? `, split into ${esc(labels)}` : ''}${d.npm ? ', and npm downloads' : ''}.`;
+    const others = [...(d.npm ? ['npm downloads'] : []), ...(d.cloudflare ? [cloudflareSource(d.cloudflare.label)] : [])];
+    return `GitHub release downloads for ${esc(d.repo)}${labels ? `, split into ${esc(labels)}` : ''}${others.length ? `, and ${joinWords(others)}` : ''}.`;
   }
-  const others = ['Stars', ...(d.totals.docker !== null ? ['Docker pulls'] : []), ...(d.npm ? ['npm downloads'] : [])];
+  const others = ['Stars', ...(d.totals.docker !== null ? ['Docker pulls'] : []), ...(d.npm ? ['npm downloads'] : []), ...(d.cloudflare ? [cloudflareSource(d.cloudflare.label)] : [])];
   return `${joinWords(others)} for ${esc(d.repo)}.`;
+}
+
+/** The Cloudflare dataset as a source in a sentence: its label, lowercased, from Cloudflare. */
+function cloudflareSource(label: string): string {
+  return `${esc(label.toLowerCase())} from Cloudflare`;
 }
 
 function header(d: Dataset, choice: RepoChoice | undefined): HTMLElement {
@@ -96,8 +104,9 @@ function footer(d: Dataset): HTMLElement {
     "GitHub's repository counts",
     ...(d.totals.docker !== null ? ['Docker Hub pulls'] : []),
     ...(d.npm ? ["npm's daily download counts"] : []),
+    ...(d.cloudflare ? ['Cloudflare Analytics Engine daily counts (users are approximate)'] : []),
   ];
-  const where = d.npm ? 'as stored on the data branch' : 'as stored in the daily snapshots';
+  const where = d.npm || d.cloudflare ? 'as stored on the data branch' : 'as stored in the daily snapshots';
   const el = document.createElement('footer');
   el.innerHTML = `<p>Data built ${esc(isoDay(d.generatedAt))}, from the snapshot taken ${esc(d.snapshotAt)}. Sources: ${joinWords(sources)}, ${where}.</p>` +
     (d.releaseDownloads
