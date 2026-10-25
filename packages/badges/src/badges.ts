@@ -22,6 +22,7 @@ export const COLORS = {
   stars: 'yellow',
   docker: '2496ed',
   npm: 'cb3837',
+  users: '0e7490',
   counter: '8957e5',
 } as const;
 
@@ -170,6 +171,22 @@ function build(dataset: Dataset, configured: Record<string, BadgeConfig>): Built
         color: colourOf(`npm-${pkg.slug}-week`, packageColour),
       });
     }
+  }
+
+  if (dataset.cloudflare) {
+    const usersColour = colourOf('users-daily', COLORS.users);
+    badges.push({
+      name: 'users-daily',
+      label: 'daily users',
+      message: formatCompact(dataset.cloudflare.totals.usersAvg7),
+      color: usersColour,
+    });
+    badges.push({
+      name: 'users-daily-latest',
+      label: `users on ${dataset.cloudflare.latest}`,
+      message: formatCompact(dataset.cloudflare.totals.usersLatest),
+      color: colourOf('users-daily-latest', usersColour),
+    });
   }
 
   for (const counter of dataset.counters) {

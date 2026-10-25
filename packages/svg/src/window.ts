@@ -28,8 +28,13 @@ export function windowSet(dataset: Dataset, chart: ChartName): boolean {
 export function windowOf(dataset: Dataset, chart: ChartName): ChartWindow | undefined {
   const options = dataset.charts?.[chart];
   if (!options || (options.from === undefined && options.range === undefined)) return undefined;
-  // the end is the data's latest day: the snapshot's, or npm's last stored day, which is where the npm chart ends
-  const end = chart === 'npm-downloads' && dataset.npm ? dataset.npm.latest : utcDate(Date.parse(dataset.snapshotAt));
+  // the end is the data's latest day: the snapshot's, or the last stored day of npm or Cloudflare, where those charts end
+  const end =
+    chart === 'npm-downloads' && dataset.npm
+      ? dataset.npm.latest
+      : chart === 'cloudflare-users' && dataset.cloudflare
+        ? dataset.cloudflare.latest
+        : utcDate(Date.parse(dataset.snapshotAt));
   return { start: options.from ?? rangeStart(options.range!, end), end };
 }
 
@@ -98,5 +103,8 @@ export function windowed(dataset: Dataset, chart: ChartName): Dataset {
     return clipReleases(dataset, w, last);
   }
   if (chart === 'npm-downloads' && w && dataset.npm) return { ...dataset, npm: clipNpm(dataset.npm, w) };
+  if (chart === 'cloudflare-users' && w && dataset.cloudflare) {
+    return { ...dataset, cloudflare: { ...dataset.cloudflare, days: dataset.cloudflare.days.filter((d) => inWindow(d.date, w)) } };
+  }
   return dataset;
 }

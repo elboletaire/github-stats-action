@@ -103,6 +103,8 @@ export interface ChartsConfig {
   'downloads-per-day': ChartConfig;
   'downloads-per-release': ChartConfig;
   'npm-downloads': ChartConfig;
+  /** Daily users from the Cloudflare source; the chart is left out without `cloudflare` days. */
+  'cloudflare-users': ChartConfig;
   /** Named variants of the charts above, in config order; absent when none are set. */
   variants?: ChartVariant[];
 }
@@ -110,7 +112,7 @@ export interface ChartsConfig {
 /** The charts the README SVGs are made of, by config key (the file name is the key). */
 export type ChartName = Exclude<keyof ChartsConfig, 'titles' | 'animate' | 'variants'>;
 
-const CHART_NAMES: ChartName[] = ['stars', 'downloads-per-day', 'downloads-per-release', 'npm-downloads'];
+const CHART_NAMES: ChartName[] = ['stars', 'downloads-per-day', 'downloads-per-release', 'npm-downloads', 'cloudflare-users'];
 /** The options a chart section takes; a variant takes the same ones. */
 const CHART_KEYS = ['title', 'animate', 'from', 'range', 'last', 'height', 'start-at-zero', 'color'];
 /** A variant's name: lowercase words joined by `-`, so it reads well in a file name. */
@@ -155,7 +157,7 @@ export const DEFAULT_CONFIG: StatsConfig = {
   counters: [],
   epochs: [],
   platforms: [],
-  charts: { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {} },
+  charts: { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {}, 'cloudflare-users': {} },
 };
 
 /** One colour per package in the npm chart and the dashboard, so the list is capped at the palette's slots. */
@@ -415,6 +417,7 @@ function parseCharts(value: unknown): ChartsConfig {
     'downloads-per-day': section('downloads-per-day'),
     'downloads-per-release': section('downloads-per-release'),
     'npm-downloads': section('npm-downloads'),
+    'cloudflare-users': section('cloudflare-users'),
     ...(variants.length > 0 ? { variants } : {}),
   };
 }

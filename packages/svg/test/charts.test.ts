@@ -206,7 +206,7 @@ describe('niceTicks', () => {
 });
 
 describe('chart options', () => {
-  const CHARTS = { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {} };
+  const CHARTS = { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {}, 'cloudflare-users': {} };
   const withCharts = async (charts: Partial<NonNullable<Dataset['charts']>>): Promise<Dataset> => ({ ...(await fixture()), charts: { ...CHARTS, ...charts } });
   /** The file without its accessible title and description, so only what is drawn is left. */
   const drawn = (svg: string): string => svg.replace(/<(title|desc) id="[^"]*">[^<]*<\/\1>/g, '');
@@ -298,7 +298,7 @@ describe('chart options', () => {
   });
 
   it('draws the stars in the configured colour of each mode, on the line, dots and area', async () => {
-    const dataset = { ...(await fixture()), charts: { titles: true, stars: { color: { light: '#9a6700', dark: '#e3b341' } }, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {} } };
+    const dataset = { ...(await fixture()), charts: { titles: true, stars: { color: { light: '#9a6700', dark: '#e3b341' } }, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {}, 'cloudflare-users': {} } };
     const files = renderCharts(dataset);
     const light = chart(files, 'charts/stars-light.svg');
     const dark = chart(files, 'charts/stars-dark.svg');
@@ -318,7 +318,7 @@ describe('chart options', () => {
   });
 
   it('keeps anything but a hex colour out of the markup', async () => {
-    const dataset = { ...(await fixture()), charts: { titles: true, stars: { color: { light: '"><script>', dark: '#e3b341' } }, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {} } } as Dataset;
+    const dataset = { ...(await fixture()), charts: { titles: true, stars: { color: { light: '"><script>', dark: '#e3b341' } }, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {}, 'cloudflare-users': {} } } as Dataset;
     const svg = chart(renderCharts(dataset), 'charts/stars-light.svg');
     expect(svg).not.toContain('<script>');
     expect(svg).toContain(`stroke="${seriesColor('light', 0)}"`);
@@ -392,7 +392,7 @@ describe('motion', () => {
   const measured = (dataset: Dataset): Dataset => ({ ...dataset, measuredDaily: Array.from({ length: 20 }, (_, i) => day(i, { app: i % 3, cli: 10 + i })) });
   /** The fixture with an npm series, and the same with measured days: together every chart and both downloads modes. */
   const sets = async (charts: Partial<NonNullable<Dataset['charts']>> = {}): Promise<ReturnType<typeof renderCharts>[]> => {
-    const dataset = { ...(await fixture()), npm: npm(), charts: { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {}, ...charts } };
+    const dataset = { ...(await fixture()), npm: npm(), charts: { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {}, 'cloudflare-users': {}, ...charts } };
     return [renderCharts(dataset), renderCharts(measured(dataset))];
   };
   /** The file minus its motion: the style, the animation groups, the path length and the line breaks between marks. */
@@ -508,7 +508,7 @@ describe('motion', () => {
 describe('stars height', () => {
   const withStars = async (stars: { height?: number }, extra: Partial<NonNullable<Dataset['charts']>> = {}): Promise<Dataset> => ({
     ...(await fixture()),
-    charts: { titles: true, stars, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {}, ...extra },
+    charts: { titles: true, stars, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {}, 'cloudflare-users': {}, ...extra },
   });
 
   it('draws the stars chart at its height, with the plot bottom and the x labels moved down', async () => {
@@ -535,7 +535,7 @@ describe('stars height', () => {
 });
 
 describe('chart variants', () => {
-  const CHARTS = { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {} };
+  const CHARTS = { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {}, 'cloudflare-users': {} };
   const VARIANTS: ChartVariant[] = [
     { chart: 'stars', name: 'full', options: { title: false, height: 400 } },
     { chart: 'downloads-per-day', name: 'year', options: { range: '1y' } },

@@ -125,6 +125,7 @@ describe('charts', () => {
       'downloads-per-day': {},
       'downloads-per-release': {},
       'npm-downloads': {},
+      'cloudflare-users': {},
     });
   });
 
@@ -141,6 +142,7 @@ charts:
       'downloads-per-day': { title: false },
       'downloads-per-release': {},
       'npm-downloads': {},
+      'cloudflare-users': {},
     });
   });
 
@@ -157,6 +159,7 @@ charts:
       'downloads-per-day': {},
       'downloads-per-release': {},
       'npm-downloads': {},
+      'cloudflare-users': {},
     });
   });
 
@@ -434,6 +437,16 @@ describe('chart windows', () => {
     expect(parseConfig("charts: { npm-downloads: { range: 1y } }").charts['npm-downloads']).toEqual({ range: '1y' });
   });
 
+  it('reads the window of cloudflare-users, and rejects last and height', () => {
+    expect(parseConfig('charts: { cloudflare-users: { from: "2026-06", title: false } }').charts['cloudflare-users']).toEqual({
+      from: '2026-06-01',
+      title: false,
+    });
+    expect(parseConfig("charts: { cloudflare-users: { range: 6m } }").charts['cloudflare-users']).toEqual({ range: '6m' });
+    expect(() => parseConfig('charts: { cloudflare-users: { last: 3 } }')).toThrow('charts.cloudflare-users.last is only for downloads-per-release');
+    expect(() => parseConfig('charts: { cloudflare-users: { height: 300 } }')).toThrow('charts.cloudflare-users.height is only for stars');
+  });
+
   it('reads last for downloads per release only', () => {
     expect(parseConfig('charts: { downloads-per-release: { last: 20 } }').charts['downloads-per-release']).toEqual({ last: 20 });
   });
@@ -511,7 +524,7 @@ charts:
     expect(() => parseConfig(text)).toThrow(message);
   });
 
-  it('leaves ChartName to the four base charts', () => {
-    expectTypeOf<ChartName>().toEqualTypeOf<'stars' | 'downloads-per-day' | 'downloads-per-release' | 'npm-downloads'>();
+  it('leaves ChartName to the five base charts', () => {
+    expectTypeOf<ChartName>().toEqualTypeOf<'stars' | 'downloads-per-day' | 'downloads-per-release' | 'npm-downloads' | 'cloudflare-users'>();
   });
 });
