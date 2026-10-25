@@ -227,7 +227,7 @@ cloudflare:
 
   it('stores the daily aggregates under cloudflare/ with the token', async () => {
     const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
-    await runStats({ repo: REPO, token: 'x', config: withSource, dataDir, traffic: false, now, log, fetch: withCloudflare(network()), cloudflareToken: 'cf' });
+    const result = await runStats({ repo: REPO, token: 'x', config: withSource, dataDir, traffic: false, now, log, fetch: withCloudflare(network()), cloudflareToken: 'cf' });
     const repo = join(dataDir, 'elboletaire', 'manga-downloader');
     const stored = JSON.parse(await readFile(join(repo, 'cloudflare', 'manga_downloader_checks.json'), 'utf8'));
     expect(stored).toEqual({
@@ -235,6 +235,8 @@ cloudflare:
       dataset: 'manga_downloader_checks',
       days: [{ date: '2026-01-02', users: 2, events: 3, by: { client: { gui: { users: 2, events: 3 } } } }],
     });
+    expect(result.dataset.cloudflare?.latest).toBe('2026-01-02');
+    expect(await readFile(join(repo, 'daily.csv'), 'utf8')).toMatch(/^date,.*cf_users,cf_events\n/);
   });
 
   it('keeps the stored days, with a warning, when no token is given', async () => {

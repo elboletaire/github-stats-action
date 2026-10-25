@@ -20,4 +20,5 @@ export * from './collectors/docker';
 export * from './collectors/npm';
 export * from './collectors/cloudflare';
 export * from './npm';
+export * from './cloudflare';
 export * from './window';

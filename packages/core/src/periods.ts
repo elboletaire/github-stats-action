@@ -7,7 +7,7 @@ import { DAY_MS, median } from './estimate';
 export interface PeriodInput {
   releases: readonly ReleaseRow[];
   epochs: readonly EpochInfo[];
-  counters: readonly CounterInfo[];
+  counters: readonly Pick<CounterInfo, 'name'>[];
   names: readonly string[];
   /** Midnight UTC of day 0 of `daily`. */
   d0: number;

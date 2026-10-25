@@ -92,6 +92,8 @@ export interface CounterInfo {
   assets: string;
   /** Only releases at or after this version are counted; absent counts every release. */
   from?: string;
+  /** Increase per daily Cloudflare user over the last 30 days; absent unless the figures can give it. */
+  perUser?: number;
 }
 
 /** One release's file, with the group it was counted in. */
@@ -331,6 +333,8 @@ export interface Dataset {
   releaseDownloads: boolean;
   /** Present only when the config lists npm packages with stored days. */
   npm?: NpmData;
+  /** Present only when the config has a Cloudflare dataset with stored days. */
+  cloudflare?: CloudflareData;
 }
 
 /** Log sink for warnings and progress; the action sends it to @actions/core. */

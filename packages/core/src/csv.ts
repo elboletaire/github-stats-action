@@ -1,8 +1,9 @@
-// daily.csv: one row per day with a snapshot or an npm count. Columns only for what the repo has: release
-// downloads, Docker and npm. Snapshot columns are blank on npm-only days; deltas are against the previous snapshot.
+// daily.csv: one row per day with a snapshot or an npm or Cloudflare count. Columns only for what the repo has:
+// release downloads, Docker, npm and Cloudflare. Snapshot columns are blank on count-only days; deltas are against
+// the previous snapshot.
 
 import type { DaySummary } from './summary';
-import type { NpmPackageStats } from './types';
+import type { CloudflareData, NpmPackageStats } from './types';
 
 function cell(value: number | null | undefined): string {
   return value === null || value === undefined ? '' : String(value);
@@ -15,13 +16,16 @@ export interface CsvOptions {
   docker: boolean;
   /** One column per package in config order, plus `npm_total`; their counts are per day, so they have no deltas. */
   npm: readonly NpmPackageStats[];
+  /** Headline users and events per day, when the repo has Cloudflare figures. */
+  cloudflare?: CloudflareData;
 }
 
 export function buildDailyCsv(days: readonly DaySummary[], names: readonly string[], options: CsvOptions): string {
-  const { downloads, docker, npm } = options;
+  const { downloads, docker, npm, cloudflare } = options;
   const groupCols = downloads ? [...names.map((n) => `${n}_downloads`), 'total_downloads'] : [];
   const deltaCols = downloads ? [...names.map((n) => `${n}_delta`), 'total_delta'] : [];
   const npmCols = npm.length > 0 ? [...npm.map((p) => `npm_${p.slug}`), 'npm_total'] : [];
+  const cloudflareCols = cloudflare ? ['cf_users', 'cf_events'] : [];
   const header = [
     'date',
     ...groupCols,
@@ -32,9 +36,17 @@ export function buildDailyCsv(days: readonly DaySummary[], names: readonly strin
     ...(docker ? ['docker_delta'] : []),
     'stars_delta',
     ...npmCols,
+    ...cloudflareCols,
   ];
   const npmByDay = npm.map((p) => new Map(p.days.map((d) => [d.date, d.downloads])));
-  const dates = [...new Set([...days.map((d) => d.date), ...npm.flatMap((p) => p.days.map((d) => d.date))])].sort();
+  const cloudflareByDay = new Map((cloudflare?.days ?? []).map((d) => [d.date, d]));
+  const dates = [
+    ...new Set([
+      ...days.map((d) => d.date),
+      ...npm.flatMap((p) => p.days.map((d) => d.date)),
+      ...cloudflareByDay.keys(),
+    ]),
+  ].sort();
   const index = new Map(days.map((d, i) => [d.date, i]));
   const lines = [header.join(',')];
   for (const date of dates) {
@@ -50,6 +62,7 @@ export function buildDailyCsv(days: readonly DaySummary[], names: readonly strin
       day && prev && day.docker !== null && prev.docker !== null ? day.docker - prev.docker : null;
     const starsDelta = day && prev ? day.stars - prev.stars : null;
     const npmValues = npmByDay.map((m) => m.get(date));
+    const cloudflareDay = cloudflareByDay.get(date);
     const npmTotal = npmValues.some((v) => v !== undefined)
       ? npmValues.reduce<number>((sum, v) => sum + (v ?? 0), 0)
       : undefined;
@@ -64,6 +77,7 @@ export function buildDailyCsv(days: readonly DaySummary[], names: readonly strin
         ...(docker ? [cell(dockerDelta)] : []),
         cell(starsDelta),
         ...(npm.length > 0 ? [...npmValues.map(cell), cell(npmTotal)] : []),
+        ...(cloudflare ? [cell(cloudflareDay?.headline), cell(cloudflareDay?.events)] : []),
       ].join(','),
     );
   }
