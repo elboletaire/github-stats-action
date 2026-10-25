@@ -13,7 +13,7 @@ const USERS = 'var(--c0)';
 export function usageHtml(cf: CloudflareData): string {
   const { totals } = cf;
   const other = cf.primary
-    ? `<div class="d">plus ${f0(totals.otherEvents7)} ${esc(cf.label.toLowerCase())} on the last 7 days</div>`
+    ? `<div class="d">plus ${f0(totals.otherEvents7)} ${esc(cf.label.toLowerCase())} outside ${esc(cf.primary.dimension)} ${esc(cf.primary.value)}, last 7 days</div>`
     : '';
   const tile = `<div class="kpi"><div class="l">Daily users</div><div class="v">${f0(totals.usersAvg7)}</div><div class="d">7-day average, approx.</div>${other}</div>`;
 

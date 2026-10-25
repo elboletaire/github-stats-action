@@ -132,6 +132,7 @@ Traffic is collected only with `traffic: true`. The daily views and clones are m
 
 - Release downloads, stars, forks, watchers, open issues and Docker Hub pulls are stored on the data branch. That branch is public when the repo is. npm's daily counts for the configured packages are stored there too; they're public npm data.
 - Stars are stored as timestamps only (`stargazers.json`). No logins are stored.
+- The Cloudflare source stores only daily aggregates (users, events and per-dimension counts), with no IPs or hashes.
 - Traffic is opt-in twice. With `traffic: true`, views, clones, referrers and paths are stored on the data branch, which is public when the repo is. `pages-traffic: true` only controls whether the Pages copy includes traffic. Both default to `false`.
 - Planned for several repos: their data would live in one private central repo rather than in each public repo. Not implemented yet; one repo per run for now.
 
@@ -207,7 +208,7 @@ The token is a secret passed as the `cloudflare-token` input. The CLI reads `CLO
 ```
 
 - **First run:** backfills the last 90 days. **Later runs:** fetch from 3 days before the last stored day, so late points overwrite the stored values. Only complete UTC days are stored; today never is.
-- **`released: true`** on one `kind: semver` dimension counts a row only when its version is a published, non-prerelease GitHub release (tag without a leading `v`) and its timestamp is at or after that release's publish time. Test builds of unreleased versions drop out.
+- **`released: true`** on one `kind: semver` dimension counts a row only when its version is a published, non-prerelease GitHub release (its version is the tag with any leading `v` removed; only plain `X.Y.Z` tags count) and its timestamp is at or after that release's publish time. Test builds of unreleased versions drop out.
 - **`per-user`** on a counter gives its increase over the last 30 days, divided by the mean daily users over the same days. It needs `cloudflare`, at least 14 stored days in the window, and a snapshot from before the window; otherwise it is left out.
 - **Stored as** `<owner>/<repo>/cloudflare/<dataset>.json`, one line per day. Like `npm/`, these files are never rebuilt or pruned.
 - **Failures** (a request error, no token) are warnings: the run goes on and the stored days stay.
@@ -286,7 +287,7 @@ dashboard/index.html              self-contained dashboard, all repos on the bra
   traffic/clones.json             same                                   (traffic: true)
   traffic/referrers/YYYY-MM-DD.json   GitHub's 14-day aggregate that day  (traffic: true)
   traffic/paths/YYYY-MM-DD.json       same                                (traffic: true)
-  daily.csv                       derived: one row per snapshot or npm day; release, Docker and npm columns only when the repo has them
+  daily.csv                       derived: one row per snapshot, npm or Cloudflare day; release, Docker, npm and Cloudflare (cf_users, cf_events) columns only when the repo has them
   dataset.json                    derived: everything the outputs read
   charts/*-light.svg, *-dark.svg  derived: SVG charts
   badges/*.json, badges/*.svg     derived: shields.io endpoint JSON and flat SVG badges

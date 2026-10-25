@@ -54,7 +54,7 @@ describe('usage section', () => {
     const html = usageHtml(cloudflare);
     expect(html).toContain('<h2>Usage<span class="est">approximate</span></h2>');
     expect(html).toContain('<div class="l">Daily users</div><div class="v">4</div><div class="d">7-day average, approx.</div>');
-    expect(html).toContain('<div class="d">plus 4 update checks on the last 7 days</div>');
+    expect(html).toContain('<div class="d">plus 4 update checks outside client gui, last 7 days</div>');
   });
 
   it('has no events subtext without a primary value', () => {
