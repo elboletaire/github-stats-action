@@ -5,6 +5,7 @@ import {
   addDays,
   buildCloudflareData,
   parseConfig,
+  seriesColor,
   type CloudflareRule,
   type CloudflareSeries,
   type Dataset,
@@ -88,5 +89,34 @@ describe('cloudflare users chart', () => {
   it('animates by default, and only with animate on', async () => {
     expect(chart(await withUsers())).toContain('class="gs-draw"');
     expect(chart(await withUsers(14, 'charts:\n  animate: false\n'))).not.toContain('<style');
+  });
+
+  it('draws the dark file in the dark palette', async () => {
+    const dataset = await withUsers();
+    const light = chart(dataset, 'light');
+    const dark = chart(dataset, 'dark');
+    expect(dark).toContain(`stroke="${seriesColor('dark', 0)}"`);
+    expect(dark).not.toContain(`stroke="${seriesColor('light', 0)}"`);
+    expect(light).toContain(`stroke="${seriesColor('light', 0)}"`);
+  });
+
+  it('writes light and dark files for a named variant', async () => {
+    const paths = renderCharts(await withUsers(14, 'charts:\n  cloudflare-users@year: { range: 1y }\n')).map((f) => f.path);
+    expect(paths).toContain('charts/cloudflare-users-year-light.svg');
+    expect(paths).toContain('charts/cloudflare-users-year-dark.svg');
+  });
+
+  it('escapes the label in the legend', async () => {
+    const base = await withUsers();
+    const cloudflare = buildCloudflareData({ ...RULE, label: '<b>"&\'</b>' }, series(14))!;
+    const svg = chart({ ...base, cloudflare });
+    expect(svg).not.toContain('<b>');
+    expect(svg).toContain('&lt;b&gt;&quot;&amp;&apos;&lt;/b&gt;</text>');
+  });
+
+  it('draws when the chart has no config key, as a dataset built without one has', async () => {
+    const base = await withUsers();
+    const { 'cloudflare-users': _, ...charts } = base.charts!;
+    expect(chart({ ...base, charts: charts as Dataset['charts'] })).toContain('>Daily users</text>');
   });
 });
