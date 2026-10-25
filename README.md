@@ -28,11 +28,18 @@ Each badge is also a `.json` shields.io endpoint, which renders the same and tak
 
 Each chart is a light and a dark SVG; `<picture>` picks the one for the reader's theme. The key under `charts:` in the config names each one.
 
-`stars`, manga-downloader:
+`stars`, manga-downloader, as a `stars@full` [variant](#config) with `{ title: false, height: 400 }`:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/stars-full-dark.svg">
+  <img alt="Stars over time, whole history" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/stars-full-light.svg">
+</picture>
+
+The same stars cut to a window, with `{ from: 2024-01-01, title: false, height: 400, start-at-zero: true }`:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/stars-dark.svg">
-  <img alt="Stars over time" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/stars-light.svg">
+  <img alt="Stars over time since 2024, starting at zero" src="https://raw.githubusercontent.com/elboletaire/manga-downloader/stats-data/elboletaire/manga-downloader/charts/stars-light.svg">
 </picture>
 
 `downloads-per-day`, manga-downloader:
