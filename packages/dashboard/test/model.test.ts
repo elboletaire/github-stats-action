@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import type { Dataset } from '@github-stats-action/core';
-import { countedGroups, periodName, periodShort, pivotColumns, platformTotals } from '../src/model';
+import { buildCloudflareData, parseConfig, type Dataset } from '@github-stats-action/core';
+import { cloudflareDaily, countedGroups, periodName, periodShort, pivotColumns, platformTotals } from '../src/model';
 import { colorVar } from '../src/palette';
 
 const fixture = JSON.parse(readFileSync(new URL('../../../fixtures/dataset.json', import.meta.url), 'utf8')) as Dataset;
@@ -34,5 +34,18 @@ describe('model', () => {
   it('maps a group to a palette slot and folds extra groups into the last one', () => {
     expect(colorVar({ color: 0 })).toBe('var(--c0)');
     expect(colorVar({ color: 99 })).toBe('var(--c7)');
+  });
+
+  it('lays the headline users on one day axis from the first stored day to the latest, zero where no day is stored', () => {
+    const rule = parseConfig(`
+cloudflare:
+  account-id: dd4d00309618abe546348e4b9cc7a893
+  dataset: checks
+  dimensions:
+    os: { column: blob3, label: OS }
+`).cloudflare!;
+    const day = (date: string, users: number) => ({ date, users, events: users, by: {} });
+    const cf = buildCloudflareData(rule, { schema: 1, dataset: 'checks', days: [day('2026-10-24', 3), day('2026-10-26', 5)] })!;
+    expect(cloudflareDaily(cf)).toEqual({ start: '2026-10-24', values: [3, 0, 5] });
   });
 });
