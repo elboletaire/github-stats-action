@@ -12,7 +12,7 @@ const shift = (day: string, days: number): string => iso(Date.parse(`${day}T00:0
 const fixture = async (): Promise<Dataset> =>
   JSON.parse(await readFile(resolve(import.meta.dirname, '../../../fixtures/dataset.json'), 'utf8')) as Dataset;
 
-const CHARTS: ChartsConfig = { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {} };
+const CHARTS: ChartsConfig = { titles: true, stars: {}, 'downloads-per-day': {}, 'downloads-per-release': {}, 'npm-downloads': {}, 'cloudflare-users': {} };
 
 const withCharts = async (charts: Partial<ChartsConfig>): Promise<Dataset> => ({ ...(await fixture()), charts: { ...CHARTS, ...charts } });
 

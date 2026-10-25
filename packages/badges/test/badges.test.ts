@@ -2,7 +2,17 @@ import { mkdtemp, readdir, writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { addDays, buildNpmData, type Dataset, type MeasuredDay, pruneDerived, writeOutputFiles } from '@github-stats-action/core';
+import {
+  addDays,
+  buildCloudflareData,
+  buildNpmData,
+  type CloudflareRule,
+  type CloudflareSeries,
+  type Dataset,
+  type MeasuredDay,
+  pruneDerived,
+  writeOutputFiles,
+} from '@github-stats-action/core';
 import { describe, expect, it } from 'vitest';
 import { buildBadges, COLORS, endpointJson, renderBadges, unknownBadges } from '../src/badges';
 import { flatSvg } from '../src/svg';
@@ -303,5 +313,57 @@ describe('npm and release badges', () => {
       'npm-plain',
       'npm-plain-week',
     ]);
+  });
+});
+
+describe('cloudflare badges', () => {
+  const rule: CloudflareRule = {
+    accountId: '0'.repeat(32),
+    dataset: 'manga_downloader_checks',
+    label: 'Update checks',
+    users: 'index1',
+    dimensions: [{ name: 'client', label: 'App vs CLI', column: 'blob1' }],
+  };
+  // users rise a day from 10 to 23, so the last seven average 20
+  const series: CloudflareSeries = {
+    schema: 1,
+    dataset: rule.dataset,
+    days: Array.from({ length: 14 }, (_, i) => ({
+      date: addDays('2026-10-18', i - 13),
+      users: 10 + i,
+      events: 2 * (10 + i),
+      by: { client: { gui: { users: 10 + i, events: 2 * (10 + i) } } },
+    })),
+  };
+  const cloudflare = buildCloudflareData(rule, series);
+
+  it('adds the daily users badges after Docker, before the counters, only with Cloudflare days', () => {
+    const names = buildBadges({ ...fixture, cloudflare, measuredDaily: [], stars: [] }).map((b) => b.name);
+    expect(names.slice(names.indexOf('docker-pulls') + 1, names.indexOf('counter-updates'))).toEqual(['users-daily', 'users-daily-latest']);
+    expect(buildBadges({ ...fixture, measuredDaily: [], stars: [] }).map((b) => b.name)).not.toContain('users-daily');
+  });
+
+  it('shows the 7-day average and the latest day, labelled with the latest date', () => {
+    const badges = buildBadges({ ...fixture, cloudflare, measuredDaily: [], stars: [] });
+    expect(badges.find((b) => b.name === 'users-daily')).toMatchObject({ label: 'daily users', message: '20' });
+    expect(badges.find((b) => b.name === 'users-daily-latest')).toMatchObject({ label: 'users on 2026-10-18', message: '23' });
+  });
+
+  it('takes the configured colours, and treats the names as known only with Cloudflare days', () => {
+    const configured = { 'users-daily-latest': { color: 'ff0000' } };
+    const badges = buildBadges({ ...fixture, cloudflare, measuredDaily: [], stars: [] }, configured);
+    expect(badges.find((b) => b.name === 'users-daily')?.color).toBe(COLORS.users);
+    expect(badges.find((b) => b.name === 'users-daily-latest')?.color).toBe('ff0000');
+    expect(unknownBadges({ ...fixture, cloudflare }, { 'users-daily': { color: 'ff0000' } })).toEqual([]);
+    expect(unknownBadges(fixture, { 'users-daily': { color: 'ff0000' } })).toEqual(['users-daily']);
+  });
+
+  it('prunes the daily users files once the dataset no longer has them', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'badges-users-'));
+    await writeOutputFiles(dir, renderBadges({ ...fixture, cloudflare, measuredDaily: [], stars: [] }));
+    expect(await readdir(join(dir, 'badges'))).toContain('users-daily-latest.svg');
+    await writeFile(join(dir, 'badges', 'stars-weekly.svg'), '<svg/>');
+    await pruneDerived(dir, []);
+    expect(await readdir(join(dir, 'badges'))).toEqual(['stars-weekly.svg']);
   });
 });
