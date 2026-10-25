@@ -4,7 +4,9 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   pruneDerived,
+  readCloudflareSeries,
   readNpmSeries,
+  writeCloudflareSeries,
   writeNpmSeries,
   readSnapshots,
   readStargazers,
@@ -14,6 +16,7 @@ import {
   writeSnapshot,
   writeStargazers,
   writeTrafficAggregates,
+  type CloudflareSeries,
   type Snapshot,
 } from '../src';
 
@@ -158,5 +161,33 @@ describe('writeNpmSeries', () => {
       '  {"date":"2026-10-17","downloads":5}',
     ]);
     expect(await readNpmSeries(dir, '@passcore/core')).toEqual(series);
+  });
+});
+
+describe('writeCloudflareSeries', () => {
+  it('writes one line per day and reads back the same series', async () => {
+    const dir = await tmp();
+    const series: CloudflareSeries = {
+      schema: 1,
+      dataset: 'manga_downloader_checks',
+      days: [
+        { date: '2026-10-24', users: 2, events: 3, by: { client: { gui: { users: 2, events: 3 } } } },
+        { date: '2026-10-25', users: 1, events: 1, by: { client: {} } },
+      ],
+    };
+    await writeCloudflareSeries(dir, series);
+    const text = await readFile(join(dir, 'cloudflare', 'manga_downloader_checks.json'), 'utf8');
+    expect(text.split('\n').filter((line) => line.includes('"date"'))).toEqual([
+      '  {"date":"2026-10-24","users":2,"events":3,"by":{"client":{"gui":{"users":2,"events":3}}}},',
+      '  {"date":"2026-10-25","users":1,"events":1,"by":{"client":{}}}',
+    ]);
+    expect(await readCloudflareSeries(dir, 'manga_downloader_checks')).toEqual(series);
+  });
+
+  it('reads no series until one was stored, and rejects another schema', async () => {
+    const dir = await tmp();
+    expect(await readCloudflareSeries(dir, 'checks')).toBeUndefined();
+    await writeOutputFiles(dir, [{ path: 'cloudflare/checks.json', content: '{"schema":2}' }]);
+    await expect(readCloudflareSeries(dir, 'checks')).rejects.toThrow('cloudflare/checks.json: unsupported schema');
   });
 });

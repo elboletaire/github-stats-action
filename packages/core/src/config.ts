@@ -20,6 +20,8 @@ export interface CounterRule {
   assets: string;
   /** Semver; releases before it aren't counted. */
   from?: string;
+  /** Also shown per daily user, from the `cloudflare` source. */
+  perUser?: boolean;
 }
 
 export interface EpochRule {
@@ -37,6 +39,33 @@ export interface NpmRule {
   /** npm package name, `name` or `@scope/name`. */
   package: string;
   label: string;
+}
+
+export interface CloudflareDimensionRule {
+  /** Name in the config and the stored `by` data. */
+  name: string;
+  label: string;
+  /** The blob holding the value, `blob1` to `blob20`. */
+  column: string;
+  /** `semver`: the values are versions, ordered as such. */
+  kind?: 'semver';
+  /** Only the rows of published releases count; at most one dimension. */
+  released?: boolean;
+}
+
+/** An Analytics Engine dataset whose daily aggregates are kept on the data branch. */
+export interface CloudflareRule {
+  accountId: string;
+  dataset: string;
+  label: string;
+  /** The point's index holding the daily user hash; only `index1` is accepted. */
+  users: 'index1';
+  /** The blob holding the UTC day; absent means the day of the point's timestamp. */
+  day?: string;
+  /** The dimension value whose users are the headline; absent counts every row. */
+  primary?: { dimension: string; value: string };
+  note?: string;
+  dimensions: CloudflareDimensionRule[];
 }
 
 /** Options of one README chart; `title` overrides `charts.titles` for that chart. */
@@ -106,6 +135,8 @@ export interface StatsConfig {
   docker?: string;
   /** npm packages to count daily; absent means no npm work at all. */
   npm?: NpmRule[];
+  /** Analytics Engine dataset to keep daily aggregates of; absent means no Cloudflare work at all. */
+  cloudflare?: CloudflareRule;
   /** Badge colours by badge name; absent means the defaults. */
   badges?: Record<string, BadgeConfig>;
 }
@@ -138,6 +169,10 @@ const STARS_HEIGHT_MAX = 600;
 const RESERVED_GROUPS = new Set(['other', 'ignored']);
 const NAME_RE = /^[A-Za-z0-9_-]+$/;
 const DOCKER_RE = /^[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*$/;
+const CLOUDFLARE_ACCOUNT_RE = /^[0-9a-f]{32}$/;
+const CLOUDFLARE_DATASET_RE = /^[A-Za-z0-9_]+$/;
+/** The blob columns of an Analytics Engine point. */
+const BLOB_RE = /^blob([1-9]|1[0-9]|20)$/;
 /** `#rgb` or `#rrggbb`. Colours end up in SVG attributes, so nothing else may get through. */
 export const HEX_COLOUR_RE = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 
@@ -253,19 +288,22 @@ function parseIgnore(value: unknown): string[] {
   return expectList(value, 'ignore').map((item, i) => expectString(item, `ignore[${i}]`));
 }
 
-function parseCounters(value: unknown): CounterRule[] {
+function parseCounters(value: unknown, hasCloudflare: boolean): CounterRule[] {
   const counters = expectList(value, 'counters').map((item, i) => {
     const path = `counters[${i}]`;
     const obj = expectObject(item, path);
-    checkKeys(obj, ['name', 'label', 'assets', 'from'], path);
+    checkKeys(obj, ['name', 'label', 'assets', 'from', 'per-user'], path);
     const name = expectString(obj.name, `${path}.name`);
     checkName(name, `${path}.name`);
     const from = obj.from === undefined ? undefined : expectVersion(obj.from, `${path}.from`);
+    const perUser = optionalBoolean(obj, 'per-user', path);
+    if (perUser && !hasCloudflare) throw new ConfigError(`${path}.per-user needs a cloudflare source`);
     return {
       name,
       label: optionalString(obj, 'label', path) ?? name,
       assets: expectString(obj.assets, `${path}.assets`),
       ...(from !== undefined ? { from } : {}),
+      ...(perUser ? { perUser } : {}),
     };
   });
   unique(counters.map((c) => c.name), 'counter');
@@ -417,6 +455,68 @@ function parseNpm(value: unknown): NpmRule[] {
   return rules;
 }
 
+function parseCloudflareDimensions(value: unknown, path: string): CloudflareDimensionRule[] {
+  const obj = expectObject(value, `${path}.dimensions`);
+  return Object.entries(obj).map(([name, item]) => {
+    const dimPath = `${path}.dimensions.${name}`;
+    if (!VARIANT_NAME_RE.test(name)) throw new ConfigError(`${dimPath}: dimension names are lowercase words joined by -`);
+    const sub = expectObject(item, dimPath);
+    checkKeys(sub, ['column', 'label', 'kind', 'released'], dimPath);
+    const column = expectString(sub.column, `${dimPath}.column`);
+    if (!BLOB_RE.test(column)) throw new ConfigError(`${dimPath}.column must be blob1 to blob20`);
+    if (sub.kind !== undefined && sub.kind !== 'semver') throw new ConfigError(`${dimPath}.kind must be semver`);
+    const kind = sub.kind === 'semver' ? 'semver' : undefined;
+    const released = optionalBoolean(sub, 'released', dimPath);
+    if (released !== undefined && kind === undefined) throw new ConfigError(`${dimPath}.released needs kind: semver`);
+    return {
+      name,
+      label: optionalString(sub, 'label', dimPath) ?? name,
+      column,
+      ...(kind ? { kind } : {}),
+      ...(released === undefined ? {} : { released }),
+    };
+  });
+}
+
+/** `primary` names one dimension and the value whose users are the headline: `{ client: gui }`. */
+function parseCloudflarePrimary(value: unknown, dimensions: CloudflareDimensionRule[], path: string): { dimension: string; value: string } {
+  const entries = Object.entries(expectObject(value, path));
+  const [entry] = entries;
+  if (entries.length !== 1 || !entry) throw new ConfigError(`${path} must name one dimension and its value, e.g. { client: gui }`);
+  const [dimension, raw] = entry;
+  if (!dimensions.some((d) => d.name === dimension)) throw new ConfigError(`${path}.${dimension} is not a dimension`);
+  return { dimension, value: expectString(raw, `${path}.${dimension}`) };
+}
+
+function parseCloudflare(value: unknown): CloudflareRule {
+  const path = 'cloudflare';
+  const obj = expectObject(value, path);
+  checkKeys(obj, ['account-id', 'dataset', 'label', 'users', 'day', 'primary', 'note', 'dimensions'], path);
+  const accountId = expectString(obj['account-id'], `${path}.account-id`);
+  if (!CLOUDFLARE_ACCOUNT_RE.test(accountId)) throw new ConfigError(`${path}.account-id must be 32 lowercase hex digits`);
+  const dataset = expectString(obj.dataset, `${path}.dataset`);
+  if (!CLOUDFLARE_DATASET_RE.test(dataset)) throw new ConfigError(`${path}.dataset may only use letters, digits and _`);
+  const users = optionalString(obj, 'users', path) ?? 'index1';
+  if (users !== 'index1') throw new ConfigError(`${path}.users must be index1, the daily user hash`);
+  const day = optionalString(obj, 'day', path);
+  if (day !== undefined && !BLOB_RE.test(day)) throw new ConfigError(`${path}.day must be blob1 to blob20`);
+  const dimensions = obj.dimensions === undefined ? [] : parseCloudflareDimensions(obj.dimensions, path);
+  if (dimensions.filter((d) => d.released).length > 1) throw new ConfigError(`${path}: only one dimension may be released`);
+  unique([...(day === undefined ? [] : [day]), ...dimensions.map((d) => d.column)], 'cloudflare column');
+  const primary = obj.primary === undefined ? undefined : parseCloudflarePrimary(obj.primary, dimensions, `${path}.primary`);
+  const note = optionalString(obj, 'note', path);
+  return {
+    accountId,
+    dataset,
+    label: optionalString(obj, 'label', path) ?? dataset,
+    users: 'index1',
+    ...(day === undefined ? {} : { day }),
+    ...(primary === undefined ? {} : { primary }),
+    ...(note === undefined ? {} : { note }),
+    dimensions,
+  };
+}
+
 /**
  * Whether a chart animates on load: its own `animate`, else the global one, else yes. Without a
  * chart name (the dashboard's sections with no README chart) only the global one applies.
@@ -435,13 +535,14 @@ export function parseConfig(text: string): StatsConfig {
   }
   if (doc === null || doc === undefined) return structuredClone(DEFAULT_CONFIG);
   const root = expectObject(doc, 'the file');
-  checkKeys(root, ['releases', 'groups', 'ignore', 'counters', 'epochs', 'platforms', 'charts', 'docker', 'npm', 'badges'], 'top level');
+  checkKeys(root, ['releases', 'groups', 'ignore', 'counters', 'epochs', 'platforms', 'charts', 'docker', 'npm', 'cloudflare', 'badges'], 'top level');
 
+  const cloudflare = root.cloudflare === undefined ? undefined : parseCloudflare(root.cloudflare);
   const config: StatsConfig = {
     releases: optionalBoolean(root, 'releases', 'top level') ?? true,
     groups: root.groups === undefined ? structuredClone(DEFAULT_CONFIG.groups) : parseGroups(root.groups),
     ignore: root.ignore === undefined ? [] : parseIgnore(root.ignore),
-    counters: root.counters === undefined ? [] : parseCounters(root.counters),
+    counters: root.counters === undefined ? [] : parseCounters(root.counters, cloudflare !== undefined),
     epochs: root.epochs === undefined ? [] : parseEpochs(root.epochs),
     platforms: root.platforms === undefined ? [] : parsePlatforms(root.platforms),
     charts: root.charts === undefined ? structuredClone(DEFAULT_CONFIG.charts) : parseCharts(root.charts),
@@ -452,6 +553,7 @@ export function parseConfig(text: string): StatsConfig {
     config.docker = docker;
   }
   if (root.npm !== undefined) config.npm = parseNpm(root.npm);
+  if (cloudflare) config.cloudflare = cloudflare;
   if (root.badges !== undefined) config.badges = parseBadges(root.badges);
   return config;
 }

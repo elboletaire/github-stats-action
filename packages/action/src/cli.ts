@@ -16,6 +16,7 @@ const USAGE = `usage:
       --traffic     collect traffic (needs a token with push access, a PAT)
       --dry-run     accepted for parity with the action; the CLI never pushes
       token         read from GITHUB_TOKEN
+      CLOUDFLARE_API_TOKEN  read for the cloudflare source (Account Analytics: Read)
 
   github-stats render (--data <dir> | --from-branch <ref>) --out <dir> [--repo owner/name] [--config <file>]
       no API calls: rebuild the derived files and outputs from stored data.
@@ -56,6 +57,7 @@ async function collect(values: Values): Promise<void> {
   const result = await runStats({
     repo: values.repo,
     token: process.env.GITHUB_TOKEN,
+    cloudflareToken: process.env.CLOUDFLARE_API_TOKEN,
     config,
     dataDir: values.out,
     traffic: values.traffic,

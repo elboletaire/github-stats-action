@@ -342,6 +342,74 @@ npm:
   });
 });
 
+describe('cloudflare', () => {
+  const ACCOUNT = 'dd4d00309618abe546348e4b9cc7a893';
+
+  it('is absent when not configured, so no Cloudflare work runs', () => {
+    expect(parseConfig('').cloudflare).toBeUndefined();
+  });
+
+  it('reads a full block, with the per-user counter it feeds', () => {
+    const config = parseConfig(`
+cloudflare:
+  account-id: ${ACCOUNT}
+  dataset: manga_downloader_checks
+  label: Update checks
+  users: index1
+  day: blob5
+  primary: { client: gui }
+  note: The CLI only checks on --version.
+  dimensions:
+    client:  { column: blob1, label: App vs CLI }
+    version: { column: blob2, label: Version, kind: semver, released: true }
+    os:      { column: blob3, label: OS }
+counters:
+  - { name: updates, label: In-app updates, assets: "*-SHA256SUMS.txt", from: v1.19.0, per-user: true }
+`);
+    expect(config.cloudflare).toEqual({
+      accountId: ACCOUNT,
+      dataset: 'manga_downloader_checks',
+      label: 'Update checks',
+      users: 'index1',
+      day: 'blob5',
+      primary: { dimension: 'client', value: 'gui' },
+      note: 'The CLI only checks on --version.',
+      dimensions: [
+        { name: 'client', label: 'App vs CLI', column: 'blob1' },
+        { name: 'version', label: 'Version', column: 'blob2', kind: 'semver', released: true },
+        { name: 'os', label: 'OS', column: 'blob3' },
+      ],
+    });
+    expect(config.counters[0]).toMatchObject({ name: 'updates', from: 'v1.19.0', perUser: true });
+  });
+
+  it('defaults the label to the dataset, the users to index1 and the dimensions to none', () => {
+    const config = parseConfig(`cloudflare: { account-id: ${ACCOUNT}, dataset: checks }\n`);
+    expect(config.cloudflare).toEqual({ accountId: ACCOUNT, dataset: 'checks', label: 'checks', users: 'index1', dimensions: [] });
+  });
+
+  it.each([
+    ['an account id that is not hex', 'cloudflare: { account-id: xyz, dataset: d }\n', 'cloudflare.account-id must be 32 lowercase hex digits'],
+    ['a dataset name with a dash', `cloudflare: { account-id: ${ACCOUNT}, dataset: a-b }\n`, 'cloudflare.dataset may only use letters, digits and _'],
+    ['users other than index1', `cloudflare: { account-id: ${ACCOUNT}, dataset: d, users: blob1 }\n`, 'cloudflare.users must be index1'],
+    ['an unknown key', `cloudflare: { account-id: ${ACCOUNT}, dataset: d, lable: x }\n`, 'cloudflare.lable is not a known key'],
+    ['a day that is not a blob', `cloudflare: { account-id: ${ACCOUNT}, dataset: d, day: blob21 }\n`, 'cloudflare.day must be blob1 to blob20'],
+    ['a dimension column that is not a blob', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    os: { column: index1 }\n`, 'cloudflare.dimensions.os.column must be blob1 to blob20'],
+    ['a dimension name that is not kebab-case', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    OS: { column: blob3 }\n`, 'cloudflare.dimensions.OS: dimension names are lowercase words joined by -'],
+    ['a column used twice', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  day: blob1\n  dimensions:\n    os: { column: blob3 }\n    arch: { column: blob3 }\n`, "cloudflare column 'blob3' is listed twice"],
+    ['a day column that is also a dimension column', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  day: blob1\n  dimensions:\n    os: { column: blob1 }\n`, "cloudflare column 'blob1' is listed twice"],
+    ['a kind other than semver', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    os: { column: blob3, kind: date }\n`, 'cloudflare.dimensions.os.kind must be semver'],
+    ['released on a dimension that is not semver', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    os: { column: blob3, released: true }\n`, 'cloudflare.dimensions.os.released needs kind: semver'],
+    ['two released dimensions', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    a: { column: blob1, kind: semver, released: true }\n    b: { column: blob2, kind: semver, released: true }\n`, 'cloudflare: only one dimension may be released'],
+    ['a primary that is not a dimension', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  primary: { client: gui }\n`, 'cloudflare.primary.client is not a dimension'],
+    ['a primary with two keys', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1 }\n  primary: { client: gui, os: linux }\n`, 'cloudflare.primary must name one dimension and its value'],
+    ['per-user without a cloudflare source', 'counters:\n  - { name: u, assets: "*", per-user: true }\n', 'counters[0].per-user needs a cloudflare source'],
+  ])('rejects %s', (_, text, message) => {
+    expect(() => parseConfig(text)).toThrow(ConfigError);
+    expect(() => parseConfig(text)).toThrow(message);
+  });
+});
+
 describe('releases', () => {
   it('is on by default, and a boolean switches it off', () => {
     expect(parseConfig('').releases).toBe(true);

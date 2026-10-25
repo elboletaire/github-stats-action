@@ -38,7 +38,7 @@ counters:
 - Per 7-day chunk: one totals query and one per dimension, each grouped by day:
   `SELECT <day> AS day[, <col> AS value], count(DISTINCT index1) AS users, sum(_sample_interval) AS events FROM <dataset> WHERE timestamp >= toDateTime('<start>') AND timestamp < toDateTime('<end>') GROUP BY day[, value] FORMAT JSON`
   With `day: blobN`, the WHERE also widens by a day each side and rows are filtered on the day string, so a point written near midnight still lands on its blob day.
-- `released: true`: a row counts only when its version is a published, non-draft, non-prerelease GitHub release (tag without a leading `v`) and its `timestamp` is at or after that release's `published_at`. Every query (totals included) gets `AND ((<col> = '23.0.0' AND timestamp >= toDateTime('2026-10-20 12:00:00')) OR …)`, built from the releases the run already fetches; tags that aren't plain semver are skipped, and no matching release means `AND 0`. This drops test builds of unreleased versions, which AE can't delete.
+- `released: true`: a row counts only when its version is a published, non-draft, non-prerelease GitHub release (tag without a leading `v`) and its `timestamp` is at or after that release's `published_at`. Every query (totals included) gets `AND ((<col> = '23.0.0' AND timestamp >= toDateTime('2026-10-20 12:00:00')) OR …)`, built from the releases the run already fetches; tags that aren't plain semver are skipped, and no matching release means `AND false`. This drops test builds of unreleased versions, which AE can't delete.
 - A failed request logs a warning and keeps the stored days unchanged (all fetched before anything is written).
 - Identifiers are interpolated from validated config only; day strings come from our own range.
 
