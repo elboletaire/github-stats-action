@@ -51,7 +51,7 @@ export function usage(d: Dataset): Section | null {
     stacked: false,
     directLabels: true,
     id: 'usage',
-    animate: animates(d.charts),
+    animate: animates(d.charts, 'cloudflare-users'),
     describe: (v) => `${f0(v)} users (approx.)`,
   });
   return { el, redraw };
