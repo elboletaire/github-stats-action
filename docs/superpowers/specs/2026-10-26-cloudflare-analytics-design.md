@@ -17,7 +17,7 @@ cloudflare:
   note: The CLI only checks on --version; users are approximate daily counts.
   dimensions:
     client:  { column: blob1, label: App vs CLI }
-    version: { column: blob2, label: Version, kind: semver }
+    version: { column: blob2, label: Version, kind: semver, released: true }
     os:      { column: blob3, label: OS }
     arch:    { column: blob4, label: Arch }
 counters:
@@ -25,7 +25,7 @@ counters:
 ```
 
 - No `cloudflare` block: nothing changes, no requests.
-- Validation: `account-id` 32 hex; `dataset` matches `^[A-Za-z0-9_]+$`; `users` is `index1`; `day` and each dimension `column` are `blob1`..`blob20`, all different; dimension names are kebab-case; `kind` is `semver` or absent; at most one `primary` key, which must be a dimension. `per-user` on a counter requires `cloudflare`.
+- Validation: `account-id` 32 hex; `dataset` matches `^[A-Za-z0-9_]+$`; `users` is `index1`; `day` and each dimension `column` are `blob1`..`blob20`, all different; dimension names are kebab-case; `kind` is `semver` or absent; at most one `primary` key, which must be a dimension; `released` only on a `kind: semver` dimension, at most one. `per-user` on a counter requires `cloudflare`.
 - Token: action input `cloudflare-token` (pass a secret; needs *Account Analytics: Read*); the CLI reads `CLOUDFLARE_API_TOKEN`. A config without a token logs a warning and keeps the stored days.
 
 ## Collecting
@@ -38,6 +38,7 @@ counters:
 - Per 7-day chunk: one totals query and one per dimension, each grouped by day:
   `SELECT <day> AS day[, <col> AS value], count(DISTINCT index1) AS users, sum(_sample_interval) AS events FROM <dataset> WHERE timestamp >= toDateTime('<start>') AND timestamp < toDateTime('<end>') GROUP BY day[, value] FORMAT JSON`
   With `day: blobN`, the WHERE also widens by a day each side and rows are filtered on the day string, so a point written near midnight still lands on its blob day.
+- `released: true`: a row counts only when its version is a published, non-draft, non-prerelease GitHub release (tag without a leading `v`) and its `timestamp` is at or after that release's `published_at`. Every query (totals included) gets `AND ((<col> = '23.0.0' AND timestamp >= toDateTime('2026-10-20 12:00:00')) OR …)`, built from the releases the run already fetches; tags that aren't plain semver are skipped, and no matching release means `AND 0`. This drops test builds of unreleased versions, which AE can't delete.
 - A failed request logs a warning and keeps the stored days unchanged (all fetched before anything is written).
 - Identifiers are interpolated from validated config only; day strings come from our own range.
 
