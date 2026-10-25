@@ -132,7 +132,7 @@ export interface CloudflareRule {
 **Consumes:** `Dataset.cloudflare` (shared types). Use a fixture dataset built in the test.
 
 - [ ] `cloudflareUsersChart(dataset, theme)`: model on `packages/svg/src/npm.ts` (window via `charts['cloudflare-users']` `from`/`range`, title, animate, empty state). Main line = `headline` per day, labelled "Daily users (approx.)"; second faint line = events, labelled with `label`. Register in `renderCharts` only when `dataset.cloudflare` is set. Snapshot tests for light/dark, a window, the empty state; config tests that `charts.cloudflare-users` accepts the window keys and rejects `last`/`height`.
-- [ ] Badges, after the npm ones, only with `dataset.cloudflare`: `users-daily` (label `daily users`, message `formatCompact(usersAvg7)`) and `users-daily-latest` (label `daily users`, message `${formatCompact(usersLatest)} yesterday`... use the latest day's date only if npm badges do similar; else plain number). Add a `COLORS.users` entry next to `COLORS.npm`; `colourOf(name, COLORS.users)` honours `badges:`. Tests mirroring the npm badge tests.
+- [ ] Badges, after the npm ones, only with `dataset.cloudflare`: `users-daily` (label `daily users`, message `formatCompact(usersAvg7)`) and `users-daily-latest` (label `users on <latest date>`, message `formatCompact(usersLatest)`). Add a `COLORS.users` entry next to `COLORS.npm`; `colourOf(name, COLORS.users)` honours `badges:`. Tests mirroring the npm badge tests.
 - [ ] `pnpm test`, `pnpm typecheck`; commit `feat(cloudflare): daily users chart and badges`.
 
 ### Task 4: dashboard section, KPI note and docs — parallel with Task 3
