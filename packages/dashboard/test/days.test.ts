@@ -26,6 +26,10 @@ describe('day axis', () => {
     expect(labels).toContain('Oct');
   });
 
+  it('labels a one-day span without looping', () => {
+    expect(xTicks(axis, 5, 5, 10)).toEqual([]);
+  });
+
   it('labels multi-year spans by year', () => {
     const years = dayAxis('2020-01-01');
     const labels = xTicks(years, 0, 2200, 5).map(([, t]) => t);
