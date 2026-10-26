@@ -4,7 +4,7 @@ import { buildDataset } from './dataset';
 import type { NpmInput } from './npm';
 import type { StatsConfig } from './config';
 import { buildDailyCsv } from './csv';
-import { readNpmSeries, readSnapshots, readStargazers, readTraffic } from './store';
+import { readCloudflareSeries, readNpmSeries, readSnapshots, readStargazers, readTraffic } from './store';
 import { groupNames, summariseDay } from './summary';
 import type { Dataset } from './types';
 
@@ -35,13 +35,19 @@ export async function deriveRepo(dir: string, repo: string, config: StatsConfig,
     stargazers: await readStargazers(dir),
     traffic: await readTraffic(dir),
     npm: await readNpmInputs(dir, config),
+    cloudflare: config.cloudflare ? await readCloudflareSeries(dir, config.cloudflare.dataset) : undefined,
     now,
   });
   const names = dataset.releaseDownloads ? groupNames(config, snapshots) : [];
   const csv = buildDailyCsv(
     snapshots.map((s) => summariseDay(s, config, repo, names)),
     names,
-    { downloads: dataset.releaseDownloads, docker: Boolean(config.docker), npm: dataset.npm?.packages ?? [] },
+    {
+      downloads: dataset.releaseDownloads,
+      docker: Boolean(config.docker),
+      npm: dataset.npm?.packages ?? [],
+      cloudflare: dataset.cloudflare,
+    },
   );
   return { dataset, csv };
 }

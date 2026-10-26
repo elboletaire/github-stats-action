@@ -1,6 +1,6 @@
 // KPI tiles: the all-time totals, each with the change since the previous measured snapshot.
 
-import type { Dataset } from '@github-stats-action/core';
+import type { CounterInfo, Dataset } from '@github-stats-action/core';
 import { esc, f0, sgn } from '../format';
 import { colorVar } from '../palette';
 import { makeSection, type Section } from './common';
@@ -13,6 +13,17 @@ interface Tile {
   change: number | null;
   swatch?: string;
   note?: string;
+}
+
+/** A counter's tile note: where its count starts, and its increase per daily user when Cloudflare gives one. */
+export function counterNote(counter: CounterInfo): string | undefined {
+  const parts = [
+    ...(counter.from ? [`Counted from ${counter.from}`] : []),
+    ...(counter.perUser !== undefined
+      ? [`≈ ${counter.perUser.toLocaleString('en-US', { maximumFractionDigits: 2 })} per daily user, last 30 days`]
+      : []),
+  ];
+  return parts.length ? parts.join('. ') : undefined;
 }
 
 export function kpis(d: Dataset): Section {
@@ -44,7 +55,7 @@ export function kpis(d: Dataset): Section {
         label: counter.label,
         value: d.totals.counters[counter.name]?.downloads ?? 0,
         change: latest ? (latest.counters[counter.name] ?? 0) : null,
-        note: counter.from ? `Counted from ${counter.from}` : undefined,
+        note: counterNote(counter),
       });
     }
   }

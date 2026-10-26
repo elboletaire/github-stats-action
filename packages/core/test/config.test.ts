@@ -125,6 +125,7 @@ describe('charts', () => {
       'downloads-per-day': {},
       'downloads-per-release': {},
       'npm-downloads': {},
+      'cloudflare-users': {},
     });
   });
 
@@ -141,6 +142,7 @@ charts:
       'downloads-per-day': { title: false },
       'downloads-per-release': {},
       'npm-downloads': {},
+      'cloudflare-users': {},
     });
   });
 
@@ -157,6 +159,7 @@ charts:
       'downloads-per-day': {},
       'downloads-per-release': {},
       'npm-downloads': {},
+      'cloudflare-users': {},
     });
   });
 
@@ -342,6 +345,90 @@ npm:
   });
 });
 
+describe('cloudflare', () => {
+  const ACCOUNT = 'dd4d00309618abe546348e4b9cc7a893';
+
+  it('is absent when not configured, so no Cloudflare work runs', () => {
+    expect(parseConfig('').cloudflare).toBeUndefined();
+  });
+
+  it('reads a full block, with the per-user counter it feeds', () => {
+    const config = parseConfig(`
+cloudflare:
+  account-id: ${ACCOUNT}
+  dataset: manga_downloader_checks
+  label: Update checks
+  users: index1
+  day: blob5
+  primary: { client: gui }
+  note: The CLI only checks on --version.
+  dimensions:
+    client:  { column: blob1, label: App vs CLI }
+    version: { column: blob2, label: Version, kind: semver, released: true }
+    os:      { column: blob3, label: OS }
+counters:
+  - { name: updates, label: In-app updates, assets: "*-SHA256SUMS.txt", from: v1.19.0, per-user: true }
+`);
+    expect(config.cloudflare).toEqual({
+      accountId: ACCOUNT,
+      dataset: 'manga_downloader_checks',
+      label: 'Update checks',
+      users: 'index1',
+      day: 'blob5',
+      primary: { dimension: 'client', value: 'gui' },
+      note: 'The CLI only checks on --version.',
+      dimensions: [
+        { name: 'client', label: 'App vs CLI', column: 'blob1' },
+        { name: 'version', label: 'Version', column: 'blob2', kind: 'semver', released: true },
+        { name: 'os', label: 'OS', column: 'blob3' },
+      ],
+    });
+    expect(config.counters[0]).toMatchObject({ name: 'updates', from: 'v1.19.0', perUser: true });
+  });
+
+  it("reads the display labels of a dimension's values", () => {
+    const config = parseConfig(`
+cloudflare:
+  account-id: ${ACCOUNT}
+  dataset: d
+  dimensions:
+    client: { column: blob1, label: App vs CLI, values: { gui: App, cli: CLI } }
+`);
+    expect(config.cloudflare!.dimensions).toEqual([
+      { name: 'client', label: 'App vs CLI', column: 'blob1', values: { gui: 'App', cli: 'CLI' } },
+    ]);
+  });
+
+  it('defaults the label to the dataset, the users to index1 and the dimensions to none', () => {
+    const config = parseConfig(`cloudflare: { account-id: ${ACCOUNT}, dataset: checks }\n`);
+    expect(config.cloudflare).toEqual({ accountId: ACCOUNT, dataset: 'checks', label: 'checks', users: 'index1', dimensions: [] });
+  });
+
+  it.each([
+    ['an account id that is not hex', 'cloudflare: { account-id: xyz, dataset: d }\n', 'cloudflare.account-id must be 32 lowercase hex digits'],
+    ['a dataset name with a dash', `cloudflare: { account-id: ${ACCOUNT}, dataset: a-b }\n`, 'cloudflare.dataset may only use letters, digits and _'],
+    ['users other than index1', `cloudflare: { account-id: ${ACCOUNT}, dataset: d, users: blob1 }\n`, 'cloudflare.users must be index1'],
+    ['an unknown key', `cloudflare: { account-id: ${ACCOUNT}, dataset: d, lable: x }\n`, 'cloudflare.lable is not a known key'],
+    ['a day that is not a blob', `cloudflare: { account-id: ${ACCOUNT}, dataset: d, day: blob21 }\n`, 'cloudflare.day must be blob1 to blob20'],
+    ['a dimension column that is not a blob', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    os: { column: index1 }\n`, 'cloudflare.dimensions.os.column must be blob1 to blob20'],
+    ['a dimension name that is not kebab-case', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    OS: { column: blob3 }\n`, 'cloudflare.dimensions.OS: dimension names are lowercase words joined by -'],
+    ['a column used twice', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  day: blob1\n  dimensions:\n    os: { column: blob3 }\n    arch: { column: blob3 }\n`, "cloudflare column 'blob3' is listed twice"],
+    ['a day column that is also a dimension column', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  day: blob1\n  dimensions:\n    os: { column: blob1 }\n`, "cloudflare column 'blob1' is listed twice"],
+    ['a value label that is not a string', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1, values: { gui: 1 } }\n`, 'cloudflare.dimensions.client.values.gui must be a non-empty string'],
+    ['an empty value label', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1, values: { gui: "" } }\n`, 'cloudflare.dimensions.client.values.gui must be a non-empty string'],
+    ['an empty value name', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1, values: { "": App } }\n`, 'cloudflare.dimensions.client.values: value names must be non-empty'],
+    ['a kind other than semver', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    os: { column: blob3, kind: date }\n`, 'cloudflare.dimensions.os.kind must be semver'],
+    ['released on a dimension that is not semver', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    os: { column: blob3, released: true }\n`, 'cloudflare.dimensions.os.released needs kind: semver'],
+    ['two released dimensions', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    a: { column: blob1, kind: semver, released: true }\n    b: { column: blob2, kind: semver, released: true }\n`, 'cloudflare: only one dimension may be released'],
+    ['a primary that is not a dimension', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  primary: { client: gui }\n`, 'cloudflare.primary.client is not a dimension'],
+    ['a primary with two keys', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1 }\n  primary: { client: gui, os: linux }\n`, 'cloudflare.primary must name one dimension and its value'],
+    ['per-user without a cloudflare source', 'counters:\n  - { name: u, assets: "*", per-user: true }\n', 'counters[0].per-user needs a cloudflare source'],
+  ])('rejects %s', (_, text, message) => {
+    expect(() => parseConfig(text)).toThrow(ConfigError);
+    expect(() => parseConfig(text)).toThrow(message);
+  });
+});
+
 describe('releases', () => {
   it('is on by default, and a boolean switches it off', () => {
     expect(parseConfig('').releases).toBe(true);
@@ -364,6 +451,16 @@ describe('chart windows', () => {
   it('reads a range as a count of days, months or years', () => {
     expect(parseConfig('charts: { downloads-per-day: { range: 90d } }').charts['downloads-per-day']).toEqual({ range: '90d' });
     expect(parseConfig("charts: { npm-downloads: { range: 1y } }").charts['npm-downloads']).toEqual({ range: '1y' });
+  });
+
+  it('reads the window of cloudflare-users, and rejects last and height', () => {
+    expect(parseConfig('charts: { cloudflare-users: { from: "2026-06", title: false } }').charts['cloudflare-users']).toEqual({
+      from: '2026-06-01',
+      title: false,
+    });
+    expect(parseConfig("charts: { cloudflare-users: { range: 6m } }").charts['cloudflare-users']).toEqual({ range: '6m' });
+    expect(() => parseConfig('charts: { cloudflare-users: { last: 3 } }')).toThrow('charts.cloudflare-users.last is only for downloads-per-release');
+    expect(() => parseConfig('charts: { cloudflare-users: { height: 300 } }')).toThrow('charts.cloudflare-users.height is only for stars');
   });
 
   it('reads last for downloads per release only', () => {
@@ -443,7 +540,7 @@ charts:
     expect(() => parseConfig(text)).toThrow(message);
   });
 
-  it('leaves ChartName to the four base charts', () => {
-    expectTypeOf<ChartName>().toEqualTypeOf<'stars' | 'downloads-per-day' | 'downloads-per-release' | 'npm-downloads'>();
+  it('leaves ChartName to the five base charts', () => {
+    expectTypeOf<ChartName>().toEqualTypeOf<'stars' | 'downloads-per-day' | 'downloads-per-release' | 'npm-downloads' | 'cloudflare-users'>();
   });
 });

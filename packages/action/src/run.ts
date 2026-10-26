@@ -5,8 +5,10 @@ import { join } from 'node:path';
 import { renderBadges, unknownBadges } from '@github-stats-action/badges';
 import { dashboardFiles } from '@github-stats-action/dashboard';
 import {
+  cloudflareClient,
   createClient,
   deriveRepo,
+  fetchCloudflareSeries,
   fetchDockerPulls,
   fetchNpmSeries,
   fetchReleases,
@@ -16,12 +18,14 @@ import {
   githubClient,
   pruneDerived,
   mergeTrafficDays,
+  readCloudflareSeries,
   readDatasets,
   readNpmSeries,
   readStargazers,
   readTrafficSeries,
   repoDir,
   utcDate,
+  writeCloudflareSeries,
   writeDerived,
   writeNpmSeries,
   writeOutputFiles,
@@ -29,12 +33,15 @@ import {
   writeStargazers,
   writeTrafficAggregates,
   writeTrafficSeries,
+  type CloudflareRule,
+  type CloudflareSeries,
   type Dataset,
   type FetchFn,
   type Logger,
   type NpmRule,
   type NpmSeries,
   type Snapshot,
+  type SnapshotRelease,
   type StatsConfig,
 } from '@github-stats-action/core';
 import { renderCharts } from '@github-stats-action/svg';
@@ -49,6 +56,8 @@ export interface RunOptions {
   traffic: boolean;
   /** The Pages site, when `pages` is on. */
   pages?: { dir: string; traffic: boolean };
+  /** Token of the `cloudflare` source; without it the stored days are kept. */
+  cloudflareToken?: string;
   now: Date;
   log: Logger;
   fetch?: FetchFn;
@@ -111,6 +120,24 @@ async function collectNpm(dir: string, packages: NpmRule[], today: string, fetch
   return series;
 }
 
+/** Brings the Cloudflare dataset's stored days up to date. Without a token they are kept, with a warning. */
+async function collectCloudflare(
+  dir: string,
+  rule: CloudflareRule,
+  releases: readonly SnapshotRelease[],
+  today: string,
+  token: string | undefined,
+  fetchFn: FetchFn,
+  log: Logger,
+): Promise<CloudflareSeries | undefined> {
+  const stored = await readCloudflareSeries(dir, rule.dataset);
+  if (!token) {
+    log.warning('cloudflare: no token (cloudflare-token input or CLOUDFLARE_API_TOKEN), keeping the stored days');
+    return stored;
+  }
+  return fetchCloudflareSeries(cloudflareClient(fetchFn, token), rule, releases, stored, today, log);
+}
+
 export async function runStats(options: RunOptions): Promise<RunResult> {
   const { repo, config, now, log } = options;
   const fetchFn = options.fetch ?? fetch;
@@ -129,6 +156,9 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
     ? await fetchDockerPulls(createClient({ fetch: fetchFn, baseUrl: 'https://hub.docker.com' }), config.docker, log)
     : undefined;
   const npm = config.npm?.length ? await collectNpm(dir, config.npm, date, fetchFn, log) : [];
+  const cloudflare = config.cloudflare
+    ? await collectCloudflare(dir, config.cloudflare, releases, date, options.cloudflareToken, fetchFn, log)
+    : undefined;
 
   const snapshot: Snapshot = {
     schema: 1,
@@ -141,6 +171,7 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
   await writeSnapshot(dir, snapshot);
   await writeStargazers(dir, stargazers);
   for (const series of npm) await writeNpmSeries(dir, series);
+  if (cloudflare) await writeCloudflareSeries(dir, cloudflare);
   if (traffic) {
     await writeTrafficSeries(dir, 'views', mergeTrafficDays(await readTrafficSeries(dir, 'views'), traffic.views));
     await writeTrafficSeries(dir, 'clones', mergeTrafficDays(await readTrafficSeries(dir, 'clones'), traffic.clones));

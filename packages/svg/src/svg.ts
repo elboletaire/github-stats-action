@@ -16,7 +16,7 @@ export const PAD = 24;
 export const PLOT_LEFT = 60;
 
 /** Whether a chart shows its title and note: its own `title` option, else `charts.titles`, else yes. */
-export const showTitle = (dataset: Dataset, chart: ChartName): boolean => dataset.charts?.[chart].title ?? dataset.charts?.titles ?? true;
+export const showTitle = (dataset: Dataset, chart: ChartName): boolean => dataset.charts?.[chart]?.title ?? dataset.charts?.titles ?? true;
 
 /** The top of the plot: lower without a title, and lower again to make room for `labelled` rows above it. */
 export const plotTop = (titled: boolean, labelled = false): number => (titled ? 80 : 40) + (labelled ? 32 : 0);

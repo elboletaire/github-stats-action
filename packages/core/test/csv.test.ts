@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildDailyCsv } from '../src/csv';
 import type { DaySummary } from '../src/summary';
-import type { NpmPackageStats } from '../src/types';
+import type { CloudflareData, NpmPackageStats } from '../src/types';
 
 const day = (date: string, app: number, cli: number, docker: number | null, stars: number): DaySummary => ({
   date,
@@ -31,6 +31,16 @@ const pkg = (name: string, slug: string, days: [string, number][]): NpmPackageSt
   first: days[0]![0],
   totals: { lastDay: 0, last7: 0, last30: 0, all: 0 },
   days: days.map(([date, downloads]) => ({ date, downloads })),
+});
+
+const cloudflare = (days: [string, number, number][]): CloudflareData => ({
+  label: 'Checks',
+  latest: days.at(-1)![0],
+  first: days[0]![0],
+  dimensions: [],
+  days: days.map(([date, headline, events]) => ({ date, users: headline, events, by: {}, headline })),
+  totals: { usersLatest: 0, usersAvg7: 0, eventsLast30: 0, otherEvents7: 0 },
+  shares: {},
 });
 
 const releasesAndDocker = [
@@ -93,5 +103,23 @@ describe('buildDailyCsv', () => {
       npm,
     });
     expect(csv.split('\n')[2]).toBe('2026-10-18,2,0,1,2,,2');
+  });
+
+  it('writes the Cloudflare users and events per day, on the dates the other sources lack', () => {
+    const csv = buildDailyCsv([repoDay('2026-10-17', 10, 2)], [], {
+      downloads: false,
+      docker: false,
+      npm: [],
+      cloudflare: cloudflare([
+        ['2026-10-16', 4, 5],
+        ['2026-10-17', 3, 6],
+      ]),
+    });
+    expect(csv.split('\n')).toEqual([
+      'date,stars,forks,stars_delta,cf_users,cf_events',
+      '2026-10-16,,,,4,5',
+      '2026-10-17,10,2,,3,6',
+      '',
+    ]);
   });
 });

@@ -30,6 +30,7 @@ async function main(): Promise<void> {
       dataDir: data.dir,
       traffic: core.getBooleanInput('traffic'),
       pages: pagesOptions,
+      cloudflareToken: core.getInput('cloudflare-token') || undefined,
       now,
       log: core,
     });

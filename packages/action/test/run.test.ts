@@ -201,3 +201,61 @@ describe('runStats with release downloads switched off', () => {
     expect(await readdir(join(repo, 'snapshots'))).toEqual(['2026-01-03.json']);
   });
 });
+
+/** Cloudflare's SQL API: answers one day, 2026-01-02, to each query whose window holds it. */
+function withCloudflare(base: typeof fetch): typeof fetch {
+  return vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const request = input instanceof Request ? input : new Request(input, init);
+    if (new URL(request.url).hostname !== 'api.cloudflare.com') return base(input, init);
+    const sql = await request.text();
+    const [, from, to] = /toDateTime\('([\d-]+) 00:00:00'\) AND timestamp < toDateTime\('([\d-]+) 00:00:00'\)/.exec(sql)!;
+    const day = '2026-01-02';
+    const inWindow = from! <= day && day < to!;
+    const row = { day, users: '2', events: '3', ...(sql.includes('AS value') ? { value: 'gui' } : {}) };
+    return json({ meta: [], data: inWindow ? [row] : [], rows: inWindow ? 1 : 0 });
+  }) as unknown as typeof fetch;
+}
+
+describe('runStats with the cloudflare source', () => {
+  const withSource = parseConfig(`
+cloudflare:
+  account-id: ${'a'.repeat(32)}
+  dataset: manga_downloader_checks
+  dimensions:
+    client: { column: blob1 }
+`);
+
+  it('stores the daily aggregates under cloudflare/ with the token', async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
+    const result = await runStats({ repo: REPO, token: 'x', config: withSource, dataDir, traffic: false, now, log, fetch: withCloudflare(network()), cloudflareToken: 'cf' });
+    const repo = join(dataDir, 'elboletaire', 'manga-downloader');
+    const stored = JSON.parse(await readFile(join(repo, 'cloudflare', 'manga_downloader_checks.json'), 'utf8'));
+    expect(stored).toEqual({
+      schema: 1,
+      dataset: 'manga_downloader_checks',
+      days: [{ date: '2026-01-02', users: 2, events: 3, by: { client: { gui: { users: 2, events: 3 } } } }],
+    });
+    expect(result.dataset.cloudflare?.latest).toBe('2026-01-02');
+    expect(await readFile(join(repo, 'daily.csv'), 'utf8')).toMatch(/^date,.*cf_users,cf_events\n/);
+  });
+
+  it('keeps the stored days, with a warning, when no token is given', async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
+    const warn = vi.fn();
+    const fetchFn = withCloudflare(network());
+    await runStats({ repo: REPO, token: 'x', config: withSource, dataDir, traffic: false, now, log: { info: vi.fn(), warning: warn }, fetch: fetchFn });
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('cloudflare: no token'));
+    expect(await readdir(join(dataDir, 'elboletaire', 'manga-downloader'))).not.toContain('cloudflare');
+    const hosts = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock.calls.map(([input]) => new URL(String(input instanceof Request ? input.url : input)).hostname);
+    expect(hosts).not.toContain('api.cloudflare.com');
+  });
+
+  it('does no Cloudflare work without the cloudflare block', async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
+    const fetchFn = withCloudflare(network());
+    await runStats({ repo: REPO, config, dataDir, traffic: false, now, log, fetch: fetchFn, cloudflareToken: 'cf' });
+    expect(await readdir(join(dataDir, 'elboletaire', 'manga-downloader'))).not.toContain('cloudflare');
+    const hosts = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock.calls.map(([input]) => new URL(String(input instanceof Request ? input.url : input)).hostname);
+    expect(hosts).not.toContain('api.cloudflare.com');
+  });
+});

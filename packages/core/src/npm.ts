@@ -24,7 +24,7 @@ export function addMonths(date: string, months: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-const dayNumber = (date: string): number => Math.round(Date.parse(`${date}T00:00:00Z`) / DAY_MS);
+export const dayNumber = (date: string): number => Math.round(Date.parse(`${date}T00:00:00Z`) / DAY_MS);
 
 /** Totals over the days ending on `latest`: its own day, the last 7 and 30 days, and everything stored. */
 export function npmTotals(days: readonly NpmDay[], latest: string): NpmTotals {

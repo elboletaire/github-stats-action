@@ -8,6 +8,9 @@ inputs:
     description: API token. Traffic needs a token with push access to the repo (a PAT); GITHUB_TOKEN gets 403 there.
     required: false
     default: ${{ github.token }}
+  cloudflare-token:
+    description: Cloudflare API token with Account Analytics: Read, for the cloudflare source.
+    required: false
   config:
     description: Path to the stats config file; .github/stats.yml when unset, which may be missing (then the defaults apply). A path set here must exist.
     required: false

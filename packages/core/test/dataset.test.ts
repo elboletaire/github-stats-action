@@ -237,4 +237,68 @@ describe('Dataset maths on small inputs', () => {
   it('refuses to build without snapshots', () => {
     expect(() => build({ snapshots: [], now: new Date() })).toThrow('at least one snapshot');
   });
+
+  describe('the Cloudflare figures', () => {
+    const cfConfig = (perUser: boolean) => parseConfig(`
+groups:
+  - { name: cli, label: CLI, assets: "manga-downloader-*" }
+counters:
+  - { name: updates, label: In-app updates, assets: "*.tar.gz"${perUser ? ', per-user: true' : ''} }
+cloudflare:
+  account-id: dd4d00309618abe546348e4b9cc7a893
+  dataset: checks
+`);
+    const releasedAt = (downloads: number): SnapshotRelease[] => [
+      rel('v1.0.0', '2026-01-01T00:00:00Z', [{ name: 'manga-downloader-v1.0.0.tar.gz', downloads }]),
+    ];
+    const cfDays = Array.from({ length: 14 }, (_, i) => ({
+      date: new Date(Date.UTC(2026, 9, 13) + i * 864e5).toISOString().slice(0, 10),
+      users: 10,
+      events: 12,
+      by: {},
+    }));
+    const snapshots = [snap('2026-09-26', releasedAt(10)), snap('2026-10-26', releasedAt(40))];
+
+    it('leaves out the figures and perUser without the config', () => {
+      const d = build({ snapshots, now: new Date('2026-10-26T12:00:00Z') });
+      expect(d).not.toHaveProperty('cloudflare');
+      expect(d.counters[0]).not.toHaveProperty('perUser');
+    });
+
+    it('leaves out the figures and perUser without stored days', () => {
+      const d = buildDataset({
+        repo: 'o/r',
+        config: cfConfig(true),
+        snapshots,
+        cloudflare: undefined,
+        now: new Date('2026-10-26T12:00:00Z'),
+      });
+      expect(d).not.toHaveProperty('cloudflare');
+      expect(d.counters[0]).not.toHaveProperty('perUser');
+    });
+
+    it('gives the figures, and the counter its perUser, once Cloudflare days are stored', () => {
+      const d = buildDataset({
+        repo: 'o/r',
+        config: cfConfig(true),
+        snapshots,
+        cloudflare: { schema: 1, dataset: 'checks', days: cfDays },
+        now: new Date('2026-10-26T12:00:00Z'),
+      });
+      expect(d.cloudflare).toMatchObject({ label: 'checks', latest: '2026-10-26', first: '2026-10-13' });
+      expect(d.counters[0]).toMatchObject({ name: 'updates', perUser: 3 });
+    });
+
+    it('leaves perUser out of a counter the config does not mark', () => {
+      const d = buildDataset({
+        repo: 'o/r',
+        config: cfConfig(false),
+        snapshots,
+        cloudflare: { schema: 1, dataset: 'checks', days: cfDays },
+        now: new Date('2026-10-26T12:00:00Z'),
+      });
+      expect(d.cloudflare).toBeDefined();
+      expect(d.counters[0]).not.toHaveProperty('perUser');
+    });
+  });
 });

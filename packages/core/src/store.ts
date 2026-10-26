@@ -6,7 +6,7 @@ import type { Dirent } from 'node:fs';
 import { join } from 'node:path';
 import type { OutputFile } from './outputs';
 import { npmSlug } from './npm';
-import type { Dataset, NpmSeries, PopularPath, Referrer, Snapshot, TrafficDay, TrafficData } from './types';
+import type { CloudflareSeries, Dataset, NpmSeries, PopularPath, Referrer, Snapshot, TrafficDay, TrafficData } from './types';
 
 export const SNAPSHOT_RE = /^(\d{4}-\d{2}-\d{2})\.json$/;
 
@@ -78,6 +78,21 @@ export async function writeNpmSeries(dir: string, series: NpmSeries): Promise<vo
   const text = `{\n"schema": ${series.schema},\n"package": ${JSON.stringify(series.package)},\n"days": [\n${days}\n]\n}\n`;
   await mkdir(join(dir, 'npm'), { recursive: true });
   await writeFile(join(dir, 'npm', `${npmSlug(series.package)}.json`), text);
+}
+
+/** The stored daily aggregates of an Analytics Engine dataset, undefined when none were stored. */
+export async function readCloudflareSeries(dir: string, dataset: string): Promise<CloudflareSeries | undefined> {
+  const series = await readJson<CloudflareSeries>(join(dir, 'cloudflare', `${dataset}.json`));
+  if (series && series.schema !== 1) throw new Error(`cloudflare/${dataset}.json: unsupported schema`);
+  return series;
+}
+
+/** One day per line, like the npm series. */
+export async function writeCloudflareSeries(dir: string, series: CloudflareSeries): Promise<void> {
+  const days = series.days.map((day) => `  ${JSON.stringify(day)}`).join(',\n');
+  const text = `{\n"schema": ${series.schema},\n"dataset": ${JSON.stringify(series.dataset)},\n"days": [\n${days}\n]\n}\n`;
+  await mkdir(join(dir, 'cloudflare'), { recursive: true });
+  await writeFile(join(dir, 'cloudflare', `${series.dataset}.json`), text);
 }
 
 export async function readTrafficSeries(dir: string, kind: 'views' | 'clones'): Promise<TrafficDay[]> {
@@ -160,7 +175,7 @@ export async function writeDerived(dir: string, dataset: Dataset, csv: string): 
  * (a logo, a hand-made chart) and is never removed.
  */
 const GENERATED =
-  /^(charts\/(stars|downloads-per-day|downloads-per-release|npm-downloads)(-[a-z0-9]+(-[a-z0-9]+)*)?-(light|dark)\.svg|badges\/(downloads|release-latest|stars|stars-(week|month)|docker-pulls|docker-pulls-month|npm-downloads|downloads-[A-Za-z0-9_-]+|npm-[A-Za-z0-9._~-]+|counter-[A-Za-z0-9_-]+)\.(json|svg))$/;
+  /^(charts\/(stars|downloads-per-day|downloads-per-release|npm-downloads|cloudflare-users)(-[a-z0-9]+(-[a-z0-9]+)*)?-(light|dark)\.svg|badges\/(downloads|release-latest|stars|stars-(week|month)|docker-pulls|docker-pulls-month|npm-downloads|users-daily|users-daily-latest|downloads-[A-Za-z0-9_-]+|npm-[A-Za-z0-9._~-]+|counter-[A-Za-z0-9_-]+)\.(json|svg))$/;
 
 /**
  * Removes the generated files of `charts/` and `badges/` that `files` no longer produces, e.g. the download

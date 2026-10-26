@@ -1,6 +1,7 @@
 // SVG charts for one repo: each chart in a light and a dark file, for a <picture> in READMEs.
 
 import type { ChartName, ChartsConfig, Dataset, OutputFile } from '@github-stats-action/core';
+import { cloudflareUsersChart } from './cloudflare';
 import { downloadsPerDayChart } from './downloads';
 import { npmDownloadsChart } from './npm';
 import { downloadsPerReleaseChart } from './releases';
@@ -9,7 +10,7 @@ import type { Theme } from './svg';
 
 type Chart = (dataset: Dataset, theme: Theme) => string;
 
-/** Paths are relative to `<owner>/<repo>/`: `charts/<name>-light.svg` and `-dark.svg`. The download charts need release downloads, the npm one npm. */
+/** Paths are relative to `<owner>/<repo>/`: `charts/<name>-light.svg` and `-dark.svg`. The download charts need release downloads, the npm one npm, the users one Cloudflare. */
 export function renderCharts(dataset: Dataset): OutputFile[] {
   const charts: [ChartName, Chart][] = [
     ['stars', starsChart],
@@ -20,6 +21,7 @@ export function renderCharts(dataset: Dataset): OutputFile[] {
         ]
       : []),
     ...(dataset.npm ? [['npm-downloads', npmDownloadsChart] as [ChartName, Chart]] : []),
+    ...(dataset.cloudflare ? [['cloudflare-users', cloudflareUsersChart] as [ChartName, Chart]] : []),
   ];
   const themes: Theme[] = ['light', 'dark'];
   const files = (name: string, chart: Chart, data: Dataset) =>

@@ -1,13 +1,17 @@
 // Builds the Dataset from the snapshots and stargazers. Pure: no clock, no I/O beyond `now`.
 
-import type { StatsConfig } from './config';
+import type { CounterRule, StatsConfig } from './config';
 import { OTHER } from './assets';
+import { buildCloudflareData, counterPerUser } from './cloudflare';
 import { DAY_MS, estimateDaily, utcDate, utcMidnight } from './estimate';
 import { buildNpmData, type NpmInput } from './npm';
 import { buildPeriods } from './periods';
 import { parseVersion, compareVersions } from './semver';
 import { countsReleaseDownloads, groupNames, summariseDay, summariseRelease } from './summary';
 import type {
+  CloudflareData,
+  CloudflareSeries,
+  CounterInfo,
   Dataset,
   EpochInfo,
   MeasuredDay,
@@ -29,6 +33,8 @@ export interface BuildInput {
   traffic?: TrafficData;
   /** The configured npm packages with their stored days, in config order. */
   npm?: NpmInput[];
+  /** The stored days of the configured Cloudflare dataset; absent when none are stored. */
+  cloudflare?: CloudflareSeries;
   now: Date;
 }
 
@@ -137,6 +143,17 @@ function buildMeasured(
   return out;
 }
 
+/** The counter as the dataset shows it: `perUser` is set only when the Cloudflare figures can give it. */
+function buildCounterInfo(
+  rule: CounterRule,
+  measured: MeasuredDay[],
+  cloudflare: CloudflareData | undefined,
+): CounterInfo {
+  const { perUser: _perUser, ...counter } = rule;
+  const perUser = rule.perUser && cloudflare ? counterPerUser(measured, rule.name, cloudflare) : undefined;
+  return perUser === undefined ? counter : { ...counter, perUser };
+}
+
 /** Cumulative stars at the end of each UTC day, from the first star to `now`'s day. */
 function buildStars(stargazers: readonly string[], nowMs: number): StarPoint[] {
   if (stargazers.length === 0) return [];
@@ -174,6 +191,9 @@ export function buildDataset(input: BuildInput): Dataset {
     ? buildPeriods({ releases, epochs: config.epochs, counters: config.counters, names, d0, daily })
     : [];
   const npm = input.npm ? buildNpmData(input.npm) : undefined;
+  const cloudflare =
+    config.cloudflare && input.cloudflare ? buildCloudflareData(config.cloudflare, input.cloudflare) : undefined;
+  const measuredDaily = buildMeasured(snapshots, effective, repo, names);
 
   return {
     repo,
@@ -185,16 +205,17 @@ export function buildDataset(input: BuildInput): Dataset {
       color,
     })),
     epochs: config.epochs.map((e) => ({ version: e.version, label: e.label })),
-    counters: effective.counters.map((c) => ({ ...c })),
+    counters: effective.counters.map((c) => buildCounterInfo(c, measuredDaily, cloudflare)),
     totals: buildTotals(releases, snapshots, effective, names),
     releases,
     periods,
     estimatedDaily: daily,
-    measuredDaily: buildMeasured(snapshots, effective, repo, names),
+    measuredDaily,
     stars: buildStars(input.stargazers ?? [], nowMs),
     charts: config.charts,
     releaseDownloads,
     ...(input.traffic ? { traffic: input.traffic } : {}),
     ...(npm ? { npm } : {}),
+    ...(cloudflare ? { cloudflare } : {}),
   };
 }

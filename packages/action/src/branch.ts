@@ -8,8 +8,8 @@ import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 
-/** The stored files of a repo: snapshots, stargazers, traffic and npm counts. */
-const DATA_PATH = /^[^/]+\/[^/]+\/(snapshots\/[^/]+\.json|stargazers\.json|traffic\/.+\.json|npm\/[^/]+\.json)$/;
+/** The stored files of a repo: snapshots, stargazers, traffic, npm counts and Cloudflare days. */
+const DATA_PATH = /^[^/]+\/[^/]+\/(snapshots\/[^/]+\.json|stargazers\.json|traffic\/.+\.json|npm\/[^/]+\.json|cloudflare\/[^/]+\.json)$/;
 
 /** Copies the data files of `ref` (in the git repo at `cwd`) under `dest`, keeping their paths. */
 export async function exportBranchData(ref: string, cwd: string, dest: string): Promise<number> {

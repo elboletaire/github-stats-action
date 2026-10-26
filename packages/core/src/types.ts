@@ -92,6 +92,8 @@ export interface CounterInfo {
   assets: string;
   /** Only releases at or after this version are counted; absent counts every release. */
   from?: string;
+  /** Increase per daily Cloudflare user over the last 30 days; absent unless the figures can give it. */
+  perUser?: number;
 }
 
 /** One release's file, with the group it was counted in. */
@@ -249,6 +251,62 @@ export interface NpmData {
   packages: NpmPackageStats[];
 }
 
+/** One value's figures on one day. */
+export interface CloudflareCount {
+  users: number;
+  events: number;
+}
+
+/** One UTC day of an Analytics Engine dataset; `by` holds each dimension's values. */
+export interface CloudflareDay extends CloudflareCount {
+  date: string;
+  by: Record<string, Record<string, CloudflareCount>>;
+}
+
+/** A dataset's days as stored on the data branch (`cloudflare/<dataset>.json`). */
+export interface CloudflareSeries {
+  schema: 1;
+  dataset: string;
+  days: CloudflareDay[];
+}
+
+export interface CloudflareDimensionInfo {
+  name: string;
+  label: string;
+  kind?: 'semver';
+  /** Display labels by raw value. */
+  values?: Record<string, string>;
+}
+
+export interface CloudflareShare {
+  value: string;
+  users: number;
+  events: number;
+}
+
+/** The Cloudflare figures of one repo; absent without config or stored days. */
+export interface CloudflareData {
+  label: string;
+  note?: string;
+  /** `{ dimension, value }` the headline users count; absent counts every row. */
+  primary?: { dimension: string; value: string };
+  latest: string;
+  first: string;
+  dimensions: CloudflareDimensionInfo[];
+  /** Stored days with `headline` added: primary users when set, else users. */
+  days: (CloudflareDay & { headline: number })[];
+  totals: {
+    usersLatest: number;
+    /** Mean headline over the last 7 stored days (fewer when fewer exist), rounded. */
+    usersAvg7: number;
+    eventsLast30: number;
+    /** Events outside `primary` over the last 7 days; 0 without primary. */
+    otherEvents7: number;
+  };
+  /** Last 30 days per dimension; top 8 then `other`; semver dimensions newest first, others by events desc. */
+  shares: Record<string, CloudflareShare[]>;
+}
+
 /** One repo's derived view, written as dataset.json and inlined in the standalone dashboard; snapshots only. */
 export interface Dataset {
   /** owner/name. */
@@ -277,6 +335,8 @@ export interface Dataset {
   releaseDownloads: boolean;
   /** Present only when the config lists npm packages with stored days. */
   npm?: NpmData;
+  /** Present only when the config has a Cloudflare dataset with stored days. */
+  cloudflare?: CloudflareData;
 }
 
 /** Log sink for warnings and progress; the action sends it to @actions/core. */
