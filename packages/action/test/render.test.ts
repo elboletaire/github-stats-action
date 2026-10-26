@@ -9,12 +9,14 @@ import {
   parseConfig,
   repoDir,
   toTrafficResponse,
+  writeCloudflareSeries,
   writeStargazers,
   writeTrafficAggregates,
   writeTrafficSeries,
   type Dataset,
   type TrafficRaw,
 } from '@github-stats-action/core';
+import { exportBranchData } from '../src/branch';
 import { runCli } from '../src/cli';
 import { renderData } from '../src/render';
 
@@ -164,6 +166,7 @@ describe('render from a git ref', () => {
     git(repo, 'rm', '-rq', '--cached', '.');
     await rm(join(repo, 'README.md'));
     await fixtureData(repo);
+    await writeCloudflareSeries(repoDir(repo, REPO), { schema: 1, dataset: 'acme', days: [] });
     await writeFile(join(repo, 'notes.txt'), 'not data\n');
     git(repo, 'add', '-A');
     git(repo, 'commit', '-q', '-m', 'data');
@@ -176,6 +179,9 @@ describe('render from a git ref', () => {
     expect(code).toBe(0);
     const dataset = JSON.parse(await readFile(join(out, REPO, 'dataset.json'), 'utf8')) as Dataset;
     expect(dataset.totals.groups).toEqual({ app: 358, cli: 11814 });
+    const exported = await mkdtemp(join(tmpdir(), 'render-export-'));
+    await exportBranchData('stats-data', repo, exported);
+    expect(await readFile(join(exported, REPO, 'cloudflare', 'acme.json'), 'utf8')).toContain('"dataset": "acme"');
     expect(git(repo, 'branch', '--show-current')).toBe('main');
     expect(git(repo, 'status', '--porcelain')).toBe(before);
     expect(await readFile(join(repo, 'README.md'), 'utf8')).toBe('code\n');
