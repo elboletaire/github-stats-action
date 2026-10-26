@@ -299,6 +299,8 @@ export interface CloudflareData {
     usersLatest: number;
     /** Mean headline over the last 7 stored days (fewer when fewer exist), rounded. */
     usersAvg7: number;
+    /** Mean headline over the last 30 stored days (fewer when fewer exist), rounded. */
+    usersAvg30: number;
     eventsLast30: number;
     /** Events outside `primary` over the last 7 days; 0 without primary. */
     otherEvents7: number;

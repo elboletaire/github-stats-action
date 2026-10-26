@@ -119,6 +119,7 @@ export function buildCloudflareData(rule: CloudflareRule, series: CloudflareSeri
     totals: {
       usersLatest: last.headline,
       usersAvg7: Math.round(recent7.reduce((sum, d) => sum + d.headline, 0) / recent7.length),
+      usersAvg30: Math.round(recent30.reduce((sum, d) => sum + d.headline, 0) / recent30.length),
       eventsLast30: recent30.reduce((sum, d) => sum + d.events, 0),
       otherEvents7: primary
         ? recent7.reduce((sum, d) => sum + d.events - (d.by[primary.dimension]?.[primary.value]?.events ?? 0), 0)

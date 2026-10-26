@@ -39,7 +39,7 @@ const cloudflare = (days: [string, number, number][]): CloudflareData => ({
   first: days[0]![0],
   dimensions: [],
   days: days.map(([date, headline, events]) => ({ date, users: headline, events, by: {}, headline })),
-  totals: { usersLatest: 0, usersAvg7: 0, eventsLast30: 0, otherEvents7: 0 },
+  totals: { usersLatest: 0, usersAvg7: 0, usersAvg30: 0, eventsLast30: 0, otherEvents7: 0 },
   shares: {},
 });
 

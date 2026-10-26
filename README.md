@@ -220,7 +220,7 @@ What you get:
 
 - **Dashboard:** a Usage section after npm, with the 7-day average of daily users, a zoomable daily chart, and a share table per dimension for the last 30 days.
 - **Chart:** `charts/cloudflare-users-light.svg` / `-dark.svg`, daily users as a Total line over a fade, plus one line per value of the `primary` dimension, labelled by its `values`. Limit it with `charts: { cloudflare-users: { range: 90d } }`.
-- **Badges:** `users-daily` (the 7-day average of daily users) and `users-daily-latest` (the latest day), see [Badges](#badges).
+- **Badges:** `users-daily` and `users-daily-month` (the 7- and 30-day averages of daily users) and `users-daily-latest` (the latest day), see [Badges](#badges).
 - **CSV:** `cf_users` (approximate) and `cf_events` columns in `daily.csv`.
 
 Caveats:
@@ -339,11 +339,12 @@ Each badge is written as `badges/<name>.json` (shields.io endpoint) and `badges/
 | `npm-downloads-week` | the same over the last 7 days | as above |
 | `npm-downloads-total` | npm downloads over every stored day, e.g. `113k total` | as above |
 | `npm-<package>`, `npm-<package>-week` | one package over the last 30 / 7 days | the package has stored days |
-| `users-daily` | the 7-day average of daily users (approximate), labelled `daily users` | a `cloudflare` dataset has stored days |
+| `users-daily` | the 7-day average of daily users (approximate), labelled `avg daily users (7d)` | a `cloudflare` dataset has stored days |
+| `users-daily-month` | the 30-day average of daily users (approximate), labelled `avg daily users (30d)` | as above |
 | `users-daily-latest` | daily users on the latest stored day (approximate) | as above |
 | `counter-<name>` | downloads of a counter's assets | a counter is configured |
 
-A badge's colour is set under `badges` in the config, by its name, e.g. green downloads. A period badge takes its base badge's colour unless it has its own entry (see [Config](#config)). `users-daily-latest` falls back to the colour configured for `users-daily`, as the period badges do:
+A badge's colour is set under `badges` in the config, by its name, e.g. green downloads. A period badge takes its base badge's colour unless it has its own entry (see [Config](#config)). `users-daily-month` and `users-daily-latest` fall back to the colour configured for `users-daily`, as the period badges do:
 
 ```yaml
 badges:

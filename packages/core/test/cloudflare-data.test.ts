@@ -68,7 +68,7 @@ describe('buildCloudflareData', () => {
       primary: { dimension: 'client', value: 'gui' },
     });
     expect(data.days.map((d) => d.headline)).toEqual([4, 3, 2]);
-    expect(data.totals).toEqual({ usersLatest: 2, usersAvg7: 3, eventsLast30: 31, otherEvents7: 20 });
+    expect(data.totals).toEqual({ usersLatest: 2, usersAvg7: 3, usersAvg30: 3, eventsLast30: 31, otherEvents7: 20 });
   });
 
   it('counts every row without a primary, and averages the last 7 days only', () => {
@@ -76,7 +76,14 @@ describe('buildCloudflareData', () => {
     const data = buildCloudflareData(plain, series(days))!;
     expect(data).not.toHaveProperty('primary');
     expect(data.days.map((d) => d.headline)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    expect(data.totals).toEqual({ usersLatest: 9, usersAvg7: 6, eventsLast30: 9, otherEvents7: 0 });
+    expect(data.totals).toEqual({ usersLatest: 9, usersAvg7: 6, usersAvg30: 5, eventsLast30: 9, otherEvents7: 0 });
+  });
+
+  it('averages the last 30 days only, rounded', () => {
+    const days = dates('2026-09-20', 40).map((date, i) => day(date, i + 1, 1));
+    const data = buildCloudflareData(plain, series(days))!;
+    expect(data.totals.usersAvg7).toBe(37);
+    expect(data.totals.usersAvg30).toBe(26);
   });
 
   it('averages over the stored days when there are fewer than 7', () => {

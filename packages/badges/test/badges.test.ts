@@ -339,13 +339,14 @@ describe('cloudflare badges', () => {
 
   it('adds the daily users badges after Docker, before the counters, only with Cloudflare days', () => {
     const names = buildBadges({ ...fixture, cloudflare, measuredDaily: [], stars: [] }).map((b) => b.name);
-    expect(names.slice(names.indexOf('docker-pulls') + 1, names.indexOf('counter-updates'))).toEqual(['users-daily', 'users-daily-latest']);
+    expect(names.slice(names.indexOf('docker-pulls') + 1, names.indexOf('counter-updates'))).toEqual(['users-daily', 'users-daily-month', 'users-daily-latest']);
     expect(buildBadges({ ...fixture, measuredDaily: [], stars: [] }).map((b) => b.name)).not.toContain('users-daily');
   });
 
-  it('shows the 7-day average and the latest day, labelled with the latest date', () => {
+  it('shows the 7-day and 30-day averages and the latest day, labelled with the latest date', () => {
     const badges = buildBadges({ ...fixture, cloudflare, measuredDaily: [], stars: [] });
-    expect(badges.find((b) => b.name === 'users-daily')).toMatchObject({ label: 'daily users', message: '20' });
+    expect(badges.find((b) => b.name === 'users-daily')).toMatchObject({ label: 'avg daily users (7d)', message: '20' });
+    expect(badges.find((b) => b.name === 'users-daily-month')).toMatchObject({ label: 'avg daily users (30d)', message: '17' });
     expect(badges.find((b) => b.name === 'users-daily-latest')).toMatchObject({ label: 'users on 2026-10-18', message: '23' });
   });
 
@@ -353,6 +354,7 @@ describe('cloudflare badges', () => {
     const configured = { 'users-daily-latest': { color: 'ff0000' } };
     const badges = buildBadges({ ...fixture, cloudflare, measuredDaily: [], stars: [] }, configured);
     expect(badges.find((b) => b.name === 'users-daily')?.color).toBe(COLORS.users);
+    expect(badges.find((b) => b.name === 'users-daily-month')?.color).toBe(COLORS.users);
     expect(badges.find((b) => b.name === 'users-daily-latest')?.color).toBe('ff0000');
     expect(unknownBadges({ ...fixture, cloudflare }, { 'users-daily': { color: 'ff0000' } })).toEqual([]);
     expect(unknownBadges(fixture, { 'users-daily': { color: 'ff0000' } })).toEqual(['users-daily']);

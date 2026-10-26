@@ -177,9 +177,15 @@ function build(dataset: Dataset, configured: Record<string, BadgeConfig>): Built
     const usersColour = colourOf('users-daily', COLORS.users);
     badges.push({
       name: 'users-daily',
-      label: 'daily users',
+      label: 'avg daily users (7d)',
       message: formatCompact(dataset.cloudflare.totals.usersAvg7),
       color: usersColour,
+    });
+    badges.push({
+      name: 'users-daily-month',
+      label: 'avg daily users (30d)',
+      message: formatCompact(dataset.cloudflare.totals.usersAvg30),
+      color: colourOf('users-daily-month', usersColour),
     });
     badges.push({
       name: 'users-daily-latest',
