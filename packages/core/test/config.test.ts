@@ -346,7 +346,7 @@ npm:
 });
 
 describe('cloudflare', () => {
-  const ACCOUNT = 'dd4d00309618abe546348e4b9cc7a893';
+  const ACCOUNT = '0123456789abcdef0123456789abcdef';
 
   it('is absent when not configured, so no Cloudflare work runs', () => {
     expect(parseConfig('').cloudflare).toBeUndefined();
@@ -397,6 +397,15 @@ cloudflare:
     expect(config.cloudflare!.dimensions).toEqual([
       { name: 'client', label: 'App vs CLI', column: 'blob1', values: { gui: 'App', cli: 'CLI' } },
     ]);
+  });
+
+  it('parses without an account-id, which the cloudflare-account-id input or CLOUDFLARE_ACCOUNT_ID can supply', () => {
+    expect(parseConfig('cloudflare: { dataset: checks }\n').cloudflare).toEqual({
+      dataset: 'checks',
+      label: 'checks',
+      users: 'index1',
+      dimensions: [],
+    });
   });
 
   it('defaults the label to the dataset, the users to index1 and the dimensions to none', () => {

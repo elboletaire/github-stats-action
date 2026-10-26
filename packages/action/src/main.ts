@@ -31,6 +31,7 @@ async function main(): Promise<void> {
       traffic: core.getBooleanInput('traffic'),
       pages: pagesOptions,
       cloudflareToken: core.getInput('cloudflare-token') || undefined,
+      cloudflareAccountId: core.getInput('cloudflare-account-id') || undefined,
       now,
       log: core,
     });

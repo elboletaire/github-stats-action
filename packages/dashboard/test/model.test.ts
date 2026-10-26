@@ -39,7 +39,7 @@ describe('model', () => {
   it('lays the users of each line on one day axis from the first stored day to the latest, zero where no day is stored', () => {
     const rule = parseConfig(`
 cloudflare:
-  account-id: dd4d00309618abe546348e4b9cc7a893
+  account-id: 0123456789abcdef0123456789abcdef
   dataset: checks
   dimensions:
     os: { column: blob3, label: OS }
@@ -52,7 +52,7 @@ cloudflare:
   it('adds a line per primary value, on the same axis as Total', () => {
     const rule = parseConfig(`
 cloudflare:
-  account-id: dd4d00309618abe546348e4b9cc7a893
+  account-id: 0123456789abcdef0123456789abcdef
   dataset: checks
   primary: { client: gui }
   dimensions:

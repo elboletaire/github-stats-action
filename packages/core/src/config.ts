@@ -57,7 +57,8 @@ export interface CloudflareDimensionRule {
 
 /** An Analytics Engine dataset whose daily aggregates are kept on the data branch. */
 export interface CloudflareRule {
-  accountId: string;
+  /** Optional: the `cloudflare-account-id` input or CLOUDFLARE_ACCOUNT_ID can supply it, keeping it in a secret. */
+  accountId?: string;
   dataset: string;
   label: string;
   /** The point's index holding the daily user hash; only `index1` is accepted. */
@@ -173,7 +174,8 @@ const STARS_HEIGHT_MAX = 600;
 const RESERVED_GROUPS = new Set(['other', 'ignored']);
 const NAME_RE = /^[A-Za-z0-9_-]+$/;
 const DOCKER_RE = /^[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*$/;
-const CLOUDFLARE_ACCOUNT_RE = /^[0-9a-f]{32}$/;
+/** A Cloudflare account ID, as the config and the `cloudflare-account-id` input take it. */
+export const CLOUDFLARE_ACCOUNT_RE = /^[0-9a-f]{32}$/;
 const CLOUDFLARE_DATASET_RE = /^[A-Za-z0-9_]+$/;
 /** The blob columns of an Analytics Engine point. */
 const BLOB_RE = /^blob([1-9]|1[0-9]|20)$/;
@@ -509,8 +511,10 @@ function parseCloudflare(value: unknown): CloudflareRule {
   const path = 'cloudflare';
   const obj = expectObject(value, path);
   checkKeys(obj, ['account-id', 'dataset', 'label', 'users', 'day', 'primary', 'note', 'dimensions'], path);
-  const accountId = expectString(obj['account-id'], `${path}.account-id`);
-  if (!CLOUDFLARE_ACCOUNT_RE.test(accountId)) throw new ConfigError(`${path}.account-id must be 32 lowercase hex digits`);
+  const accountId = optionalString(obj, 'account-id', path);
+  if (accountId !== undefined && !CLOUDFLARE_ACCOUNT_RE.test(accountId)) {
+    throw new ConfigError(`${path}.account-id must be 32 lowercase hex digits`);
+  }
   const dataset = expectString(obj.dataset, `${path}.dataset`);
   if (!CLOUDFLARE_DATASET_RE.test(dataset)) throw new ConfigError(`${path}.dataset may only use letters, digits and _`);
   const users = optionalString(obj, 'users', path) ?? 'index1';
@@ -523,7 +527,7 @@ function parseCloudflare(value: unknown): CloudflareRule {
   const primary = obj.primary === undefined ? undefined : parseCloudflarePrimary(obj.primary, dimensions, `${path}.primary`);
   const note = optionalString(obj, 'note', path);
   return {
-    accountId,
+    ...(accountId === undefined ? {} : { accountId }),
     dataset,
     label: optionalString(obj, 'label', path) ?? dataset,
     users: 'index1',

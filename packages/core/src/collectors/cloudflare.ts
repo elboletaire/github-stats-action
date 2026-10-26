@@ -92,8 +92,8 @@ export function cloudflareClient(fetchFn: FetchFn, token: string): Client {
 }
 
 /** Runs one query. The SQL is the body, and the API only takes it with `FORMAT JSON`. */
-async function query(api: Client, rule: CloudflareRule, sql: string): Promise<SqlRow[]> {
-  const body = await api<{ data: SqlRow[] }>(`/accounts/${rule.accountId}/analytics_engine/sql`, {
+async function query(api: Client, accountId: string, sql: string): Promise<SqlRow[]> {
+  const body = await api<{ data: SqlRow[] }>(`/accounts/${accountId}/analytics_engine/sql`, {
     method: 'POST',
     body: sql,
   });
@@ -101,9 +101,9 @@ async function query(api: Client, rule: CloudflareRule, sql: string): Promise<Sq
 }
 
 /** The days of one chunk: the totals first, then each dimension's values under the days that have totals. */
-async function fetchChunk(api: Client, rule: CloudflareRule, filter: string, piece: DayRange): Promise<CloudflareDay[]> {
+async function fetchChunk(api: Client, rule: CloudflareRule, accountId: string, filter: string, piece: DayRange): Promise<CloudflareDay[]> {
   const days = new Map<string, CloudflareDay>();
-  for (const row of await query(api, rule, cloudflareSql(rule, piece, filter))) {
+  for (const row of await query(api, accountId, cloudflareSql(rule, piece, filter))) {
     // the widened window also returns the neighbouring days, which their own chunk fetches
     if (row.day < piece.start || row.day >= piece.end) continue;
     // values come from the API, so a `__proto__` value must become an ordinary key, not the prototype
@@ -111,7 +111,7 @@ async function fetchChunk(api: Client, rule: CloudflareRule, filter: string, pie
     days.set(row.day, { date: row.day, users: Number(row.users), events: Number(row.events), by });
   }
   for (const dimension of rule.dimensions) {
-    for (const row of await query(api, rule, cloudflareSql(rule, piece, filter, dimension.column))) {
+    for (const row of await query(api, accountId, cloudflareSql(rule, piece, filter, dimension.column))) {
       const day = days.get(row.day);
       if (!day) continue;
       const counts: CloudflareCount = { users: Number(row.users), events: Number(row.events) };
@@ -128,6 +128,7 @@ async function fetchChunk(api: Client, rule: CloudflareRule, filter: string, pie
 export async function fetchCloudflareSeries(
   api: Client,
   rule: CloudflareRule,
+  accountId: string,
   releases: readonly SnapshotRelease[],
   stored: CloudflareSeries | undefined,
   today: string,
@@ -137,7 +138,7 @@ export async function fetchCloudflareSeries(
   const filter = releasedFilter(rule, releases);
   const fetched: CloudflareDay[] = [];
   try {
-    for (const piece of cloudflareChunks(range.start, range.end)) fetched.push(...(await fetchChunk(api, rule, filter, piece)));
+    for (const piece of cloudflareChunks(range.start, range.end)) fetched.push(...(await fetchChunk(api, rule, accountId, filter, piece)));
   } catch (error) {
     log.warning(`cloudflare: ${rule.dataset} not collected (${(error as Error).message})`);
     return stored;

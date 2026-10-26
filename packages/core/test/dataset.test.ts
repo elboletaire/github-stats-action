@@ -245,7 +245,7 @@ groups:
 counters:
   - { name: updates, label: In-app updates, assets: "*.tar.gz"${perUser ? ', per-user: true' : ''} }
 cloudflare:
-  account-id: dd4d00309618abe546348e4b9cc7a893
+  account-id: 0123456789abcdef0123456789abcdef
   dataset: checks
 `);
     const releasedAt = (downloads: number): SnapshotRelease[] => [

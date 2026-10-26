@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { renderBadges, unknownBadges } from '@github-stats-action/badges';
 import { dashboardFiles } from '@github-stats-action/dashboard';
 import {
+  CLOUDFLARE_ACCOUNT_RE,
   cloudflareClient,
   createClient,
   deriveRepo,
@@ -58,6 +59,8 @@ export interface RunOptions {
   pages?: { dir: string; traffic: boolean };
   /** Token of the `cloudflare` source; without it the stored days are kept. */
   cloudflareToken?: string;
+  /** Account ID of the `cloudflare` source, overriding `cloudflare.account-id`. Never logged. */
+  cloudflareAccountId?: string;
   now: Date;
   log: Logger;
   fetch?: FetchFn;
@@ -120,22 +123,34 @@ async function collectNpm(dir: string, packages: NpmRule[], today: string, fetch
   return series;
 }
 
-/** Brings the Cloudflare dataset's stored days up to date. Without a token they are kept, with a warning. */
+/**
+ * Brings the Cloudflare dataset's stored days up to date. Without a token or an account ID they are kept,
+ * with a warning. The account ID is the input's, else the config's.
+ */
 async function collectCloudflare(
   dir: string,
   rule: CloudflareRule,
   releases: readonly SnapshotRelease[],
   today: string,
   token: string | undefined,
+  accountIdInput: string | undefined,
   fetchFn: FetchFn,
   log: Logger,
 ): Promise<CloudflareSeries | undefined> {
+  if (accountIdInput !== undefined && !CLOUDFLARE_ACCOUNT_RE.test(accountIdInput)) {
+    throw new Error('cloudflare-account-id must be 32 lowercase hex digits');
+  }
   const stored = await readCloudflareSeries(dir, rule.dataset);
   if (!token) {
     log.warning('cloudflare: no token (cloudflare-token input or CLOUDFLARE_API_TOKEN), keeping the stored days');
     return stored;
   }
-  return fetchCloudflareSeries(cloudflareClient(fetchFn, token), rule, releases, stored, today, log);
+  const accountId = accountIdInput ?? rule.accountId;
+  if (!accountId) {
+    log.warning('cloudflare: no account ID (cloudflare-account-id input, CLOUDFLARE_ACCOUNT_ID or cloudflare.account-id), keeping the stored days');
+    return stored;
+  }
+  return fetchCloudflareSeries(cloudflareClient(fetchFn, token), rule, accountId, releases, stored, today, log);
 }
 
 export async function runStats(options: RunOptions): Promise<RunResult> {
@@ -157,7 +172,7 @@ export async function runStats(options: RunOptions): Promise<RunResult> {
     : undefined;
   const npm = config.npm?.length ? await collectNpm(dir, config.npm, date, fetchFn, log) : [];
   const cloudflare = config.cloudflare
-    ? await collectCloudflare(dir, config.cloudflare, releases, date, options.cloudflareToken, fetchFn, log)
+    ? await collectCloudflare(dir, config.cloudflare, releases, date, options.cloudflareToken, options.cloudflareAccountId, fetchFn, log)
     : undefined;
 
   const snapshot: Snapshot = {

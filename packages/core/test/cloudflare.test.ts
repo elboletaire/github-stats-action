@@ -8,7 +8,7 @@ const json = (body: unknown, status = 200): Response =>
 
 const logger = (): Logger => ({ info: vi.fn<(m: string) => void>(), warning: vi.fn<(m: string) => void>() });
 
-const ACCOUNT = 'dd4d00309618abe546348e4b9cc7a893';
+const ACCOUNT = '0123456789abcdef0123456789abcdef';
 
 /** A fetch that answers each SQL query (the request body) with `answer`, and records the queries. */
 function fakeCloudflare(answer: (sql: string) => unknown, status = 200) {
@@ -121,7 +121,7 @@ describe('cloudflareSql', () => {
 describe('cloudflareClient', () => {
   it('sends the token as a bearer header', async () => {
     const fake = fakeCloudflare(() => ({ data: [] }));
-    await fetchCloudflareSeries(cloudflareClient(fake.fetch, 'secret'), plain, [], undefined, '2026-10-26', logger());
+    await fetchCloudflareSeries(cloudflareClient(fake.fetch, 'secret'), plain, ACCOUNT, [], undefined, '2026-10-26', logger());
     expect(fake.headers[0]!.get('authorization')).toBe('Bearer secret');
   });
 });
@@ -138,7 +138,7 @@ describe('fetchCloudflareSeries', () => {
   it('backfills in 7-day queries, parses the string numbers and drops today', async () => {
     const fake = fakeCloudflare(answer);
     const log = logger();
-    const series = await fetchCloudflareSeries(cloudflareClient(fake.fetch, 't'), plain, [], undefined, '2026-10-26', log);
+    const series = await fetchCloudflareSeries(cloudflareClient(fake.fetch, 't'), plain, ACCOUNT, [], undefined, '2026-10-26', log);
     expect(fake.sqls).toHaveLength(13);
     expect(series).toEqual({
       schema: 1,
@@ -152,7 +152,7 @@ describe('fetchCloudflareSeries', () => {
     const fake = fakeCloudflare((sql) =>
       sql.includes('blob1 AS value') ? { data: [{ day: '2026-10-25', value: '__proto__', users: '1', events: '1' }] } : { data: [{ day: '2026-10-25', users: '1', events: '1' }] },
     );
-    const series = await fetchCloudflareSeries(cloudflareClient(fake.fetch, 't'), dimensioned, [], undefined, '2026-10-26', logger());
+    const series = await fetchCloudflareSeries(cloudflareClient(fake.fetch, 't'), dimensioned, ACCOUNT, [], undefined, '2026-10-26', logger());
     const client = series!.days[0]!.by.client!;
     expect(Object.getPrototypeOf(client)).toBeNull();
     expect(Object.keys(client)).toEqual(['__proto__']);
@@ -164,7 +164,7 @@ describe('fetchCloudflareSeries', () => {
 
   it('fills each dimension under its day', async () => {
     const fake = fakeCloudflare(answer);
-    const series = await fetchCloudflareSeries(cloudflareClient(fake.fetch, 't'), dimensioned, [], undefined, '2026-10-26', logger());
+    const series = await fetchCloudflareSeries(cloudflareClient(fake.fetch, 't'), dimensioned, ACCOUNT, [], undefined, '2026-10-26', logger());
     expect(series!.days).toEqual([
       { date: '2026-10-25', users: 2, events: 3, by: { client: { gui: { users: 2, events: 3 } }, version: {} } },
     ]);
@@ -173,7 +173,7 @@ describe('fetchCloudflareSeries', () => {
   it('refetches the overlap and replaces the stored days it covers', async () => {
     const fake = fakeCloudflare(() => ({ data: [{ day: '2026-10-24', users: '5', events: '6' }] }));
     const old = stored([day('2026-10-20', 1), day('2026-10-24', 1)]);
-    const series = await fetchCloudflareSeries(cloudflareClient(fake.fetch, 't'), plain, [], old, '2026-10-26', logger());
+    const series = await fetchCloudflareSeries(cloudflareClient(fake.fetch, 't'), plain, ACCOUNT, [], old, '2026-10-26', logger());
     expect(fake.sqls[0]).toContain("toDateTime('2026-10-21 00:00:00')");
     expect(series!.days).toEqual([day('2026-10-20', 1), { date: '2026-10-24', users: 5, events: 6, by: {} }]);
   });
@@ -182,14 +182,14 @@ describe('fetchCloudflareSeries', () => {
     const fake = fakeCloudflare(() => ({ errors: [{ code: 10000, message: 'bad sql' }] }), 400);
     const old = stored([day('2026-10-20', 1)]);
     const log = logger();
-    expect(await fetchCloudflareSeries(cloudflareClient(fake.fetch, 't'), plain, [], old, '2026-10-26', log)).toBe(old);
+    expect(await fetchCloudflareSeries(cloudflareClient(fake.fetch, 't'), plain, ACCOUNT, [], old, '2026-10-26', log)).toBe(old);
     expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('checks not collected'));
   });
 
   it('returns nothing, with a warning, when nothing is stored and the query fails', async () => {
     const fake = fakeCloudflare(() => ({}), 500);
     const log = logger();
-    expect(await fetchCloudflareSeries(cloudflareClient(fake.fetch, 't'), plain, [], undefined, '2026-10-26', log)).toBeUndefined();
+    expect(await fetchCloudflareSeries(cloudflareClient(fake.fetch, 't'), plain, ACCOUNT, [], undefined, '2026-10-26', log)).toBeUndefined();
     expect(log.warning).toHaveBeenCalledTimes(1);
   });
 });

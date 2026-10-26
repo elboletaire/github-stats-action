@@ -17,6 +17,7 @@ const USAGE = `usage:
       --dry-run     accepted for parity with the action; the CLI never pushes
       token         read from GITHUB_TOKEN
       CLOUDFLARE_API_TOKEN  read for the cloudflare source (Account Analytics: Read)
+      CLOUDFLARE_ACCOUNT_ID read for the cloudflare source, overrides cloudflare.account-id
 
   github-stats render (--data <dir> | --from-branch <ref>) --out <dir> [--repo owner/name] [--config <file>]
       no API calls: rebuild the derived files and outputs from stored data.
@@ -58,6 +59,7 @@ async function collect(values: Values): Promise<void> {
     repo: values.repo,
     token: process.env.GITHUB_TOKEN,
     cloudflareToken: process.env.CLOUDFLARE_API_TOKEN,
+    cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID?.trim() || undefined,
     config,
     dataDir: values.out,
     traffic: values.traffic,
