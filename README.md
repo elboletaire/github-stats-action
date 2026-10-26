@@ -111,6 +111,7 @@ Use `@v1` (the latest 1.x release, moved by the release workflow) or pin a full 
 | `pages-dir` | `_site` | Where the Pages site goes. |
 | `pages-traffic` | `false` | Include traffic in the Pages site. |
 | `cloudflare-token` | unset | Token with *Account Analytics: Read* for the `cloudflare` source, see [Cloudflare Analytics Engine](#cloudflare-analytics-engine). |
+| `cloudflare-account-id` | unset | Account ID for the `cloudflare` source; overrides `cloudflare.account-id` in the config, so it can come from a secret. |
 | `dry-run` | `false` | Collect and build, but don't commit or push. |
 
 Outputs: `pages-dir` (absolute, empty when `pages` is off), `dataset` (absolute path of the repo's `dataset.json`) and `summary` (one line of totals).
@@ -184,7 +185,7 @@ Describe the dataset in `.github/stats.yml`. `day` and each dimension's `column`
 
 ```yaml
 cloudflare:
-  account-id: 0123456789abcdef0123456789abcdef
+  account-id: 0123456789abcdef0123456789abcdef  # optional; usually passed as the cloudflare-account-id input
   dataset: acme_checks
   label: Update checks          # what an event is called in charts and tables
   users: index1                 # the daily user hash, counted as distinct values
@@ -199,19 +200,21 @@ counters:
   - { name: updates, label: In-app updates, assets: "acme-*-SHA256SUMS.txt", from: v1.19.0, per-user: true }
 ```
 
-The token is a secret passed as the `cloudflare-token` input. The CLI reads `CLOUDFLARE_API_TOKEN` instead:
+The token and the account ID are secrets, passed as the `cloudflare-token` and `cloudflare-account-id` inputs. The CLI reads `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` instead:
 
 ```yaml
       - uses: elboletaire/github-stats-action@v1
         with:
           cloudflare-token: ${{ secrets.CLOUDFLARE_TOKEN }}
+          cloudflare-account-id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 ```
 
 - **First run:** backfills the last 90 days. **Later runs:** fetch from 3 days before the last stored day, so late points overwrite the stored values. Only complete UTC days are stored; today never is.
 - **`released: true`** on one `kind: semver` dimension counts a row only when its version is a published, non-prerelease GitHub release (its version is the tag with any leading `v` removed; only plain `X.Y.Z` tags count) and its timestamp is at or after that release's publish time. Test builds of unreleased versions drop out.
 - **`per-user`** on a counter gives its increase over the last 30 days, divided by the mean daily users over the same days. It needs `cloudflare`, at least 14 stored days in the window, and a snapshot from before the window; otherwise it is left out.
 - **Stored as** `<owner>/<repo>/cloudflare/<dataset>.json`, one line per day. Like `npm/`, these files are never rebuilt or pruned.
-- **Failures** (a request error, no token) are warnings: the run goes on and the stored days stay.
+- **Failures** (a request error, no token, no account ID) are warnings: the run goes on and the stored days stay.
+  An invalid `cloudflare-account-id` (anything but 32 lowercase hex digits) fails the run, like an invalid `account-id` in the config.
 
 What you get:
 

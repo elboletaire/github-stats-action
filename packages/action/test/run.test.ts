@@ -250,6 +250,40 @@ cloudflare:
     expect(hosts).not.toContain('api.cloudflare.com');
   });
 
+  it('takes the account ID from the input over the config', async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
+    const fetchFn = withCloudflare(network());
+    const accountId = '0123456789abcdef0123456789abcdef';
+    await runStats({ repo: REPO, token: 'x', config: withSource, dataDir, traffic: false, now, log, fetch: fetchFn, cloudflareToken: 'cf', cloudflareAccountId: accountId });
+    const paths = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock.calls
+      .map(([input]) => new URL(String(input instanceof Request ? input.url : input)))
+      .filter((url) => url.hostname === 'api.cloudflare.com')
+      .map((url) => url.pathname);
+    expect(paths.length).toBeGreaterThan(0);
+    expect(paths.every((path) => path === `/client/v4/accounts/${accountId}/analytics_engine/sql`)).toBe(true);
+  });
+
+  it('keeps the stored days, with a warning, when there is no account ID', async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
+    const warn = vi.fn();
+    const noAccount = parseConfig('cloudflare: { dataset: manga_downloader_checks }\n');
+    const fetchFn = withCloudflare(network());
+    await runStats({ repo: REPO, token: 'x', config: noAccount, dataDir, traffic: false, now, log: { info: vi.fn(), warning: warn }, fetch: fetchFn, cloudflareToken: 'cf' });
+    expect(warn).toHaveBeenCalledWith(
+      'cloudflare: no account ID (cloudflare-account-id input, CLOUDFLARE_ACCOUNT_ID or cloudflare.account-id), keeping the stored days',
+    );
+    expect(await readdir(join(dataDir, 'elboletaire', 'manga-downloader'))).not.toContain('cloudflare');
+    const hosts = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock.calls.map(([input]) => new URL(String(input instanceof Request ? input.url : input)).hostname);
+    expect(hosts).not.toContain('api.cloudflare.com');
+  });
+
+  it('fails the run on an invalid account ID input, without printing it', async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
+    const input = '0123456789ABCDEF0123456789ABCDEF';
+    const error = await runStats({ repo: REPO, token: 'x', config: withSource, dataDir, traffic: false, now, log, fetch: withCloudflare(network()), cloudflareToken: 'cf', cloudflareAccountId: input }).then(() => null, (e: Error) => e);
+    expect(error?.message).toBe('cloudflare-account-id must be 32 lowercase hex digits');
+  });
+
   it('does no Cloudflare work without the cloudflare block', async () => {
     const dataDir = await mkdtemp(join(tmpdir(), 'stats-run-'));
     const fetchFn = withCloudflare(network());

@@ -5,7 +5,7 @@ import { SLOTS } from '../src/theme';
 import { addDays } from '../src/npm';
 import type { CloudflareDay, CloudflareSeries, MeasuredDay } from '../src/types';
 
-const ACCOUNT = 'dd4d00309618abe546348e4b9cc7a893';
+const ACCOUNT = '0123456789abcdef0123456789abcdef';
 
 const rule = parseConfig(`
 cloudflare:
