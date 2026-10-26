@@ -47,7 +47,8 @@ export function xTicks(axis: DayAxis, a: number, b: number, max: number): Array<
   const span = b - a;
   const out: Array<[number, string]> = [];
   if (span <= 45) {
-    const step = Math.ceil(span / max);
+    // a one-day span gives step 0, which would never advance
+    const step = Math.max(1, Math.ceil(span / max));
     for (let i = a + step; i <= b; i += step) out.push([i, axis.short(i)]);
   } else if (span <= 400) {
     const months: Array<[number, number]> = [];
