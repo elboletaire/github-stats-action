@@ -9,7 +9,7 @@ inputs:
     required: false
     default: ${{ github.token }}
   cloudflare-token:
-    description: Cloudflare API token with Account Analytics: Read, for the cloudflare source.
+    description: "Cloudflare API token with Account Analytics: Read, for the cloudflare source."
     required: false
   cloudflare-account-id:
     description: Cloudflare account ID for the cloudflare source; overrides `cloudflare.account-id` in the config, so it can come from a secret.
