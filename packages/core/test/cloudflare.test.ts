@@ -112,9 +112,43 @@ describe('cloudflareSql', () => {
   });
 
   it('groups a dimension by its value, and widens the window by a day around the day blob', () => {
-    expect(cloudflareSql(dimensioned, range, ' AND false', 'blob1')).toBe(
+    expect(cloudflareSql(dimensioned, range, ' AND false', dimensioned.dimensions[0])).toBe(
       "SELECT blob5 AS day, blob1 AS value, count(DISTINCT index1) AS users, sum(_sample_interval) AS events FROM manga_downloader_checks WHERE timestamp >= toDateTime('2026-10-16 00:00:00') AND timestamp < toDateTime('2026-10-25 00:00:00') AND false GROUP BY day, value ORDER BY day FORMAT JSON",
     );
+  });
+});
+
+describe('cloudflareSql with where', () => {
+  const range = { start: '2026-10-17', end: '2026-10-24' };
+  const scoped = parseConfig(`
+cloudflare:
+  account-id: ${ACCOUNT}
+  dataset: checks
+  dimensions:
+    client: { column: blob1 }
+    syslang: { column: blob7, where: { client: gui } }
+    syslang-cli: { column: blob7, where: { client: cli, lang: en } }
+    lang: { column: blob6 }
+`).cloudflare!;
+
+  it('adds the where rows after the released filter, each as its dimension column', () => {
+    expect(cloudflareSql(scoped, range, ' AND false', scoped.dimensions[2])).toBe(
+      "SELECT formatDateTime(timestamp, '%Y-%m-%d') AS day, blob7 AS value, count(DISTINCT index1) AS users, sum(_sample_interval) AS events FROM checks WHERE timestamp >= toDateTime('2026-10-17 00:00:00') AND timestamp < toDateTime('2026-10-24 00:00:00') AND false AND blob1 = 'cli' AND blob6 = 'en' GROUP BY day, value ORDER BY day FORMAT JSON",
+    );
+  });
+
+  it('leaves the totals and the dimensions without where alone', () => {
+    expect(cloudflareSql(scoped, range, '')).not.toContain('blob1 =');
+    expect(cloudflareSql(scoped, range, '', scoped.dimensions[0])).not.toContain('AND blob1 =');
+  });
+
+  it('sends each dimension its own where, and the totals none', async () => {
+    const fake = fakeCloudflare(() => ({ data: [] }));
+    await fetchCloudflareSeries(cloudflareClient(fake.fetch, 't'), scoped, ACCOUNT, [], undefined, '2026-10-26', logger());
+    const syslang = fake.sqls.filter((sql) => sql.includes('blob7 AS value') && sql.includes("blob1 = 'gui'"));
+    expect(syslang).toHaveLength(13);
+    expect(fake.sqls.filter((sql) => sql.includes('blob7 AS value') && sql.includes("blob1 = 'cli'"))).toHaveLength(syslang.length);
+    expect(fake.sqls.filter((sql) => sql.includes("blob1 = 'gui'") && !sql.includes('blob7 AS value'))).toEqual([]);
   });
 });
 

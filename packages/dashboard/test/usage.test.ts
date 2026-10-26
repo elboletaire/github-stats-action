@@ -109,3 +109,80 @@ describe('subtitle with Cloudflare figures', () => {
     expect(subtitle(page)).toBe('Stars and update checks from Cloudflare for elboletaire/manga-downloader.');
   });
 });
+
+describe('usage section with a supported locale dimension and a chart per dimension', () => {
+  const localeRule = parseConfig(`
+cloudflare:
+  account-id: 0123456789abcdef0123456789abcdef
+  dataset: checks
+  label: Update checks
+  dimensions:
+    lang: { column: blob6, label: App language, chart: true }
+    syslang: { column: blob7, label: System language, locale: true, supported: [en, es] }
+`).cloudflare!;
+
+  const localeSeries: CloudflareSeries = {
+    schema: 1,
+    dataset: 'checks',
+    days: [
+      {
+        date: '2026-10-25',
+        users: 4,
+        events: 4,
+        by: {
+          lang: { en: { users: 3, events: 3 }, tr: { users: 1, events: 1 } },
+          syslang: { 'en-US': { users: 2, events: 2 }, 'tr-TR': { users: 1, events: 1 }, de: { users: 1, events: 1 } },
+        },
+      },
+      {
+        date: '2026-10-26',
+        users: 4,
+        events: 4,
+        by: {
+          lang: { en: { users: 2, events: 2 }, es: { users: 2, events: 2 } },
+          syslang: { es: { users: 2, events: 2 }, 'tr-TR': { users: 2, events: 2 } },
+        },
+      },
+    ],
+  };
+  const locale = buildCloudflareData(localeRule, localeSeries)!;
+
+  it('adds a Translated column only to a supported dimension, yes or not yet per row', () => {
+    const html = usageHtml(locale);
+    expect(html).toContain('<th>Share</th><th>Translated</th></tr></thead>');
+    expect(html.match(/<th>Translated<\/th>/g)).toHaveLength(1);
+    expect(html).toMatch(/<tr><td>English \(en\)<\/td>(<td>[^<]*<\/td>){3}<td>yes<\/td><\/tr>/);
+    expect(html).toMatch(/<tr><td>Turkish \(tr\)<\/td>(<td>[^<]*<\/td>){3}<td class="pending">not yet<\/td><\/tr>/);
+  });
+
+  it('leaves the Translated cell blank on the folded other row', () => {
+    const codes = 'aa ab ac ad ae af ag ah ai'.split(' ');
+    const many: CloudflareSeries = {
+      schema: 1,
+      dataset: 'checks',
+      days: [{ date: '2026-10-26', users: 9, events: 9, by: { syslang: Object.fromEntries(codes.map((c) => [c, { users: 1, events: 1 }])) } }],
+    };
+    const html = usageHtml(buildCloudflareData(localeRule, many)!);
+    expect(html.match(/<td><\/td><\/tr>/g)).toHaveLength(1);
+    expect(html.match(/<td class="pending">not yet<\/td><\/tr>/g)).toHaveLength(8);
+  });
+
+  it('draws a stacked daily chart for each dimension that asks for one, under its own heading', () => {
+    const html = usageHtml(locale);
+    expect(html).toContain('<div data-main-chart>');
+    expect(html).toContain('<div data-dimension-chart="lang"><h3>App language, daily users (approx.)</h3>');
+    expect(html).toContain('aria-label="App language approximate daily users per day, stacked"');
+    expect(html).not.toContain('data-dimension-chart="syslang"');
+    // the chart sits before the tables
+    expect(html.indexOf('data-dimension-chart="lang"')).toBeLessThan(html.indexOf('<h3>App language, last 30 days</h3>'));
+  });
+
+  it('skips a chart for a dimension with no lines', () => {
+    const none: CloudflareSeries = {
+      schema: 1,
+      dataset: 'checks',
+      days: [{ date: '2026-10-26', users: 1, events: 1, by: { syslang: { de: { users: 1, events: 1 } } } }],
+    };
+    expect(usageHtml(buildCloudflareData(localeRule, none)!)).not.toContain('data-dimension-chart="lang"');
+  });
+});

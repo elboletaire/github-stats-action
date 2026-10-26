@@ -332,6 +332,12 @@ td.pos {
   color: var(--good);
 }
 
+/* a locale not translated yet: its cell stands out, as the list of what to translate next */
+td.pending {
+  color: var(--warn);
+  font-weight: 600;
+}
+
 /* the "estimated" / "measured" tag beside a heading */
 .est {
   display: inline-block;

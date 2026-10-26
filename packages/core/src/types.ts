@@ -276,12 +276,20 @@ export interface CloudflareDimensionInfo {
   kind?: 'semver';
   /** Display labels by raw value. */
   values?: Record<string, string>;
+  /** The values are locales, grouped by primary subtag; without a label they show as their English name. */
+  locale?: boolean;
+  /** Primary subtags counted as supported; the shares say which values are. */
+  supported?: string[];
+  /** Drawn as stacked daily lines. */
+  chart?: boolean;
 }
 
 export interface CloudflareShare {
   value: string;
   users: number;
   events: number;
+  /** Only on a dimension with `supported`: whether the value is one. */
+  supported?: boolean;
 }
 
 /** The Cloudflare figures of one repo; absent without config or stored days. */

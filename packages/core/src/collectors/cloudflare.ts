@@ -1,7 +1,7 @@
 // Cloudflare Analytics Engine: daily aggregates of a dataset, through its SQL API. Only complete UTC
 // days are fetched, so a day's figures don't move while it is still open.
 
-import type { CloudflareRule } from '../config';
+import type { CloudflareDimensionRule, CloudflareRule } from '../config';
 import { addDays } from '../npm';
 import type { CloudflareCount, CloudflareDay, CloudflareSeries, Logger, SnapshotRelease } from '../types';
 import { createClient, type Client, type FetchFn } from './client';
@@ -68,18 +68,22 @@ export function releasedFilter(rule: CloudflareRule, releases: readonly Snapshot
 }
 
 /**
- * One query over `range`: the day's totals, or each day's figures per value of `column`. `filter` is
- * releasedFilter's output.
+ * One query over `range`: the day's totals, or each day's figures per value of `dimension`, over the rows
+ * its `where` keeps. `filter` is releasedFilter's output.
  */
-export function cloudflareSql(rule: CloudflareRule, range: DayRange, filter: string, column?: string): string {
+export function cloudflareSql(rule: CloudflareRule, range: DayRange, filter: string, dimension?: CloudflareDimensionRule): string {
   // a point's blob day can sit a day off its timestamp, so the window widens by a day; rows are filtered after parsing
   const pad = rule.day ? 1 : 0;
   const from = addDays(range.start, -pad);
   const to = addDays(range.end, pad);
   const dayExpr = rule.day ?? "formatDateTime(timestamp, '%Y-%m-%d')";
-  const value = column ? `, ${column} AS value` : '';
-  const group = column ? 'day, value' : 'day';
-  return `SELECT ${dayExpr} AS day${value}, count(DISTINCT ${rule.users}) AS users, sum(_sample_interval) AS events FROM ${rule.dataset} WHERE timestamp >= toDateTime('${from} 00:00:00') AND timestamp < toDateTime('${to} 00:00:00')${filter} GROUP BY ${group} ORDER BY day FORMAT JSON`;
+  const value = dimension ? `, ${dimension.column} AS value` : '';
+  const group = dimension ? 'day, value' : 'day';
+  // the values come from the config, which only lets quote-free text through
+  const where = Object.entries(dimension?.where ?? {})
+    .map(([name, text]) => ` AND ${rule.dimensions.find((d) => d.name === name)!.column} = '${text}'`)
+    .join('');
+  return `SELECT ${dayExpr} AS day${value}, count(DISTINCT ${rule.users}) AS users, sum(_sample_interval) AS events FROM ${rule.dataset} WHERE timestamp >= toDateTime('${from} 00:00:00') AND timestamp < toDateTime('${to} 00:00:00')${filter}${where} GROUP BY ${group} ORDER BY day FORMAT JSON`;
 }
 
 /** The Analytics Engine SQL API; the token needs Account Analytics: Read. */
@@ -111,7 +115,7 @@ async function fetchChunk(api: Client, rule: CloudflareRule, accountId: string, 
     days.set(row.day, { date: row.day, users: Number(row.users), events: Number(row.events), by });
   }
   for (const dimension of rule.dimensions) {
-    for (const row of await query(api, accountId, cloudflareSql(rule, piece, filter, dimension.column))) {
+    for (const row of await query(api, accountId, cloudflareSql(rule, piece, filter, dimension))) {
       const day = days.get(row.day);
       if (!day) continue;
       const counts: CloudflareCount = { users: Number(row.users), events: Number(row.events) };

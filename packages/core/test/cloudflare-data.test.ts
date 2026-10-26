@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { parseConfig } from '../src/config';
-import { buildCloudflareData, counterPerUser, cloudflareUserSeries } from '../src/cloudflare';
+import { parseConfig, primarySubtag } from '../src/config';
+import { buildCloudflareData, cloudflareDimensionSeries, cloudflareValueLabel, counterPerUser, cloudflareUserSeries } from '../src/cloudflare';
 import { SLOTS } from '../src/theme';
 import { addDays } from '../src/npm';
 import type { CloudflareDay, CloudflareSeries, MeasuredDay } from '../src/types';
@@ -46,6 +46,16 @@ const measured = (date: string, days: number, updates: number): MeasuredDay => (
   docker: null,
   counters: { updates },
 });
+
+const locales = parseConfig(`
+cloudflare:
+  account-id: ${ACCOUNT}
+  dataset: checks
+  dimensions:
+    client: { column: blob1, values: { gui: App } }
+    lang: { column: blob6, label: App language, chart: true }
+    syslang: { column: blob7, label: System language, where: { client: gui }, locale: true, supported: [en, es, ca, ja] }
+`).cloudflare!;
 
 describe('buildCloudflareData', () => {
   it('is undefined without stored days', () => {
@@ -115,6 +125,34 @@ describe('buildCloudflareData', () => {
     expect(data.shares.os!.map((s) => s.value)).toEqual([...Object.keys(counts).slice(0, 8), 'other']);
     expect(data.shares.os![0]).toEqual({ value: 'os0', users: 10, events: 10 });
     expect(data.shares.os!.at(-1)).toEqual({ value: 'other', users: 3, events: 3 });
+  });
+
+  it('keeps the empty value in the stored days but leaves it out of the shares', () => {
+    const data = buildCloudflareData(plain, series([day('2026-10-26', 4, 4, { os: byCount({ '': 3, linux: 1 }) })]))!;
+    expect(data.shares.os).toEqual([{ value: 'linux', users: 1, events: 1 }]);
+    expect(data.days[0]!.by.os).toEqual({ '': { users: 3, events: 3 }, linux: { users: 1, events: 1 } });
+  });
+
+  it('groups locales by primary subtag, sums them and marks the supported ones', () => {
+    const data = buildCloudflareData(
+      locales,
+      series([day('2026-10-26', 9, 9, { syslang: { 'tr-TR': { users: 2, events: 2 }, tr: { users: 1, events: 1 }, TR_tr: { users: 1, events: 1 }, 'en-US': { users: 5, events: 5 } } })]),
+    )!;
+    expect(data.shares.syslang).toEqual([
+      { value: 'en', users: 5, events: 5, supported: true },
+      { value: 'tr', users: 4, events: 4, supported: false },
+    ]);
+    expect(data.shares.lang).toEqual([]);
+    expect(data.shares.client).toEqual([]);
+  });
+
+  it('exposes the locale, supported and chart flags of each dimension, without the where', () => {
+    const data = buildCloudflareData(locales, series([day('2026-10-26', 1, 1)]))!;
+    expect(data.dimensions).toEqual([
+      { name: 'client', label: 'client', values: { gui: 'App' } },
+      { name: 'lang', label: 'App language', chart: true },
+      { name: 'syslang', label: 'System language', locale: true, supported: ['en', 'es', 'ca', 'ja'] },
+    ]);
   });
 
   it('orders semver values newest first, with the values that are not versions last', () => {
@@ -203,6 +241,142 @@ cloudflare:
   it('does not take a prototype property as a label', () => {
     const data = buildCloudflareData(labelled, series([day('2026-10-26', 1, 1, { client: byCount({ constructor: 1 }) })]))!;
     expect(cloudflareUserSeries(data)[1]!.label).toBe('constructor');
+  });
+});
+
+describe('locale values as written in the config', () => {
+  it('groups POSIX locales by language, and hides the C and POSIX ones', () => {
+    expect(primarySubtag('de.UTF-8')).toBe('de');
+    expect(primarySubtag('ca_ES@valencia')).toBe('ca');
+    expect(primarySubtag('en_US.utf8')).toBe('en');
+    expect(primarySubtag('C')).toBe('');
+    expect(primarySubtag('POSIX')).toBe('');
+    expect(primarySubtag('pt-BR')).toBe('pt');
+  });
+
+  it('normalises the values labels and the primary value of a locale dimension the way the data is grouped', () => {
+    const config = parseConfig(`
+cloudflare:
+  account-id: ${ACCOUNT}
+  dataset: checks
+  primary: { syslang: en-US }
+  dimensions:
+    syslang: { column: blob7, locale: true, values: { tr-TR: Turkish (Turkey) } }
+    os: { column: blob3, values: { tr-TR: kept } }
+`).cloudflare!;
+    expect(config.primary).toEqual({ dimension: 'syslang', value: 'en' });
+    expect(config.dimensions[0]).toMatchObject({ values: { tr: 'Turkish (Turkey)' } });
+    expect(config.dimensions[1]).toMatchObject({ values: { 'tr-TR': 'kept' } });
+  });
+
+  it('matches a primary written as a tag, and a values label keyed by one, to the grouped locale', () => {
+    const cf = buildCloudflareData(
+      parseConfig(`
+cloudflare:
+  account-id: ${ACCOUNT}
+  dataset: checks
+  primary: { syslang: en-US }
+  dimensions:
+    syslang: { column: blob7, locale: true, values: { tr-TR: Turkish } }
+`).cloudflare!,
+      series([day('2026-10-26', 5, 5, { syslang: { 'en-GB': { users: 2, events: 2 }, en_US: { users: 3, events: 3 }, 'tr-TR': { users: 4, events: 4 } } })]),
+    )!;
+    expect(cf.days[0]!.headline).toBe(5);
+    expect(cloudflareUserSeries(cf).map((l) => [l.key, l.label])).toEqual([
+      ['total', 'Total'],
+      ['en', 'English (en)'],
+      ['tr', 'Turkish'],
+    ]);
+  });
+});
+
+describe('cloudflareValueLabel', () => {
+  const locale = { name: 'syslang', label: 'System language', locale: true };
+
+  it('names a locale in English with its code, the code alone when Intl knows no name', () => {
+    expect(cloudflareValueLabel(locale, 'tr')).toBe('Turkish (tr)');
+    expect(cloudflareValueLabel(locale, 'pt')).toBe('Portuguese (pt)');
+    expect(cloudflareValueLabel(locale, 'xx')).toBe('xx');
+    expect(cloudflareValueLabel(locale, 'beta')).toBe('beta');
+  });
+
+  it('keeps an explicit value label over the locale name', () => {
+    expect(cloudflareValueLabel({ ...locale, values: { tr: 'Turkish (Turkey)' } }, 'tr')).toBe('Turkish (Turkey)');
+  });
+
+  it('labels the folded value Other on every dimension, unless its values name it', () => {
+    expect(cloudflareValueLabel({ name: 'os', label: 'OS' }, 'other')).toBe('Other');
+    expect(cloudflareValueLabel(locale, 'other')).toBe('Other');
+    expect(cloudflareValueLabel({ ...locale, values: { other: 'Else' } }, 'other')).toBe('Else');
+  });
+
+  it('shows a value as it is without a locale or a dimension', () => {
+    expect(cloudflareValueLabel({ name: 'os', label: 'OS' }, 'linux')).toBe('linux');
+    expect(cloudflareValueLabel(undefined, 'tr')).toBe('tr');
+  });
+});
+
+describe('cloudflareDimensionSeries', () => {
+  it('draws one line per value of the top 7 by users over the last 30 days, the rest folded into other', () => {
+    // 2026-09-20 is outside the 30 days ending on 2026-10-26, so `old` has no users in the window and folds into other
+    const counts = Object.fromEntries(Array.from({ length: 9 }, (_, i) => [`v${i + 1}`, { users: 9 - i, events: 9 - i }]));
+    const cf = buildCloudflareData(
+      locales,
+      series([day('2026-09-20', 100, 100, { lang: byCount({ old: 100 }) }), day('2026-10-26', 45, 45, { lang: counts })]),
+    )!;
+    const lines = cloudflareDimensionSeries(cf, 'lang');
+    expect(lines.map((l) => l.key)).toEqual(['v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7', 'other']);
+    expect(lines[0]!.values).toEqual([
+      { date: '2026-09-20', users: 0 },
+      { date: '2026-10-26', users: 9 },
+    ]);
+    expect(lines.at(-1)).toEqual({
+      key: 'other',
+      label: 'Other',
+      values: [
+        { date: '2026-09-20', users: 100 },
+        { date: '2026-10-26', users: 3 },
+      ],
+    });
+    expect(lines.map((l) => l.key)).not.toContain('old');
+  });
+
+  it('folds a value with no users in the last 30 days into other even when the values fit the lines', () => {
+    const cf = buildCloudflareData(
+      locales,
+      series([day('2026-09-20', 7, 7, { lang: byCount({ old: 4, en: 3 }) }), day('2026-10-26', 2, 2, { lang: byCount({ es: 2 }) })]),
+    )!;
+    const lines = cloudflareDimensionSeries(cf, 'lang');
+    expect(lines.map((l) => l.key)).toEqual(['es', 'other']);
+    expect(lines.at(-1)).toEqual({
+      key: 'other',
+      label: 'Other',
+      values: [
+        { date: '2026-09-20', users: 7 },
+        { date: '2026-10-26', users: 0 },
+      ],
+    });
+  });
+
+  it('groups a locale dimension by primary subtag, so the lines add up to the day users', () => {
+    const cf = buildCloudflareData(
+      locales,
+      series([day('2026-10-26', 9, 9, { syslang: { 'tr-TR': { users: 3, events: 3 }, tr: { users: 0, events: 0 }, 'en-US': { users: 6, events: 6 } } })]),
+    )!;
+    const lines = cloudflareDimensionSeries(cf, 'syslang');
+    expect(lines.map((l) => [l.key, l.label])).toEqual([
+      ['en', 'English (en)'],
+      ['tr', 'Turkish (tr)'],
+    ]);
+    expect(lines.map((l) => l.values[0]!.users)).toEqual([6, 3]);
+  });
+
+  it('leaves the empty value out, and is empty for an unknown dimension', () => {
+    const cf = buildCloudflareData(locales, series([day('2026-10-26', 1, 1, { lang: byCount({ '': 5, de: 1 }) })]))!;
+    expect(cloudflareDimensionSeries(cf, 'lang')).toEqual([
+      { key: 'de', label: 'de', values: [{ date: '2026-10-26', users: 1 }] },
+    ]);
+    expect(cloudflareDimensionSeries(cf, 'nope')).toEqual([]);
   });
 });
 

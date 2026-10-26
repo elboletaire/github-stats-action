@@ -399,6 +399,25 @@ cloudflare:
     ]);
   });
 
+  it('reads where, locale, supported and chart on a dimension, supported by primary subtag', () => {
+    const config = parseConfig(`
+cloudflare:
+  account-id: ${ACCOUNT}
+  dataset: d
+  dimensions:
+    client: { column: blob1, values: { gui: App, cli: CLI } }
+    lang: { column: blob6, label: App language, chart: true }
+    syslang: { column: blob7, label: System language (app), where: { client: gui }, locale: true, supported: [en, es, Ca-ES, ja] }
+    syslang-cli: { column: blob7, label: System language (CLI), where: { client: cli }, locale: true, supported: [en] }
+`);
+    expect(config.cloudflare!.dimensions).toEqual([
+      { name: 'client', label: 'client', column: 'blob1', values: { gui: 'App', cli: 'CLI' } },
+      { name: 'lang', label: 'App language', column: 'blob6', chart: true },
+      { name: 'syslang', label: 'System language (app)', column: 'blob7', where: { client: 'gui' }, locale: true, supported: ['en', 'es', 'ca', 'ja'] },
+      { name: 'syslang-cli', label: 'System language (CLI)', column: 'blob7', where: { client: 'cli' }, locale: true, supported: ['en'] },
+    ]);
+  });
+
   it('parses without an account-id, which the cloudflare-account-id input or CLOUDFLARE_ACCOUNT_ID can supply', () => {
     expect(parseConfig('cloudflare: { dataset: checks }\n').cloudflare).toEqual({
       dataset: 'checks',
@@ -432,6 +451,24 @@ cloudflare:
     ['a primary that is not a dimension', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  primary: { client: gui }\n`, 'cloudflare.primary.client is not a dimension'],
     ['a primary with two keys', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1 }\n  primary: { client: gui, os: linux }\n`, 'cloudflare.primary must name one dimension and its value'],
     ['per-user without a cloudflare source', 'counters:\n  - { name: u, assets: "*", per-user: true }\n', 'counters[0].per-user needs a cloudflare source'],
+    ['a where that is not a dimension', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1 }\n    syslang: { column: blob7, where: { os: linux } }\n`, 'cloudflare.dimensions.syslang.where.os is not a dimension'],
+    ['a where on the dimension itself', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1, where: { client: gui } }\n`, "cloudflare.dimensions.client.where.client can't be the dimension itself"],
+    ['an empty where', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1, where: {} }\n`, 'cloudflare.dimensions.client.where must name at least one dimension'],
+    ['a where value that is not a string', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1 }\n    syslang: { column: blob7, where: { client: 1 } }\n`, 'cloudflare.dimensions.syslang.where.client must be a non-empty string'],
+    ['a where value with a quote', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1 }\n    syslang: { column: blob7, where: { client: "g'ui" } }\n`, "cloudflare.dimensions.syslang.where.client can't use quotes or backslashes"],
+    ['a where value with a backslash', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1 }\n    syslang: { column: blob7, where: { client: "g\\\\ui" } }\n`, "cloudflare.dimensions.syslang.where.client can't use quotes or backslashes"],
+    ['one column twice under the same where', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1 }\n    a: { column: blob7, where: { client: gui } }\n    b: { column: blob7, where: { client: gui } }\n`, "cloudflare column 'blob7' is listed twice"],
+    ['a day column that a where dimension reads', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  day: blob7\n  dimensions:\n    client: { column: blob1 }\n    syslang: { column: blob7, where: { client: gui } }\n`, "cloudflare column 'blob7' is listed twice"],
+    ['supported without locale', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    syslang: { column: blob7, supported: [en] }\n`, 'cloudflare.dimensions.syslang.supported needs locale: true'],
+    ['an empty supported list', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    syslang: { column: blob7, locale: true, supported: [] }\n`, 'cloudflare.dimensions.syslang.supported must list at least one locale'],
+    ['a supported locale that is not a string', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    syslang: { column: blob7, locale: true, supported: [1] }\n`, 'cloudflare.dimensions.syslang.supported[0] must be a non-empty string'],
+    ['locale on a semver dimension', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    version: { column: blob2, kind: semver, locale: true }\n`, "cloudflare.dimensions.version.locale can't be combined with kind: semver"],
+    ['a locale flag that is not a boolean', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    syslang: { column: blob7, locale: "yes" }\n`, 'cloudflare.dimensions.syslang.locale must be true or false'],
+    ['a chart flag that is not a boolean', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    lang: { column: blob6, chart: 1 }\n`, 'cloudflare.dimensions.lang.chart must be true or false'],
+    ['two locale values in one language', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    syslang: { column: blob7, locale: true, values: { tr: Turkish, tr-TR: Turkey } }\n`, 'cloudflare.dimensions.syslang.values.tr-TR and cloudflare.dimensions.syslang.values.tr are the same language'],
+    ['a locale value that names no language', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    syslang: { column: blob7, locale: true, values: { C: C } }\n`, 'cloudflare.dimensions.syslang.values.C is not a language tag'],
+    ['a primary locale that names no language', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  primary: { syslang: POSIX }\n  dimensions:\n    syslang: { column: blob7, locale: true }\n`, 'cloudflare.primary.syslang is not a language tag'],
+    ['the same column under the same where, with the where named', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1 }\n    a: { column: blob7, where: { client: gui } }\n    b: { column: blob7, where: { client: gui } }\n`, "cloudflare column 'blob7' is listed twice with the same where"],
   ])('rejects %s', (_, text, message) => {
     expect(() => parseConfig(text)).toThrow(ConfigError);
     expect(() => parseConfig(text)).toThrow(message);

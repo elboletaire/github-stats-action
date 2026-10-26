@@ -53,6 +53,14 @@ export interface CloudflareDimensionRule {
   released?: boolean;
   /** Display labels by raw value; values without one show as they are. */
   values?: Record<string, string>;
+  /** Only the rows where these dimensions hold these values count, e.g. `{ client: gui }`. */
+  where?: Record<string, string>;
+  /** The values are BCP 47 tags, grouped by primary subtag at build time: `tr-TR` and `tr` are both `tr`. */
+  locale?: boolean;
+  /** Primary subtags counted as supported, e.g. `[en, es]`; each share says whether it is one. Needs `locale`. */
+  supported?: string[];
+  /** Also drawn as stacked daily lines, see `cloudflareDimensionSeries`. */
+  chart?: boolean;
 }
 
 /** An Analytics Engine dataset whose daily aggregates are kept on the data branch. */
@@ -462,30 +470,79 @@ function parseNpm(value: unknown): NpmRule[] {
   return rules;
 }
 
+/**
+ * A locale's primary subtag, lowercased: `tr-TR`, `tr_tr` and `tr` are all `tr`, and a POSIX locale such as
+ * `de.UTF-8` or `ca_ES@valencia` is `de` or `ca`. The C and POSIX locales name no language, so they give ''.
+ */
+export function primarySubtag(tag: string): string {
+  const subtag = tag.split(/[-_.@]/, 1)[0]!.toLowerCase();
+  return subtag === 'c' || subtag === 'posix' ? '' : subtag;
+}
+
 /** `values` maps each raw value to its label: `{ gui: App, cli: CLI }`. */
-function parseCloudflareValues(value: unknown, path: string): Record<string, string> {
+function parseCloudflareValues(value: unknown, path: string, locale?: boolean): Record<string, string> {
+  const labels: [string, string][] = [];
+  const keys = new Map<string, string>();
+  for (const [raw, label] of Object.entries(expectObject(value, path))) {
+    if (raw.trim() === '') throw new ConfigError(`${path}: value names must be non-empty`);
+    let key = raw;
+    // a locale's values group by primary subtag, so their labels are keyed the same way and two can't share one
+    if (locale) {
+      key = primarySubtag(raw);
+      if (key === '') throw new ConfigError(`${path}.${raw} is not a language tag`);
+      const other = keys.get(key);
+      if (other !== undefined) throw new ConfigError(`${path}.${raw} and ${path}.${other} are the same language`);
+      keys.set(key, raw);
+    }
+    labels.push([key, expectString(label, `${path}.${raw}`)]);
+  }
+  return Object.fromEntries(labels);
+}
+
+/** `where` names other dimensions and the value each must hold: `{ client: gui }`. */
+function parseCloudflareWhere(value: unknown, self: string, names: string[], path: string): Record<string, string> {
+  const entries = Object.entries(expectObject(value, path));
+  if (entries.length === 0) throw new ConfigError(`${path} must name at least one dimension, e.g. { client: gui }`);
   return Object.fromEntries(
-    Object.entries(expectObject(value, path)).map(([raw, label]) => {
-      if (raw.trim() === '') throw new ConfigError(`${path}: value names must be non-empty`);
-      return [raw, expectString(label, `${path}.${raw}`)];
+    entries.map(([dimension, raw]) => {
+      if (!names.includes(dimension)) throw new ConfigError(`${path}.${dimension} is not a dimension`);
+      if (dimension === self) throw new ConfigError(`${path}.${dimension} can't be the dimension itself`);
+      const text = expectString(raw, `${path}.${dimension}`);
+      // the value goes into the SQL, so quotes and backslashes are refused rather than escaped
+      if (/['\\]/.test(text)) throw new ConfigError(`${path}.${dimension} can't use quotes or backslashes`);
+      return [dimension, text];
     }),
   );
 }
 
+/** The supported locales by primary subtag, so `pt-BR` and `pt` compare alike. */
+function parseCloudflareSupported(value: unknown, path: string): string[] {
+  const list = expectList(value, path).map((item, i) => primarySubtag(expectString(item, `${path}[${i}]`)));
+  if (list.length === 0) throw new ConfigError(`${path} must list at least one locale`);
+  return list;
+}
+
 function parseCloudflareDimensions(value: unknown, path: string): CloudflareDimensionRule[] {
   const obj = expectObject(value, `${path}.dimensions`);
+  const names = Object.keys(obj);
   return Object.entries(obj).map(([name, item]) => {
     const dimPath = `${path}.dimensions.${name}`;
     if (!VARIANT_NAME_RE.test(name)) throw new ConfigError(`${dimPath}: dimension names are lowercase words joined by -`);
     const sub = expectObject(item, dimPath);
-    checkKeys(sub, ['column', 'label', 'kind', 'released', 'values'], dimPath);
+    checkKeys(sub, ['column', 'label', 'kind', 'released', 'values', 'where', 'locale', 'supported', 'chart'], dimPath);
     const column = expectString(sub.column, `${dimPath}.column`);
     if (!BLOB_RE.test(column)) throw new ConfigError(`${dimPath}.column must be blob1 to blob20`);
     if (sub.kind !== undefined && sub.kind !== 'semver') throw new ConfigError(`${dimPath}.kind must be semver`);
     const kind = sub.kind === 'semver' ? 'semver' : undefined;
     const released = optionalBoolean(sub, 'released', dimPath);
     if (released !== undefined && kind === undefined) throw new ConfigError(`${dimPath}.released needs kind: semver`);
-    const values = sub.values === undefined ? undefined : parseCloudflareValues(sub.values, `${dimPath}.values`);
+    const locale = optionalBoolean(sub, 'locale', dimPath);
+    if (locale && kind !== undefined) throw new ConfigError(`${dimPath}.locale can't be combined with kind: semver`);
+    if (sub.supported !== undefined && !locale) throw new ConfigError(`${dimPath}.supported needs locale: true`);
+    const values = sub.values === undefined ? undefined : parseCloudflareValues(sub.values, `${dimPath}.values`, locale);
+    const where = sub.where === undefined ? undefined : parseCloudflareWhere(sub.where, name, names, `${dimPath}.where`);
+    const supported = sub.supported === undefined ? undefined : parseCloudflareSupported(sub.supported, `${dimPath}.supported`);
+    const chart = optionalBoolean(sub, 'chart', dimPath);
     return {
       name,
       label: optionalString(sub, 'label', dimPath) ?? name,
@@ -493,8 +550,22 @@ function parseCloudflareDimensions(value: unknown, path: string): CloudflareDime
       ...(kind ? { kind } : {}),
       ...(released === undefined ? {} : { released }),
       ...(values === undefined ? {} : { values }),
+      ...(where === undefined ? {} : { where }),
+      ...(locale ? { locale } : {}),
+      ...(supported === undefined ? {} : { supported }),
+      ...(chart ? { chart } : {}),
     };
   });
+}
+
+/** A column may serve several dimensions when their `where`s differ, as each then reads its own rows. */
+function uniqueColumns(dimensions: CloudflareDimensionRule[]): void {
+  const seen = new Set<string>();
+  for (const { column, where } of dimensions) {
+    const key = JSON.stringify([column, Object.entries(where ?? {}).sort()]);
+    if (seen.has(key)) throw new ConfigError(`cloudflare column '${column}' is listed twice${where ? ' with the same where' : ''}`);
+    seen.add(key);
+  }
 }
 
 /** `primary` names one dimension and the value whose users are the headline: `{ client: gui }`. */
@@ -503,8 +574,12 @@ function parseCloudflarePrimary(value: unknown, dimensions: CloudflareDimensionR
   const [entry] = entries;
   if (entries.length !== 1 || !entry) throw new ConfigError(`${path} must name one dimension and its value, e.g. { client: gui }`);
   const [dimension, raw] = entry;
-  if (!dimensions.some((d) => d.name === dimension)) throw new ConfigError(`${path}.${dimension} is not a dimension`);
-  return { dimension, value: expectString(raw, `${path}.${dimension}`) };
+  const found = dimensions.find((d) => d.name === dimension);
+  if (!found) throw new ConfigError(`${path}.${dimension} is not a dimension`);
+  const text = expectString(raw, `${path}.${dimension}`);
+  const grouped = found.locale ? primarySubtag(text) : text;
+  if (grouped === '') throw new ConfigError(`${path}.${dimension} is not a language tag`);
+  return { dimension, value: grouped };
 }
 
 function parseCloudflare(value: unknown): CloudflareRule {
@@ -523,7 +598,8 @@ function parseCloudflare(value: unknown): CloudflareRule {
   if (day !== undefined && !BLOB_RE.test(day)) throw new ConfigError(`${path}.day must be blob1 to blob20`);
   const dimensions = obj.dimensions === undefined ? [] : parseCloudflareDimensions(obj.dimensions, path);
   if (dimensions.filter((d) => d.released).length > 1) throw new ConfigError(`${path}: only one dimension may be released`);
-  unique([...(day === undefined ? [] : [day]), ...dimensions.map((d) => d.column)], 'cloudflare column');
+  if (day !== undefined && dimensions.some((d) => d.column === day)) throw new ConfigError(`cloudflare column '${day}' is listed twice`);
+  uniqueColumns(dimensions);
   const primary = obj.primary === undefined ? undefined : parseCloudflarePrimary(obj.primary, dimensions, `${path}.primary`);
   const note = optionalString(obj, 'note', path);
   return {
