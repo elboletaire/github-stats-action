@@ -1,7 +1,8 @@
 // The stars chart's shared maths: the sampled points and a monotone curve through them. Browser code
 // imports this file alone (`@github-stats-action/core/stars`), so it stays free of Node imports.
 
-import type { StarPoint } from './types';
+import { clipStars, windowOf } from './window';
+import type { Dataset, StarPoint } from './types';
 
 export type { StarPoint };
 
@@ -30,6 +31,25 @@ export function sampleStars(points: readonly StarPoint[], count = STAR_SAMPLES):
       while (k + 1 < points.length && points[k + 1]!.date <= date) k++;
       return { date, stars: points[k]!.stars };
     });
+}
+
+/** The samples the stars chart draws, with the values it plots: the README chart and the dashboard share them. */
+export interface StarSamples {
+  /** Up to about 30 points over the window, each with its real count. */
+  samples: StarPoint[];
+  /** The value each sample is plotted at: the first is zero when `startsAtZero`, as its tooltip keeps the real count. */
+  plotted: number[];
+  startsAtZero: boolean;
+}
+
+/** The stars of `all` (the unwindowed dataset) inside its `charts.stars` window, sampled and with the first value set to zero if `start-at-zero` applies. */
+export function starsSamples(all: Dataset): StarSamples {
+  const w = windowOf(all, 'stars');
+  const samples = sampleStars(w ? clipStars(all.stars, w) : all.stars);
+  // with a window that cuts off history, the first point is drawn at zero; one point has no segment to start, so it stays where it is
+  const cutOff = w !== undefined && all.stars[0] !== undefined && w.start > all.stars[0].date;
+  const startsAtZero = cutOff && samples.length > 1 && all.charts?.stars.startAtZero === true;
+  return { samples, plotted: samples.map((p, i) => (i === 0 && startsAtZero ? 0 : p.stars)), startsAtZero };
 }
 
 /** A point in plot coordinates. */

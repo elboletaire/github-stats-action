@@ -27,6 +27,8 @@ export interface TimelineOptions {
   startLabel?: boolean;
   /** Whether the chart's config animates it on load. */
   animate: boolean;
+  /** The chart's height in px; the default is the dashboard's usual 240. */
+  height?: number;
 }
 
 const HEIGHT = 240;
@@ -36,7 +38,7 @@ const START_LABEL_GAP = 60;
 /** Draws the chart into `svg` for the container's current width. */
 export function drawTimeline(svg: SVGSVGElement, o: TimelineOptions): void {
   const W = widthOf(svg);
-  const H = HEIGHT;
+  const H = o.height ?? HEIGHT;
   const m = { l: 44, r: 16, t: 16, b: 28 };
   resetSvg(svg, W, H, playsIntro(o.animate));
   const first = o.xs[0] ?? 0;

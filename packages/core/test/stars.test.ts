@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { StarPoint } from '../src/types';
-import { drawShares, monotoneCurve, monotonePath, sampleStars, STAR_SAMPLES } from '../src/stars';
+import type { Dataset } from '../src/types';
+import { drawShares, monotoneCurve, monotonePath, sampleStars, starsSamples, STAR_SAMPLES } from '../src/stars';
 
 const DAY = 86_400_000;
 const dateOf = (i: number, from = '2024-01-01'): string => new Date(Date.parse(from) + i * DAY).toISOString().slice(0, 10);
@@ -203,5 +204,49 @@ describe('drawShares', () => {
     expect(steep).toBeGreaterThan(0.5);
     expect(steep).toBeCloseTo(Math.hypot(10, 90) / (10 + Math.hypot(10, 90)), 5);
     expect(shares[2]).toBe(1);
+  });
+});
+
+/** A dataset with only what the stars window reads: its stars, snapshot day and the stars chart's options. */
+const starsDataset = (stars: StarPoint[], options?: NonNullable<Dataset['charts']>['stars']): Dataset =>
+  ({ stars, snapshotAt: '2024-03-01T00:00:00Z', charts: { titles: true, stars: options ?? {} } }) as unknown as Dataset;
+
+describe('starsSamples', () => {
+  it('samples the whole history with no window, and plots the real counts', () => {
+    const stars = oneADay(60);
+    const got = starsSamples(starsDataset(stars, { startAtZero: true }));
+    expect(got.samples).toEqual(sampleStars(stars));
+    expect(got.plotted).toEqual(got.samples.map((p) => p.stars));
+    expect(got.startsAtZero).toBe(false);
+  });
+
+  it('starts the window at its from day, with the count on that day', () => {
+    const got = starsSamples(starsDataset(oneADay(60), { from: '2024-02-01' }));
+    expect(got.samples[0]).toEqual({ date: '2024-02-01', stars: 32 });
+    expect(got.samples.at(-1)!.date).toBe('2024-02-29');
+    expect(got.plotted[0]).toBe(32);
+    expect(got.startsAtZero).toBe(false);
+  });
+
+  it('plots the first sample at zero when start-at-zero cuts off history, and keeps its count', () => {
+    const got = starsSamples(starsDataset(oneADay(60), { from: '2024-02-01', startAtZero: true }));
+    expect(got.startsAtZero).toBe(true);
+    expect(got.plotted[0]).toBe(0);
+    expect(got.samples[0]!.stars).toBe(32);
+    expect(got.plotted.slice(1)).toEqual(got.samples.slice(1).map((p) => p.stars));
+  });
+
+  it('takes a range counted back from the snapshot day', () => {
+    const got = starsSamples(starsDataset(oneADay(60), { range: '30d', startAtZero: true }));
+    // 30 days including the snapshot day, 2024-03-01: from 2024-02-01
+    expect(got.samples[0]!.date).toBe('2024-02-01');
+    expect(got.startsAtZero).toBe(true);
+  });
+
+  it('leaves the first point alone when the window holds one sample', () => {
+    const got = starsSamples(starsDataset(oneADay(60), { from: '2024-02-29', startAtZero: true }));
+    expect(got.samples).toHaveLength(1);
+    expect(got.startsAtZero).toBe(false);
+    expect(got.plotted).toEqual([got.samples[0]!.stars]);
   });
 });

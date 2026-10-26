@@ -74,6 +74,8 @@ async function boot(): Promise<void> {
     clearTimeout(timer);
     timer = setTimeout(redrawAll, 120);
   });
+  // a configured stars colour depends on the page's theme, so the OS theme switching redraws the charts
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redrawAll);
 }
 
 void boot();

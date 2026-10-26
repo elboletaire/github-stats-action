@@ -1,22 +1,17 @@
 // The README charts' windows: each chart is drawn from the dataset cut to its own days, so the chart
-// functions don't know about windows. The dashboard keeps its own zoom and isn't windowed.
+// functions don't know about windows. The dashboard's sampled stars use the same window (core's starsSamples).
 
 import {
-  rangeStart,
+  clipStars,
   utcDate,
+  windowOf,
   type ChartName,
+  type ChartWindow,
   type Dataset,
   type EstimatedDaily,
   type NpmData,
-  type StarPoint,
 } from '@github-stats-action/core';
 import { dayLabel, dayOf } from './svg';
-
-/** The first and last day a chart covers, YYYY-MM-DD, both inclusive. */
-export interface ChartWindow {
-  start: string;
-  end: string;
-}
 
 /** Whether the config sets a window for `chart`, so an empty chart can say the window matched nothing. */
 export function windowSet(dataset: Dataset, chart: ChartName): boolean {
@@ -24,31 +19,7 @@ export function windowSet(dataset: Dataset, chart: ChartName): boolean {
   return options?.from !== undefined || options?.range !== undefined || options?.last !== undefined;
 }
 
-/** The days a chart covers: its `from`, or its `range` counted back from the end. Undefined shows all history. */
-export function windowOf(dataset: Dataset, chart: ChartName): ChartWindow | undefined {
-  const options = dataset.charts?.[chart];
-  if (!options || (options.from === undefined && options.range === undefined)) return undefined;
-  // the end is the data's latest day: the snapshot's, or the last stored day of npm or Cloudflare, where those charts end
-  const end =
-    chart === 'npm-downloads' && dataset.npm
-      ? dataset.npm.latest
-      : chart === 'cloudflare-users' && dataset.cloudflare
-        ? dataset.cloudflare.latest
-        : utcDate(Date.parse(dataset.snapshotAt));
-  return { start: options.from ?? rangeStart(options.range!, end), end };
-}
-
 const inWindow = (day: string, w: ChartWindow): boolean => day >= w.start && day <= w.end;
-
-/** The curve starts at the count on the window's first day, or on the first star when the window reaches back past it. */
-function clipStars(stars: StarPoint[], w: ChartWindow): StarPoint[] {
-  const first = stars[0];
-  if (!first) return [];
-  const from = w.start > first.date ? w.start : first.date;
-  if (from > w.end) return [];
-  const before = stars.filter((p) => p.date <= from).at(-1);
-  return [{ date: from, stars: before?.stars ?? 0 }, ...stars.filter((p) => p.date > from && p.date <= w.end)];
-}
 
 /** The estimate's days inside the window; its start moves to the first of them, so the axis starts there. */
 function clipEstimate(estimate: EstimatedDaily, w: ChartWindow): EstimatedDaily {

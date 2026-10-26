@@ -1,8 +1,9 @@
-// The stars chart's sampled view: about 30 samples placed at their dates on the same day axis as the daily
-// view, a monotone curve through them, a dot on each and a tooltip per sample.
+// The stars chart's sampled view: the README chart's samples (core's starsSamples: its window and start-at-zero)
+// placed at their dates on the same day axis as the daily view, a monotone curve through them, a dot on each and
+// a tooltip per sample.
 
-import { drawShares, monotonePath, type CurvePoint } from '@github-stats-action/core/stars';
-import type { StarPoint } from '@github-stats-action/core';
+import type { Dataset, StarPoint } from '@github-stats-action/core';
+import { drawShares, monotonePath, starsSamples, type CurvePoint } from '@github-stats-action/core/stars';
 import { type DayAxis, xTicks } from './days';
 import { esc, f0 } from './format';
 import { fadeFill, gridLines, resetSvg, svgEl, widthOf } from './svg';
@@ -18,29 +19,50 @@ export interface SampledOptions {
   /** Prefix of the chart's gradient id, unique on the page. */
   id: string;
   axis: DayAxis;
+  /** The samples, each with the real count its tooltip shows. */
   samples: readonly StarPoint[];
+  /** The value each sample is drawn at; the first is zero when `startsAtZero`. */
+  values: readonly number[];
+  startsAtZero: boolean;
   /** Ascending day indices of the samples, counted by `axis`. */
   xs: readonly number[];
   color: string;
   /** Whether the chart's config animates it on load. */
   animate: boolean;
+  /** The chart's height in px; the default is the dashboard's usual 240. */
+  height?: number;
+}
+
+/** The samples of `d` in its `charts.stars` window, placed on `axis`, with the values they are drawn at. */
+export function sampledPoints(d: Dataset, axis: DayAxis): Pick<SampledOptions, 'samples' | 'values' | 'startsAtZero' | 'xs'> {
+  const { samples, plotted, startsAtZero } = starsSamples(d);
+  return {
+    samples,
+    values: plotted,
+    startsAtZero,
+    xs: samples.map((p) => axis.indexOf(Date.parse(`${p.date}T00:00:00Z`))),
+  };
 }
 
 /** Draws the samples into `svg` for the container's current width. */
 export function drawSampled(svg: SVGSVGElement, o: SampledOptions): void {
   const W = widthOf(svg);
-  const H = HEIGHT;
+  const H = o.height ?? HEIGHT;
   const m = { l: 44, r: 16, t: 16, b: 28 };
   resetSvg(svg, W, H, playsIntro(o.animate));
-  const { axis, samples, xs, color } = o;
+  const { axis, samples, values, xs, color } = o;
   const n = samples.length;
-  if (n === 0) return;
+  // the window holds no star: the README chart says so in its middle, and so does this view
+  if (n === 0) {
+    svgEl('text', { x: W / 2, y: H / 2 + 4, 'text-anchor': 'middle' }, svg).textContent = 'No stars in this window';
+    return;
+  }
 
   const first = xs[0]!;
   const last = Math.max(first + 1, xs[n - 1]!);
   const pw = W - m.l - m.r;
   const x = (day: number): number => m.l + (pw * (day - first)) / (last - first);
-  const mx = quarterMax(Math.max(0, ...samples.map((p) => p.stars)));
+  const mx = quarterMax(Math.max(0, ...values));
   const y = (v: number): number => m.t + (H - m.t - m.b) * (1 - v / mx);
   const base = y(0);
 
@@ -51,17 +73,17 @@ export function drawSampled(svg: SVGSVGElement, o: SampledOptions): void {
     svgEl('text', { x: x(day), y: H - 8, 'text-anchor': 'middle' }, svg).textContent = text;
   }
 
-  const points: CurvePoint[] = samples.map((p, i) => [x(xs[i]!), y(p.stars)]);
+  const points: CurvePoint[] = values.map((v, i) => [x(xs[i]!), y(v)]);
   const line = monotonePath(points);
   const endX = x(xs[n - 1]!);
   svgEl('path', { d: `${line}L${endX.toFixed(1)},${base.toFixed(1)}L${x(first).toFixed(1)},${base.toFixed(1)}Z`, fill: fadeFill(svg, `${o.id}-fade`, color), class: 'fade' }, svg);
   svgEl('path', { d: line, fill: 'none', stroke: color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', pathLength: 1, class: 'draw' }, svg);
   // each dot pops in as the drawn line reaches it: its share of the line's length, of the draw
   const shares = drawShares(points);
-  samples.slice(0, -1).forEach((p, i) => {
-    svgEl('circle', { cx: x(xs[i]!), cy: y(p.stars), r: 3, fill: color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'pop', ...introDelay(DRAW_MS * shares[i]!) }, svg);
+  values.slice(0, -1).forEach((v, i) => {
+    svgEl('circle', { cx: x(xs[i]!), cy: y(v), r: 3, fill: color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'pop', ...introDelay(DRAW_MS * shares[i]!) }, svg);
   });
-  const endY = y(samples[n - 1]!.stars);
+  const endY = y(values[n - 1]!);
   svgEl('circle', { cx: endX, cy: endY, r: 4, fill: color, stroke: 'var(--surface)', 'stroke-width': 2, class: 'late' }, svg);
   svgEl('text', { x: endX - 8, y: Math.max(m.t + 10, endY - 10), 'text-anchor': 'end', class: 'strong late' }, svg).textContent = f0(samples[n - 1]!.stars);
 
@@ -81,9 +103,11 @@ export function drawSampled(svg: SVGSVGElement, o: SampledOptions): void {
     cross.setAttribute('x2', String(x(xs[k]!)));
     cross.setAttribute('visibility', 'visible');
     dot.setAttribute('cx', String(x(xs[k]!)));
-    dot.setAttribute('cy', String(y(p.stars)));
+    dot.setAttribute('cy', String(y(values[k]!)));
     dot.setAttribute('visibility', 'visible');
-    showTip(`<b>${esc(axis.long(xs[k]!))}</b><br>${f0(p.stars)} ${p.stars === 1 ? 'star' : 'stars'}`, ev);
+    // as the README chart's tooltip: the first point keeps its real count when it is drawn at zero
+    const before = k === 0 && o.startsAtZero ? ' before the window' : '';
+    showTip(`<b>${esc(axis.long(xs[k]!))}</b><br>${f0(p.stars)} ${p.stars === 1 ? 'star' : 'stars'}${before}`, ev);
   });
   hit.addEventListener('pointerleave', (ev) => {
     if (ev.pointerType === 'touch') return;

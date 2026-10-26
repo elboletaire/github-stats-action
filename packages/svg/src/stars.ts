@@ -2,7 +2,7 @@
 // their dates, joined by a monotone curve with a dot on each, over a fade to the baseline.
 
 import type { Dataset, StarPoint } from '@github-stats-action/core';
-import { HEX_COLOUR_RE, TYPE, animates, drawShares, monotonePath, sampleStars, type CurvePoint } from '@github-stats-action/core';
+import { HEX_COLOUR_RE, TYPE, animates, drawShares, monotonePath, starsSamples, type CurvePoint } from '@github-stats-action/core';
 import {
   areaGradient,
   compact,
@@ -34,7 +34,7 @@ import {
   type Theme,
 } from './svg';
 import { DRAW_MS, LATE_MS, animated } from './motion';
-import { windowed, windowOf, windowSet } from './window';
+import { windowed, windowSet } from './window';
 
 /** The plot's bottom sits this far above the chart's foot, where the x labels go. */
 const PLOT_FOOT = 48;
@@ -85,24 +85,19 @@ export function starsChart(all: Dataset, theme: Theme): string {
   const xOf = (day: number): number =>
     span > 0 ? box.left + ((finite(day) - first) / span) * (box.right - box.left) : (box.left + box.right) / 2;
 
-  const samples = sampleStars(dataset.stars);
-  // with a window that cuts off history, the first point is drawn at zero and its tooltip keeps the real count;
-  // one point has no segment to start, so it stays where it is
-  const chartWindow = windowOf(all, 'stars');
-  const cutOff = chartWindow !== undefined && all.stars[0] !== undefined && chartWindow.start > all.stars[0].date;
-  const startsAtZero = cutOff && samples.length > 1 && dataset.charts?.stars.startAtZero === true;
-  const plotted = samples.map((p, i) => (i === 0 && startsAtZero ? { ...p, stars: 0 } : p));
+  // the first point is drawn at zero when the window cuts off history and start-at-zero is set; its tooltip keeps the real count
+  const { samples, plotted, startsAtZero } = starsSamples(all);
   const tip = (p: StarPoint, i: number): string =>
     `${p.date}: ${plural(p.stars, 'star')}${i === 0 && startsAtZero ? ' before the window' : ''}`;
   const xs = samples.map((p) => xOf(dayOf(p.date)));
-  const points: CurvePoint[] = plotted.map((p, i) => [xs[i]!, yOf(p.stars)]);
+  const points: CurvePoint[] = plotted.map((v, i) => [xs[i]!, yOf(v)]);
   const line = monotonePath(points);
   const lastX = xs[xs.length - 1]!;
   // each dot pops in as the drawn line reaches it: its share of the line's length, of the draw
   const shares = drawShares(points);
   const dots = samples.slice(0, -1).map((p, i) => {
     const reached = Math.round(DRAW_MS * shares[i]!);
-    const dot = `<circle cx="${px(xs[i]!)}" cy="${px(yOf(plotted[i]!.stars))}" r="3" fill="${color}" stroke="${ink(theme).surface}" stroke-width="2"><title>${esc(tip(p, i))}</title></circle>`;
+    const dot = `<circle cx="${px(xs[i]!)}" cy="${px(yOf(plotted[i]!))}" r="3" fill="${color}" stroke="${ink(theme).surface}" stroke-width="2"><title>${esc(tip(p, i))}</title></circle>`;
     return animated(motion, 'pop', [dot], reached ? `animation-delay:${reached}ms` : '');
   });
   const hover = samples.map((p, i) => {
