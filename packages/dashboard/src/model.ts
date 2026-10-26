@@ -1,6 +1,6 @@
 // Reshaping of the Dataset that more than one section needs. Pure, so it is unit tested.
 
-import type { CloudflareData, Dataset, GroupInfo, NpmData, Period, ReleaseRow } from '@github-stats-action/core';
+import { cloudflareUserSeries, type CloudflareData, type Dataset, type GroupInfo, type NpmData, type Period, type ReleaseRow } from '@github-stats-action/core';
 import { DAY_MS } from './days';
 
 /** The group of files the ignore list matched: kept in the data, never counted. */
@@ -77,11 +77,14 @@ export function npmDaily(npm: NpmData): { start: string; series: number[][] } {
   return { start: npm.first, series };
 }
 
-/** The headline users per UTC day from the first stored day to the latest; zero where no day is stored, as no rows means no checks. */
-export function cloudflareDaily(cf: CloudflareData): { start: string; values: number[] } {
+/** The lines of `cloudflareUserSeries` with their users per UTC day, from the first stored day to the latest; zero where no day is stored, as no rows means no checks. */
+export function cloudflareDaily(cf: CloudflareData): { start: string; lines: { label: string; values: number[] }[] } {
   const first = Date.parse(`${cf.first}T00:00:00Z`);
   const n = Math.round((Date.parse(`${cf.latest}T00:00:00Z`) - first) / DAY_MS) + 1;
-  const values = new Array<number>(n).fill(0);
-  for (const day of cf.days) values[Math.round((Date.parse(`${day.date}T00:00:00Z`) - first) / DAY_MS)] = day.headline;
-  return { start: cf.first, values };
+  const lines = cloudflareUserSeries(cf).map((line) => {
+    const values = new Array<number>(n).fill(0);
+    for (const point of line.values) values[Math.round((Date.parse(`${point.date}T00:00:00Z`) - first) / DAY_MS)] = point.users;
+    return { label: line.label, values };
+  });
+  return { start: cf.first, lines };
 }

@@ -274,6 +274,8 @@ export interface CloudflareDimensionInfo {
   name: string;
   label: string;
   kind?: 'semver';
+  /** Display labels by raw value. */
+  values?: Record<string, string>;
 }
 
 export interface CloudflareShare {

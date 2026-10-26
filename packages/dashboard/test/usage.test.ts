@@ -73,6 +73,17 @@ describe('usage section', () => {
     expect(html).toContain('<th>Users (approx.)</th><th>Events</th><th>Share</th>');
   });
 
+  it('shows the configured label of each value in the share tables, and the raw value without one', () => {
+    const labelled = buildCloudflareData(
+      { ...rule, dimensions: [{ ...rule.dimensions[0]!, values: { gui: 'App', cli: '<i>CLI</i>' } }, rule.dimensions[1]!] },
+      series,
+    )!;
+    const html = usageHtml(labelled);
+    expect(html).toContain('<tr><td>App</td><td>8</td><td>9</td><td>69%</td></tr>');
+    expect(html).toContain('<tr><td>&lt;i&gt;CLI&lt;/i&gt;</td><td>4</td><td>4</td><td>31%</td></tr>');
+    expect(html).toContain('<tr><td>&lt;b&gt;Mac</td>');
+  });
+
   it('escapes the dimension values and the note', () => {
     const html = usageHtml({ ...cloudflare, note: 'Checks & <i>only</i>' });
     expect(html).toContain('<td>&lt;b&gt;Mac</td>');

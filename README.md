@@ -192,7 +192,7 @@ cloudflare:
   primary: { client: gui }      # optional; the headline users only count these rows
   note: The CLI only checks on --version; users are approximate daily counts.
   dimensions:
-    client:  { column: blob1, label: App vs CLI }
+    client:  { column: blob1, label: App vs CLI, values: { gui: App, cli: CLI } }  # values: display labels by raw value
     version: { column: blob2, label: Version, kind: semver, released: true }
     os:      { column: blob3, label: OS }
 counters:
@@ -216,7 +216,7 @@ The token is a secret passed as the `cloudflare-token` input. The CLI reads `CLO
 What you get:
 
 - **Dashboard:** a Usage section after npm, with the 7-day average of daily users, a zoomable daily chart, and a share table per dimension for the last 30 days.
-- **Chart:** `charts/cloudflare-users-light.svg` / `-dark.svg`, daily users with the events as a faint second line. Limit it with `charts: { cloudflare-users: { range: 90d } }`.
+- **Chart:** `charts/cloudflare-users-light.svg` / `-dark.svg`, daily users as a Total line over a fade, plus one line per value of the `primary` dimension, labelled by its `values`. Limit it with `charts: { cloudflare-users: { range: 90d } }`.
 - **Badges:** `users-daily` (the 7-day average of daily users) and `users-daily-latest` (the latest day), see [Badges](#badges).
 - **CSV:** `cf_users` (approximate) and `cf_events` columns in `daily.csv`.
 

@@ -5,6 +5,7 @@ import { OTHER } from './assets';
 import type { CloudflareRule } from './config';
 import { addDays, dayNumber } from './npm';
 import { compareVersions, parseVersion } from './semver';
+import { SLOTS } from './theme';
 import type {
   CloudflareData,
   CloudflareDay,
@@ -14,10 +15,19 @@ import type {
   MeasuredDay,
 } from './types';
 
+/** A line of the usage chart: Total, or one value of the primary dimension. */
+export interface CloudflareUserSeries {
+  key: string;
+  label: string;
+  values: { date: string; users: number }[];
+}
+
 /** The window of the 30-day figures: shares, events and counters per user. */
 const LAST_DAYS = 30;
 /** Values shown per dimension; the rest fold into `other`. */
 const SHARE_LIMIT = 8;
+/** Value lines on the usage chart: the primary value and the top others, with Total within the palette. */
+const LINE_LIMIT = SLOTS - 1;
 /** Fewest stored days in the window before a counter gets a per-user figure. */
 const PER_USER_MIN_DAYS = 14;
 
@@ -25,6 +35,11 @@ const PER_USER_MIN_DAYS = 14;
 function within(date: string, latest: string, count: number): boolean {
   const ago = dayNumber(latest) - dayNumber(date);
   return ago >= 0 && ago < count;
+}
+
+/** A raw value's display label, or the value itself when the dimension names none. */
+export function cloudflareValueLabel(dimension: CloudflareDimensionInfo | undefined, value: string): string {
+  return dimension?.values && Object.hasOwn(dimension.values, value) ? dimension.values[value]! : value;
 }
 
 /** The day's headline users: the primary value's when one is set, else every row's. */
@@ -94,7 +109,12 @@ export function buildCloudflareData(rule: CloudflareRule, series: CloudflareSeri
     ...(primary ? { primary } : {}),
     latest,
     first: days[0]!.date,
-    dimensions: rule.dimensions.map(({ name, label, kind }) => ({ name, label, ...(kind ? { kind } : {}) })),
+    dimensions: rule.dimensions.map(({ name, label, kind, values }) => ({
+      name,
+      label,
+      ...(kind ? { kind } : {}),
+      ...(values ? { values } : {}),
+    })),
     days,
     totals: {
       usersLatest: last.headline,
@@ -106,6 +126,40 @@ export function buildCloudflareData(rule: CloudflareRule, series: CloudflareSeri
     },
     shares: buildShares(series.days, latest, rule.dimensions),
   };
+}
+
+/**
+ * The usage chart's lines over the stored days: Total first, then with `primary` set, one line per value of its
+ * dimension seen in the days, the primary value first and the rest by users, up to `LINE_LIMIT`. A day without
+ * a value counts 0.
+ */
+export function cloudflareUserSeries(cf: CloudflareData): CloudflareUserSeries[] {
+  const total: CloudflareUserSeries = {
+    key: 'total',
+    label: 'Total',
+    values: cf.days.map((day) => ({ date: day.date, users: day.users })),
+  };
+  const primary = cf.primary;
+  if (!primary) return [total];
+  const sums = new Map<string, number>();
+  for (const day of cf.days) {
+    for (const [value, count] of Object.entries(day.by[primary.dimension] ?? {})) {
+      sums.set(value, (sums.get(value) ?? 0) + count.users);
+    }
+  }
+  const dimension = cf.dimensions.find((d) => d.name === primary.dimension);
+  const lines = [...sums.entries()]
+    .sort(([a, usersA], [b, usersB]) => {
+      if (a === primary.value || b === primary.value) return a === primary.value ? -1 : 1;
+      return usersB - usersA;
+    })
+    .slice(0, LINE_LIMIT)
+    .map(([value]) => ({
+      key: value,
+      label: cloudflareValueLabel(dimension, value),
+      values: cf.days.map((day) => ({ date: day.date, users: day.by[primary.dimension]?.[value]?.users ?? 0 })),
+    }));
+  return [total, ...lines];
 }
 
 /**

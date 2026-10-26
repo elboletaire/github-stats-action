@@ -16,7 +16,7 @@ cloudflare:
   primary: { client: gui }      # optional; the headline users only count these rows
   note: The CLI only checks on --version; users are approximate daily counts.
   dimensions:
-    client:  { column: blob1, label: App vs CLI }
+    client:  { column: blob1, label: App vs CLI, values: { gui: App, cli: CLI } }
     version: { column: blob2, label: Version, kind: semver, released: true }
     os:      { column: blob3, label: OS }
     arch:    { column: blob4, label: Arch }
@@ -25,7 +25,7 @@ counters:
 ```
 
 - No `cloudflare` block: nothing changes, no requests.
-- Validation: `account-id` 32 hex; `dataset` matches `^[A-Za-z0-9_]+$`; `users` is `index1`; `day` and each dimension `column` are `blob1`..`blob20`, all different; dimension names are kebab-case; `kind` is `semver` or absent; at most one `primary` key, which must be a dimension; `released` only on a `kind: semver` dimension, at most one. `per-user` on a counter requires `cloudflare`.
+- Validation: `account-id` 32 hex; `dataset` matches `^[A-Za-z0-9_]+$`; `users` is `index1`; `day` and each dimension `column` are `blob1`..`blob20`, all different; dimension names are kebab-case; `kind` is `semver` or absent; at most one `primary` key, which must be a dimension; `released` only on a `kind: semver` dimension, at most one; `values` maps non-empty raw values to non-empty labels. `per-user` on a counter requires `cloudflare`.
 - Token: action input `cloudflare-token` (pass a secret; needs *Account Analytics: Read*); the CLI reads `CLOUDFLARE_API_TOKEN`. A config without a token logs a warning and keeps the stored days.
 
 ## Collecting
@@ -62,7 +62,7 @@ Only daily aggregates: no hashes, IPs or per-install data leave AE. Refetched da
 
 `Dataset.cloudflare?: CloudflareData`, absent without config or stored days:
 
-- `label`, `note`, `latest`, `first`, `days` (as stored), `dimensions` (name, label, kind).
+- `label`, `note`, `latest`, `first`, `days` (as stored), `dimensions` (name, label, kind, values).
 - `headline(day)`: users of the `primary` value when set (`by.client.gui.users`), else `users`.
 - `totals`: `usersLatest` (headline, latest day), `usersAvg7` (mean headline over the last 7 stored days), `eventsLast30`, `otherEvents7` (events outside `primary` over 7 days, for "plus N CLI checks").
 - `shares[dimension]`: each value's users and events summed over the last 30 days, ordered by events (semver dimensions: by version, newest first), small values beyond 8 folded into `other`.
@@ -73,7 +73,7 @@ Counters with `per-user`: `CounterInfo.perUser` = counter increase over the last
 
 ## Outputs
 
-- **Chart `cloudflare-users`** (`packages/svg`): headline users per day as a line, events as a faint second series; `title`, `animate`, `from`, `range` and variants like the other charts. Empty state when the window has no days.
+- **Chart `cloudflare-users`** (`packages/svg`): Total users per day as a line over a fade, plus one plain line per value of `primary`'s dimension (the primary value first, then the top others by users, at most 7 so the lines fit the palette), labelled by `values`. No events line. `title`, `animate`, `from`, `range` and variants like the other charts. Empty state when the window has no days.
 - **Badges**: `users-daily` (label "daily users", `usersAvg7`) and `users-daily-latest` (`usersLatest`); colours from `badges:`.
 - **Dashboard** "Usage" section, after npm: a *Daily users* tile (`usersAvg7`, "7-day average", subtext "plus N <other> checks" when `primary` is set), the chart, one share table per dimension (last 30 days), and `note` under the section. Every users figure is labelled approximate.
 - **KPIs**: a counter with `perUser` gets the note "≈ X per daily user, last 30 days" under its existing note.

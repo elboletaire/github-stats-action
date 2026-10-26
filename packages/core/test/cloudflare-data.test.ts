@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseConfig } from '../src/config';
-import { buildCloudflareData, counterPerUser } from '../src/cloudflare';
+import { buildCloudflareData, counterPerUser, cloudflareUserSeries } from '../src/cloudflare';
+import { SLOTS } from '../src/theme';
 import { addDays } from '../src/npm';
 import type { CloudflareDay, CloudflareSeries, MeasuredDay } from '../src/types';
 
@@ -119,6 +120,82 @@ describe('buildCloudflareData', () => {
       ]),
     )!;
     expect(data.shares.version!.map((s) => s.value)).toEqual(['23.0.0', '23.0.0-rc1', '9.1.0', 'nightly']);
+  });
+});
+
+describe('cloudflareUserSeries', () => {
+  const labelled = parseConfig(`
+cloudflare:
+  account-id: ${ACCOUNT}
+  dataset: checks
+  primary: { client: gui }
+  dimensions:
+    client: { column: blob1, values: { gui: App, cli: CLI } }
+`).cloudflare!;
+
+  it('is Total alone without a primary, every row counted', () => {
+    const data = buildCloudflareData(plain, series([day('2026-10-25', 3, 3, { os: byCount({ linux: 3 }) }), day('2026-10-26', 5, 5)]))!;
+    expect(cloudflareUserSeries(data)).toEqual([
+      {
+        key: 'total',
+        label: 'Total',
+        values: [
+          { date: '2026-10-25', users: 3 },
+          { date: '2026-10-26', users: 5 },
+        ],
+      },
+    ]);
+  });
+
+  it('adds a line per value of the primary dimension, the primary value first and then by users', () => {
+    const data = buildCloudflareData(
+      labelled,
+      series([
+        day('2026-10-25', 9, 9, { client: byCount({ cli: 6, gui: 3 }) }),
+        day('2026-10-26', 8, 8, { client: byCount({ gui: 4, web: 2 }) }),
+      ]),
+    )!;
+    const lines = cloudflareUserSeries(data);
+    expect(lines.map((l) => [l.key, l.label])).toEqual([
+      ['total', 'Total'],
+      ['gui', 'App'],
+      ['cli', 'CLI'],
+      ['web', 'web'],
+    ]);
+    expect(lines[0]!.values.map((v) => v.users)).toEqual([9, 8]);
+    expect(lines[1]!.values.map((v) => v.users)).toEqual([3, 4]);
+  });
+
+  it('caps the value lines so Total and them fit the palette, keeping the primary value and the top others', () => {
+    const counts = Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`v${i}`, 20 - i]));
+    const data = buildCloudflareData(labelled, series([day('2026-10-26', 1, 1, { client: byCount({ gui: 1, ...counts }) })]))!;
+    const lines = cloudflareUserSeries(data);
+    expect(lines.length).toBe(SLOTS);
+    expect(lines.slice(1).map((l) => l.key)).toEqual(['gui', 'v0', 'v1', 'v2', 'v3', 'v4', 'v5']);
+  });
+
+  it('counts a day without a value as 0 for that value', () => {
+    const data = buildCloudflareData(labelled, series([day('2026-10-25', 6, 6, { client: byCount({ cli: 6 }) }), day('2026-10-26', 4, 4, { client: byCount({ gui: 4 }) })]))!;
+    const cli = cloudflareUserSeries(data).find((l) => l.key === 'cli')!;
+    expect(cli.values).toEqual([
+      { date: '2026-10-25', users: 6 },
+      { date: '2026-10-26', users: 0 },
+    ]);
+  });
+
+  it('leaves out the primary value when no stored day has it', () => {
+    const data = buildCloudflareData(labelled, series([day('2026-10-26', 6, 6, { client: byCount({ cli: 6 }) })]))!;
+    expect(cloudflareUserSeries(data).map((l) => l.key)).toEqual(['total', 'cli']);
+  });
+
+  it('keeps a raw value as its label when the dimension names no label for it', () => {
+    const data = buildCloudflareData(labelled, series([day('2026-10-26', 4, 4, { client: byCount({ gui: 2, beta: 2 }) })]))!;
+    expect(cloudflareUserSeries(data).map((l) => l.label)).toEqual(['Total', 'App', 'beta']);
+  });
+
+  it('does not take a prototype property as a label', () => {
+    const data = buildCloudflareData(labelled, series([day('2026-10-26', 1, 1, { client: byCount({ constructor: 1 }) })]))!;
+    expect(cloudflareUserSeries(data)[1]!.label).toBe('constructor');
   });
 });
 

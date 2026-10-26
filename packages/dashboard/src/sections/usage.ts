@@ -1,13 +1,13 @@
-// Usage: the Cloudflare Analytics Engine figures, approximate daily users on a zoomable chart with a share
-// table per dimension. Shown only when the dataset has Cloudflare figures; every users figure is approximate.
+// Usage: the Cloudflare Analytics Engine figures, approximate daily users (Total, and each value of the primary
+// dimension) on a zoomable chart with a share table per dimension. Shown only when the dataset has Cloudflare
+// figures; every users figure is approximate.
 
-import { animates, type CloudflareData, type Dataset } from '@github-stats-action/core';
+import { animates, cloudflareValueLabel, type CloudflareData, type Dataset } from '@github-stats-action/core';
 import { esc, f0, percent } from '../format';
 import { cloudflareDaily } from '../model';
+import { colorVar } from '../palette';
 import { makeSection, type Section } from './common';
 import { wireDailyChart } from './daily-chart';
-
-const USERS = 'var(--c0)';
 
 /** The section's markup without its chart: the tile, the chart's frame, one table per dimension and the note. */
 export function usageHtml(cf: CloudflareData): string {
@@ -22,7 +22,7 @@ export function usageHtml(cf: CloudflareData): string {
     const events = shares.reduce((sum, s) => sum + s.events, 0);
     const body = shares.length
       ? `<div class="scroll"><table><thead><tr><th>Value</th><th>Users (approx.)</th><th>Events</th><th>Share</th></tr></thead><tbody>` +
-        shares.map((s) => `<tr><td>${esc(s.value)}</td><td>${f0(s.users)}</td><td>${f0(s.events)}</td><td>${percent(s.events, events)}</td></tr>`).join('') +
+        shares.map((s) => `<tr><td>${esc(cloudflareValueLabel(dimension, s.value))}</td><td>${f0(s.users)}</td><td>${f0(s.events)}</td><td>${percent(s.events, events)}</td></tr>`).join('') +
         `</tbody></table></div>`
       : '<p class="note">No events in the last 30 days.</p>';
     return `<div><h3>${esc(dimension.label)}, last 30 days</h3></div>` + body;
@@ -43,13 +43,18 @@ export function usageHtml(cf: CloudflareData): string {
 export function usage(d: Dataset): Section | null {
   const cf = d.cloudflare;
   if (!cf) return null;
-  const { start, values } = cloudflareDaily(cf);
+  const { start, lines } = cloudflareDaily(cf);
   const el = makeSection(usageHtml(cf));
   const redraw = wireDailyChart(el, {
     start,
-    series: [{ label: 'Daily users (approx.)', color: USERS, values }],
+    series: lines.map((line, i) => ({
+      label: i === 0 ? `${line.label} (approx.)` : line.label,
+      color: colorVar({ color: i }),
+      values: line.values,
+    })),
     stacked: false,
-    directLabels: true,
+    // beyond four lines the end labels pile up
+    directLabels: lines.length <= 4,
     id: 'usage',
     animate: animates(d.charts, 'cloudflare-users'),
     describe: (v) => `${f0(v)} users (approx.)`,

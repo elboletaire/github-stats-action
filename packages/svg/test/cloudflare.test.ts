@@ -23,6 +23,13 @@ const RULE: CloudflareRule = {
   dimensions: [{ name: 'client', label: 'App vs CLI', column: 'blob1' }],
 };
 
+/** The rule with `primary: { client: gui }` and the value labels App and CLI. */
+const SPLIT: CloudflareRule = {
+  ...RULE,
+  primary: { dimension: 'client', value: 'gui' },
+  dimensions: [{ name: 'client', label: 'App vs CLI', column: 'blob1', values: { gui: 'App', cli: 'CLI' } }],
+};
+
 /** `count` days ending on `latest`: users rise a day, and each user makes two checks. */
 function series(count: number, latest = '2026-10-18'): CloudflareSeries {
   const days = Array.from({ length: count }, (_, i) => {
@@ -37,9 +44,18 @@ function series(count: number, latest = '2026-10-18'): CloudflareSeries {
   return { schema: 1, dataset: RULE.dataset, days };
 }
 
+/** `count` days like `series`, with 4 of each day's users on cli and the rest on gui. */
+function split(count: number, latest = '2026-10-18'): CloudflareSeries {
+  const days = series(count, latest).days.map((day) => ({
+    ...day,
+    by: { client: { gui: { users: day.users - 4, events: day.events - 8 }, cli: { users: 4, events: 8 } } },
+  }));
+  return { schema: 1, dataset: RULE.dataset, days };
+}
+
 /** The fixture dataset with `count` Cloudflare days, and the chart options of `config`. */
-async function withUsers(count = 14, config = ''): Promise<Dataset> {
-  const cloudflare = buildCloudflareData(RULE, series(count))!;
+async function withUsers(count = 14, config = '', rule: CloudflareRule = RULE): Promise<Dataset> {
+  const cloudflare = buildCloudflareData(rule, rule === SPLIT ? split(count) : series(count))!;
   return { ...(await fixture()), cloudflare, charts: parseConfig(config || 'charts: {}').charts };
 }
 
@@ -55,12 +71,22 @@ describe('cloudflare users chart', () => {
     expect(paths).toContain('charts/cloudflare-users-dark.svg');
   });
 
-  it('labels the headline users as approximate next to the events', async () => {
-    const svg = chart(await withUsers());
-    expect(svg).toContain('>Daily users (approx.)</text>');
-    expect(svg).toContain('>Update checks</text>');
+  it('labels Total as approximate, and draws no events line', async () => {
+    const svg = chart(await withUsers(14, '', SPLIT));
+    expect(svg).toContain('>Total (approx.)</text>');
+    expect(svg).not.toContain('stroke-opacity="0.5"');
     expect(svg).toContain('Approximate users per day, 14 days to 2026-10-18');
-    expect(svg).toContain('approximate.</desc>');
+    expect(svg).toContain('about 23 daily users in total on 2026-10-18, approximate.</desc>');
+  });
+
+  it('draws Total over the fade, then a plain line per primary value, each in its palette slot', async () => {
+    const svg = chart(await withUsers(14, '', SPLIT));
+    expect(svg).toContain('>Total (approx.)</text>');
+    expect(svg).toContain('>App</text>');
+    expect(svg).toContain('>CLI</text>');
+    expect(svg).toContain(`stroke="${seriesColor('light', 1)}"`);
+    expect(svg).toContain(`stroke="${seriesColor('light', 2)}"`);
+    expect(svg.indexOf(`stroke="${seriesColor('light', 1)}"`)).toBeLessThan(svg.indexOf(`stroke="${seriesColor('light', 0)}"`));
   });
 
   it('draws a single day without dividing by a zero span', async () => {
@@ -81,9 +107,9 @@ describe('cloudflare users chart', () => {
   });
 
   it('hides the title when charts.titles is off, keeping the legend', async () => {
-    const svg = chart(await withUsers(14, 'charts:\n  titles: false\n'));
+    const svg = chart(await withUsers(14, 'charts:\n  titles: false\n', SPLIT));
     expect(svg).not.toContain('>Daily users</text>');
-    expect(svg).toContain('>Daily users (approx.)</text>');
+    expect(svg).toContain('>Total (approx.)</text>');
   });
 
   it('animates by default, and only with animate on', async () => {
@@ -106,10 +132,12 @@ describe('cloudflare users chart', () => {
     expect(paths).toContain('charts/cloudflare-users-year-dark.svg');
   });
 
-  it('escapes the label in the legend', async () => {
-    const base = await withUsers();
-    const cloudflare = buildCloudflareData({ ...RULE, label: '<b>"&\'</b>' }, series(14))!;
-    const svg = chart({ ...base, cloudflare });
+  it('escapes the value labels in the legend', async () => {
+    const rule: CloudflareRule = {
+      ...SPLIT,
+      dimensions: [{ ...SPLIT.dimensions[0]!, values: { gui: '<b>"&\'</b>', cli: 'CLI' } }],
+    };
+    const svg = chart(await withUsers(14, '', rule));
     expect(svg).not.toContain('<b>');
     expect(svg).toContain('&lt;b&gt;&quot;&amp;&apos;&lt;/b&gt;</text>');
   });

@@ -386,6 +386,19 @@ counters:
     expect(config.counters[0]).toMatchObject({ name: 'updates', from: 'v1.19.0', perUser: true });
   });
 
+  it("reads the display labels of a dimension's values", () => {
+    const config = parseConfig(`
+cloudflare:
+  account-id: ${ACCOUNT}
+  dataset: d
+  dimensions:
+    client: { column: blob1, label: App vs CLI, values: { gui: App, cli: CLI } }
+`);
+    expect(config.cloudflare!.dimensions).toEqual([
+      { name: 'client', label: 'App vs CLI', column: 'blob1', values: { gui: 'App', cli: 'CLI' } },
+    ]);
+  });
+
   it('defaults the label to the dataset, the users to index1 and the dimensions to none', () => {
     const config = parseConfig(`cloudflare: { account-id: ${ACCOUNT}, dataset: checks }\n`);
     expect(config.cloudflare).toEqual({ accountId: ACCOUNT, dataset: 'checks', label: 'checks', users: 'index1', dimensions: [] });
@@ -401,6 +414,9 @@ counters:
     ['a dimension name that is not kebab-case', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    OS: { column: blob3 }\n`, 'cloudflare.dimensions.OS: dimension names are lowercase words joined by -'],
     ['a column used twice', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  day: blob1\n  dimensions:\n    os: { column: blob3 }\n    arch: { column: blob3 }\n`, "cloudflare column 'blob3' is listed twice"],
     ['a day column that is also a dimension column', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  day: blob1\n  dimensions:\n    os: { column: blob1 }\n`, "cloudflare column 'blob1' is listed twice"],
+    ['a value label that is not a string', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1, values: { gui: 1 } }\n`, 'cloudflare.dimensions.client.values.gui must be a non-empty string'],
+    ['an empty value label', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1, values: { gui: "" } }\n`, 'cloudflare.dimensions.client.values.gui must be a non-empty string'],
+    ['an empty value name', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    client: { column: blob1, values: { "": App } }\n`, 'cloudflare.dimensions.client.values: value names must be non-empty'],
     ['a kind other than semver', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    os: { column: blob3, kind: date }\n`, 'cloudflare.dimensions.os.kind must be semver'],
     ['released on a dimension that is not semver', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    os: { column: blob3, released: true }\n`, 'cloudflare.dimensions.os.released needs kind: semver'],
     ['two released dimensions', `cloudflare:\n  account-id: ${ACCOUNT}\n  dataset: d\n  dimensions:\n    a: { column: blob1, kind: semver, released: true }\n    b: { column: blob2, kind: semver, released: true }\n`, 'cloudflare: only one dimension may be released'],

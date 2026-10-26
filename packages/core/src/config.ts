@@ -51,6 +51,8 @@ export interface CloudflareDimensionRule {
   kind?: 'semver';
   /** Only the rows of published releases count; at most one dimension. */
   released?: boolean;
+  /** Display labels by raw value; values without one show as they are. */
+  values?: Record<string, string>;
 }
 
 /** An Analytics Engine dataset whose daily aggregates are kept on the data branch. */
@@ -458,25 +460,37 @@ function parseNpm(value: unknown): NpmRule[] {
   return rules;
 }
 
+/** `values` maps each raw value to its label: `{ gui: App, cli: CLI }`. */
+function parseCloudflareValues(value: unknown, path: string): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(expectObject(value, path)).map(([raw, label]) => {
+      if (raw.trim() === '') throw new ConfigError(`${path}: value names must be non-empty`);
+      return [raw, expectString(label, `${path}.${raw}`)];
+    }),
+  );
+}
+
 function parseCloudflareDimensions(value: unknown, path: string): CloudflareDimensionRule[] {
   const obj = expectObject(value, `${path}.dimensions`);
   return Object.entries(obj).map(([name, item]) => {
     const dimPath = `${path}.dimensions.${name}`;
     if (!VARIANT_NAME_RE.test(name)) throw new ConfigError(`${dimPath}: dimension names are lowercase words joined by -`);
     const sub = expectObject(item, dimPath);
-    checkKeys(sub, ['column', 'label', 'kind', 'released'], dimPath);
+    checkKeys(sub, ['column', 'label', 'kind', 'released', 'values'], dimPath);
     const column = expectString(sub.column, `${dimPath}.column`);
     if (!BLOB_RE.test(column)) throw new ConfigError(`${dimPath}.column must be blob1 to blob20`);
     if (sub.kind !== undefined && sub.kind !== 'semver') throw new ConfigError(`${dimPath}.kind must be semver`);
     const kind = sub.kind === 'semver' ? 'semver' : undefined;
     const released = optionalBoolean(sub, 'released', dimPath);
     if (released !== undefined && kind === undefined) throw new ConfigError(`${dimPath}.released needs kind: semver`);
+    const values = sub.values === undefined ? undefined : parseCloudflareValues(sub.values, `${dimPath}.values`);
     return {
       name,
       label: optionalString(sub, 'label', dimPath) ?? name,
       column,
       ...(kind ? { kind } : {}),
       ...(released === undefined ? {} : { released }),
+      ...(values === undefined ? {} : { values }),
     };
   });
 }
